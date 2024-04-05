@@ -1,19 +1,42 @@
 --- before/net/minecraft/tileentity/TileEntity.java
 +++ after/net/minecraft/tileentity/TileEntity.java
-@@ -21,10 +21,10 @@
+@@ -1,6 +1,7 @@
+ package net.minecraft.tileentity;
+ 
+ import javax.annotation.Nullable;
++
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockJukebox;
+ import net.minecraft.block.state.IBlockState;
+@@ -20,16 +21,23 @@
+ import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
- 
+-
 -public abstract class TileEntity
++import org.bukkit.inventory.InventoryHolder;
++import org.spigotmc.CustomTimingsHandler;
++
++import catserver.server.inventory.CatInventoryUtils;
++
 +public abstract class TileEntity implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>
  {
++
      private static final Logger field_145852_a = LogManager.getLogger();
 -    private static final RegistryNamespaced < ResourceLocation, Class <? extends TileEntity >> field_190562_f = new RegistryNamespaced<>();
+-    protected World field_145850_b;
 +    private static final RegistryNamespaced < ResourceLocation, Class <? extends TileEntity >> field_190562_f = new RegistryNamespaced < ResourceLocation, Class <? extends TileEntity >> ();
-     protected World field_145850_b;
++    public World field_145850_b;
      protected BlockPos field_174879_c = BlockPos.field_177992_a;
      protected boolean field_145846_f;
-@@ -60,6 +60,8 @@
+     private int field_145847_g = -1;
+     protected Block field_145854_h;
++    public CustomTimingsHandler tickTimer = org.bukkit.craftbukkit.v1_12_R1.SpigotTimings.getTileEntityTimings(this); // Spigot
++    public boolean skipTick = false;
+ 
+     public static void func_190560_a(String p_190560_0_, Class <? extends TileEntity > p_190560_1_)
+     {
+@@ -60,6 +68,8 @@
      public void func_145839_a(NBTTagCompound p_145839_1_)
      {
          this.field_174879_c = new BlockPos(p_145839_1_.func_74762_e("x"), p_145839_1_.func_74762_e("y"), p_145839_1_.func_74762_e("z"));
@@ -22,7 +45,7 @@
      }
  
      public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_)
-@@ -81,6 +83,8 @@
+@@ -81,6 +91,8 @@
              p_189516_1_.func_74768_a("x", this.field_174879_c.func_177958_n());
              p_189516_1_.func_74768_a("y", this.field_174879_c.func_177956_o());
              p_189516_1_.func_74768_a("z", this.field_174879_c.func_177952_p());
@@ -31,7 +54,7 @@
              return p_189516_1_;
          }
      }
-@@ -90,10 +94,11 @@
+@@ -90,10 +102,11 @@
      {
          TileEntity tileentity = null;
          String s = p_190200_1_.func_74779_i("id");
@@ -44,7 +67,7 @@
  
              if (oclass != null)
              {
-@@ -103,6 +108,8 @@
+@@ -103,6 +116,8 @@
          catch (Throwable throwable1)
          {
              field_145852_a.error("Failed to create block entity {}", s, throwable1);
@@ -53,7 +76,7 @@
          }
  
          if (tileentity != null)
-@@ -115,12 +122,14 @@
+@@ -115,12 +130,14 @@
              catch (Throwable throwable)
              {
                  field_145852_a.error("Failed to load data for block entity {}", s, throwable);
@@ -69,7 +92,7 @@
          }
  
          return tileentity;
-@@ -156,19 +165,18 @@
+@@ -156,19 +173,18 @@
          }
      }
  
@@ -93,7 +116,7 @@
      }
  
      public BlockPos func_174877_v()
-@@ -244,9 +252,9 @@
+@@ -244,9 +260,9 @@
  
                      try
                      {
@@ -105,12 +128,10 @@
                      {
                          return "ID #" + i;
                      }
-@@ -295,6 +303,204 @@
- 
-     public void func_189668_a(Mirror p_189668_1_)
+@@ -297,6 +313,204 @@
      {
-+    }
-+
+     }
+ 
 +    // -- BEGIN FORGE PATCHES --
 +    /**
 +     * Called when you receive a TileEntityData packet for the location this
@@ -307,6 +328,19 @@
 +        NBTTagCompound ret = new NBTTagCompound();
 +        this.func_189515_b(ret);
 +        return ret;
-     }
- 
++    }
++
      static
+     {
+         func_190560_a("furnace", TileEntityFurnace.class);
+@@ -324,5 +538,10 @@
+         func_190560_a("command_block", TileEntityCommandBlock.class);
+         func_190560_a("shulker_box", TileEntityShulkerBox.class);
+         func_190560_a("bed", TileEntityBed.class);
++    }
++
++    @Nullable
++    public InventoryHolder getOwner() {
++        return CatInventoryUtils.getOwner(field_145850_b, field_174879_c); // CatServer - move to CatInventoryUtils
+     }
+ }

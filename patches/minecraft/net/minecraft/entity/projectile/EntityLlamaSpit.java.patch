@@ -1,6 +1,23 @@
 --- before/net/minecraft/entity/projectile/EntityLlamaSpit.java
 +++ after/net/minecraft/entity/projectile/EntityLlamaSpit.java
-@@ -32,27 +32,19 @@
+@@ -5,6 +5,7 @@
+ import javax.annotation.Nullable;
+ import net.minecraft.block.material.Material;
+ import net.minecraft.entity.Entity;
++import net.minecraft.entity.EntityLivingBase;
+ import net.minecraft.entity.IProjectile;
+ import net.minecraft.entity.passive.EntityLlama;
+ import net.minecraft.nbt.NBTTagCompound;
+@@ -20,7 +21,7 @@
+ 
+ public class EntityLlamaSpit extends Entity implements IProjectile
+ {
+-    public EntityLlama field_190539_a;
++    public EntityLivingBase field_190539_a; // CraftBukkit - type EntityLlama -> EntityLivingBase
+     private NBTTagCompound field_190540_b;
+ 
+     public EntityLlamaSpit(World p_i47272_1_)
+@@ -32,27 +33,19 @@
      {
          super(p_i47273_1_);
          this.field_190539_a = p_i47273_2_;
@@ -31,7 +48,7 @@
              p_i47274_1_.func_175688_a(EnumParticleTypes.SPIT, p_i47274_2_, p_i47274_4_, p_i47274_6_, p_i47274_8_ * d0, p_i47274_10_, p_i47274_12_ * d0);
          }
  
-@@ -61,7 +53,6 @@
+@@ -61,7 +54,6 @@
          this.field_70179_y = p_i47274_12_;
      }
  
@@ -39,7 +56,7 @@
      public void func_70071_h_()
      {
          super.func_70071_h_();
-@@ -89,7 +80,7 @@
+@@ -89,7 +81,7 @@
              raytraceresult = new RayTraceResult(entity);
          }
  
@@ -48,7 +65,7 @@
          {
              this.func_190536_a(raytraceresult);
          }
-@@ -98,12 +89,11 @@
+@@ -98,12 +90,11 @@
          this.field_70163_u += this.field_70181_x;
          this.field_70161_v += this.field_70179_y;
          float f = MathHelper.func_76133_a(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
@@ -64,7 +81,7 @@
          }
  
          while (this.field_70125_A - this.field_70127_C >= 180.0F)
-@@ -136,13 +126,13 @@
+@@ -136,13 +127,13 @@
          }
          else
          {
@@ -82,7 +99,7 @@
              }
  
              this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-@@ -150,7 +140,6 @@
+@@ -150,7 +141,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -90,7 +107,7 @@
      public void func_70016_h(double p_70016_1_, double p_70016_3_, double p_70016_5_)
      {
          this.field_70159_w = p_70016_1_;
-@@ -160,8 +149,8 @@
+@@ -160,8 +150,8 @@
          if (this.field_70127_C == 0.0F && this.field_70126_B == 0.0F)
          {
              float f = MathHelper.func_76133_a(p_70016_1_ * p_70016_1_ + p_70016_5_ * p_70016_5_);
@@ -101,7 +118,7 @@
              this.field_70127_C = this.field_70125_A;
              this.field_70126_B = this.field_70177_z;
              this.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
-@@ -172,22 +161,21 @@
+@@ -172,22 +162,21 @@
      private Entity func_190538_a(Vec3d p_190538_1_, Vec3d p_190538_2_)
      {
          Entity entity = null;
@@ -128,7 +145,7 @@
                      {
                          entity = entity1;
                          d0 = d1;
-@@ -199,25 +187,24 @@
+@@ -199,31 +188,31 @@
          return entity;
      }
  
@@ -165,7 +182,14 @@
          this.field_70126_B = this.field_70177_z;
          this.field_70127_C = this.field_70125_A;
      }
-@@ -235,12 +222,10 @@
+ 
+     public void func_190536_a(RayTraceResult p_190536_1_)
+     {
++        org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callProjectileHitEvent(this, p_190536_1_);
+         if (p_190536_1_.field_72308_g != null && this.field_190539_a != null)
+         {
+             p_190536_1_.field_72308_g.func_70097_a(DamageSource.func_188403_a(this, this.field_190539_a).func_76349_b(), 1.0F);
+@@ -235,12 +224,10 @@
          }
      }
  
@@ -178,7 +202,7 @@
      protected void func_70037_a(NBTTagCompound p_70037_1_)
      {
          if (p_70037_1_.func_150297_b("Owner", 10))
-@@ -249,7 +234,6 @@
+@@ -249,7 +236,6 @@
          }
      }
  
@@ -186,7 +210,7 @@
      protected void func_70014_b(NBTTagCompound p_70014_1_)
      {
          if (this.field_190539_a != null)
-@@ -267,7 +251,7 @@
+@@ -267,7 +253,7 @@
          {
              UUID uuid = this.field_190540_b.func_186857_a("OwnerUUID");
  

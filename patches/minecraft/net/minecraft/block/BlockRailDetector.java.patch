@@ -1,6 +1,10 @@
 --- before/net/minecraft/block/BlockRailDetector.java
 +++ after/net/minecraft/block/BlockRailDetector.java
-@@ -25,79 +25,63 @@
+@@ -22,82 +22,67 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.IBlockAccess;
+ import net.minecraft.world.World;
++import org.bukkit.event.block.BlockRedstoneEvent;
  
  public class BlockRailDetector extends BlockRailBase
  {
@@ -88,7 +92,7 @@
          {
              return 0;
          }
-@@ -109,9 +93,9 @@
+@@ -109,18 +94,25 @@
  
      private void func_176570_e(World p_176570_1_, BlockPos p_176570_2_, IBlockState p_176570_3_)
      {
@@ -100,8 +104,16 @@
  
          if (!list.isEmpty())
          {
-@@ -120,7 +104,7 @@
+             flag1 = true;
+         }
  
++        if (flag != flag1) {
++            org.bukkit.block.Block block = p_176570_1_.getWorld().getBlockAt(p_176570_2_.func_177958_n(), p_176570_2_.func_177956_o(), p_176570_2_.func_177952_p());
++            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, flag ? 15 : 0, flag1 ? 15 : 0);
++            p_176570_1_.getServer().getPluginManager().callEvent(eventRedstone);
++            flag1 = eventRedstone.getNewCurrent() > 0;
++        }
++
          if (flag1 && !flag)
          {
 -            p_176570_1_.func_180501_a(p_176570_2_, p_176570_3_.func_177226_a(field_176574_M, true), 3);
@@ -109,7 +121,7 @@
              this.func_185592_b(p_176570_1_, p_176570_2_, p_176570_3_, true);
              p_176570_1_.func_175685_c(p_176570_2_, this, false);
              p_176570_1_.func_175685_c(p_176570_2_.func_177977_b(), this, false);
-@@ -129,7 +113,7 @@
+@@ -129,7 +121,7 @@
  
          if (!flag1 && flag)
          {
@@ -118,7 +130,7 @@
              this.func_185592_b(p_176570_1_, p_176570_2_, p_176570_3_, false);
              p_176570_1_.func_175685_c(p_176570_2_, this, false);
              p_176570_1_.func_175685_c(p_176570_2_.func_177977_b(), this, false);
-@@ -159,38 +143,36 @@
+@@ -159,38 +151,36 @@
          }
      }
  
@@ -163,7 +175,7 @@
  
              if (!list1.isEmpty())
              {
-@@ -204,39 +186,26 @@
+@@ -204,39 +194,26 @@
      protected <T extends EntityMinecart> List<T> func_176571_a(World p_176571_1_, BlockPos p_176571_2_, Class<T> p_176571_3_, Predicate<Entity>... p_176571_4_)
      {
          AxisAlignedBB axisalignedbb = this.func_176572_a(p_176571_2_);
@@ -208,7 +220,7 @@
          {
              i |= 8;
          }
-@@ -245,7 +214,6 @@
+@@ -245,7 +222,6 @@
      }
  
      @SuppressWarnings("incomplete-switch")
@@ -216,7 +228,7 @@
      public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_)
      {
          switch (p_185499_2_)
-@@ -330,10 +298,9 @@
+@@ -330,10 +306,9 @@
      }
  
      @SuppressWarnings("incomplete-switch")
@@ -228,7 +240,7 @@
  
          switch (p_185471_2_)
          {
-@@ -383,9 +350,8 @@
+@@ -383,9 +358,8 @@
          return super.func_185471_a(p_185471_1_, p_185471_2_);
      }
  

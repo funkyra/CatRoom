@@ -38,6 +38,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
+import catserver.server.BukkitInjector;
+import catserver.server.CatServer;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.item.EntityItem;
@@ -58,6 +60,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import net.minecraftforge.client.model.animation.Animation;
+import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.CompoundDataFixer;
@@ -301,6 +304,7 @@ public class FMLCommonHandler
     {
         Loader.instance().serverStarted();
         sidedDelegate.allowLogins();
+        catserver.server.utils.ModFixUtils.fixNetherex(); // CatServer
     }
 
     public void handleServerStopping()
@@ -385,6 +389,7 @@ public class FMLCommonHandler
 
     public void handleWorldDataSave(SaveHandler handler, WorldInfo worldInfo, NBTTagCompound tagCompound)
     {
+        if (worldInfo.getDimension() != 0) return; // CatServer
         for (ModContainer mc : Loader.instance().getModList())
         {
             if (mc instanceof InjectedModContainer)
@@ -397,6 +402,7 @@ public class FMLCommonHandler
                 }
             }
         }
+        catserver.server.CatServer.onWorldDataSave(handler, worldInfo, tagCompound); // CatServer
     }
 
     public void handleWorldDataLoad(SaveHandler handler, WorldInfo worldInfo, NBTTagCompound tagCompound)
@@ -405,7 +411,7 @@ public class FMLCommonHandler
         {
             return;
         }
-        if (handlerSet.contains(handler))
+        if (handlerSet.contains(handler) || DimensionManager.getWorld(0) != null) // CatServer
         {
             return;
         }
@@ -424,6 +430,7 @@ public class FMLCommonHandler
                 }
             }
         }
+        catserver.server.CatServer.onWorldDataLave(handler, worldInfo, tagCompound); // CatServer
     }
 
     public void confirmBackupLevelDatUse(SaveHandler handler)
@@ -655,7 +662,7 @@ public class FMLCommonHandler
             return false;
         }
 
-        manager.channel().attr(NetworkRegistry.FML_MARKER).set(packet.hasFMLMarker());
+        manager.channel().attr(NetworkRegistry.FML_MARKER).set((!CatServer.getConfig().disableFMLHandshake || !NetworkRegistry.INSTANCE.isVanillaAccepted(Side.CLIENT)) && packet.hasFMLMarker());
         return true;
     }
 

@@ -1,6 +1,14 @@
 --- before/net/minecraft/command/server/CommandWhitelist.java
 +++ after/net/minecraft/command/server/CommandWhitelist.java
-@@ -15,30 +15,26 @@
+@@ -8,6 +8,7 @@
+ import net.minecraft.command.CommandException;
+ import net.minecraft.command.ICommandSender;
+ import net.minecraft.command.WrongUsageException;
++import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.text.TextComponentString;
+@@ -15,30 +16,26 @@
  
  public class CommandWhitelist extends CommandBase
  {
@@ -32,7 +40,7 @@
          }
          else
          {
-@@ -54,11 +50,7 @@
+@@ -54,11 +51,7 @@
              }
              else if ("list".equals(p_184881_3_[0]))
              {
@@ -45,7 +53,7 @@
                  String[] astring = p_184881_1_.func_184103_al().func_152598_l();
                  p_184881_2_.func_145747_a(new TextComponentString(func_71527_a(astring)));
              }
-@@ -66,14 +58,14 @@
+@@ -66,14 +59,14 @@
              {
                  if (p_184881_3_.length < 2)
                  {
@@ -53,7 +61,8 @@
 +                    throw new WrongUsageException("commands.whitelist.add.usage", new Object[0]);
                  }
  
-                 GameProfile gameprofile = p_184881_1_.func_152358_ax().func_152655_a(p_184881_3_[1]);
+-                GameProfile gameprofile = p_184881_1_.func_152358_ax().func_152655_a(p_184881_3_[1]);
++                GameProfile gameprofile = p_184881_1_.func_71266_T() ? p_184881_1_.func_152358_ax().func_152655_a(p_184881_3_[1]) : new GameProfile(EntityPlayer.func_175147_b(p_184881_3_[1]), p_184881_3_[1]); // CatServer - offline mode support
  
                  if (gameprofile == null)
                  {
@@ -62,7 +71,7 @@
                  }
  
                  p_184881_1_.func_184103_al().func_152601_d(gameprofile);
-@@ -83,14 +75,14 @@
+@@ -83,14 +76,14 @@
              {
                  if (p_184881_3_.length < 2)
                  {
@@ -79,7 +88,7 @@
                  }
  
                  p_184881_1_.func_184103_al().func_152597_c(gameprofile1);
-@@ -104,7 +96,6 @@
+@@ -104,7 +97,6 @@
          }
      }
  
@@ -87,7 +96,7 @@
      public List<String> func_184883_a(MinecraftServer p_184883_1_, ICommandSender p_184883_2_, String[] p_184883_3_, @Nullable BlockPos p_184883_4_)
      {
          if (p_184883_3_.length == 1)
-@@ -126,7 +117,7 @@
+@@ -126,7 +118,7 @@
                  }
              }
  

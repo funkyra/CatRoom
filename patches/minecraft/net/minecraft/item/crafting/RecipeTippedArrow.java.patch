@@ -1,6 +1,6 @@
 --- before/net/minecraft/item/crafting/RecipeTippedArrow.java
 +++ after/net/minecraft/item/crafting/RecipeTippedArrow.java
-@@ -7,12 +7,9 @@
+@@ -7,12 +7,17 @@
  import net.minecraft.potion.PotionUtils;
  import net.minecraft.util.NonNullList;
  import net.minecraft.world.World;
@@ -8,13 +8,21 @@
 -import net.minecraftforge.fml.relauncher.SideOnly;
  
 -public class RecipeTippedArrow implements IRecipe
-+public class RecipeTippedArrow extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
++public class RecipeTippedArrow extends ShapedRecipes implements IRecipe
  {
 -    @Override
++    public RecipeTippedArrow() {
++        super("", 3, 3, NonNullList.func_193580_a(Ingredient.field_193370_a,
++                Ingredient.func_193367_a(Items.field_151032_g), Ingredient.func_193367_a(Items.field_151032_g), Ingredient.func_193367_a(Items.field_151032_g),
++                Ingredient.func_193367_a(Items.field_151032_g), Ingredient.func_193367_a(Items.field_185156_bI), Ingredient.func_193367_a(Items.field_151032_g),
++                Ingredient.func_193367_a(Items.field_151032_g), Ingredient.func_193367_a(Items.field_151032_g), Ingredient.func_193367_a(Items.field_151032_g)),
++                new ItemStack(Items.field_185167_i, 8));
++    }
++
      public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
      {
          if (p_77569_1_.func_174922_i() == 3 && p_77569_1_.func_174923_h() == 3)
-@@ -52,7 +49,6 @@
+@@ -52,7 +57,6 @@
          }
      }
  
@@ -22,7 +30,7 @@
      public ItemStack func_77572_b(InventoryCrafting p_77572_1_)
      {
          ItemStack itemstack = p_77572_1_.func_70463_b(1, 1);
-@@ -70,26 +66,21 @@
+@@ -70,26 +74,21 @@
          }
      }
  

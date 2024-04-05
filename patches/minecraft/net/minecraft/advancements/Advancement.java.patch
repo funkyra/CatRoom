@@ -1,0 +1,10 @@
+--- before/net/minecraft/advancements/Advancement.java
++++ after/net/minecraft/advancements/Advancement.java
+@@ -32,6 +32,7 @@
+     private final String[][] field_192081_f;
+     private final Set<Advancement> field_192082_g = Sets.newLinkedHashSet();
+     private final ITextComponent field_193125_h;
++    public final org.bukkit.advancement.Advancement bukkit = new org.bukkit.craftbukkit.v1_12_R1.advancement.CraftAdvancement(this);
+ 
+     public Advancement(
+         ResourceLocation p_i47472_1_,

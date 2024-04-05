@@ -1,6 +1,24 @@
 --- before/net/minecraft/entity/EntityLiving.java
 +++ after/net/minecraft/entity/EntityLiving.java
-@@ -60,7 +60,7 @@
+@@ -19,6 +19,7 @@
+ import net.minecraft.entity.monster.EntityGhast;
+ import net.minecraft.entity.monster.IMob;
+ import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.init.Items;
+ import net.minecraft.inventory.EntityEquipmentSlot;
+@@ -57,10 +58,17 @@
+ import net.minecraft.world.storage.loot.LootTable;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.entity.CraftLivingEntity;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.event.entity.EntityPickupItemEvent;
++import org.bukkit.event.entity.EntityTargetEvent;
++import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
++import org.bukkit.event.entity.EntityUnleashEvent;
  
  public abstract class EntityLiving extends EntityLivingBase
  {
@@ -9,19 +27,33 @@
      public int field_70757_a;
      protected int field_70728_aV;
      private final EntityLookHelper field_70749_g;
-@@ -72,9 +72,9 @@
-     public final EntityAITasks field_70715_bh;
+@@ -68,16 +76,17 @@
+     protected EntityJumpHelper field_70767_i;
+     private final EntityBodyHelper field_70762_j;
+     protected PathNavigate field_70699_by;
+-    public final EntityAITasks field_70714_bg;
+-    public final EntityAITasks field_70715_bh;
++    public EntityAITasks field_70714_bg;
++    public EntityAITasks field_70715_bh;
      private EntityLivingBase field_70696_bz;
      private final EntitySenses field_70723_bA;
 -    private final NonNullList<ItemStack> field_184656_bv = NonNullList.func_191197_a(2, ItemStack.field_190927_a);
-+    private final NonNullList<ItemStack> field_184656_bv = NonNullList.<ItemStack>func_191197_a(2, ItemStack.field_190927_a);
-     protected float[] field_82174_bp = new float[2];
+-    protected float[] field_82174_bp = new float[2];
 -    private final NonNullList<ItemStack> field_184657_bw = NonNullList.func_191197_a(4, ItemStack.field_190927_a);
+-    protected float[] field_184655_bs = new float[4];
+-    private boolean field_82172_bs;
+-    private boolean field_82179_bU;
++    private final NonNullList<ItemStack> field_184656_bv = NonNullList.<ItemStack>func_191197_a(2, ItemStack.field_190927_a);
++    public float[] field_82174_bp = new float[2];
 +    private final NonNullList<ItemStack> field_184657_bw = NonNullList.<ItemStack>func_191197_a(4, ItemStack.field_190927_a);
-     protected float[] field_184655_bs = new float[4];
-     private boolean field_82172_bs;
-     private boolean field_82179_bU;
-@@ -109,11 +109,10 @@
++    public float[] field_184655_bs = new float[4];
++    // private boolean canPickUpLoot; // CraftBukkit - moved up to EntityLivingBase
++    private boolean canPickUpLoot_Legacy = false; // CatServer - keep filed index
++    public boolean field_82179_bU;
+     private final Map<PathNodeType, Float> field_184658_bz = Maps.newEnumMap(PathNodeType.class);
+     private ResourceLocation field_184659_bA;
+     private long field_184653_bB;
+@@ -109,11 +118,10 @@
      {
      }
  
@@ -34,7 +66,7 @@
      }
  
      protected PathNavigate func_175447_b(World p_175447_1_)
-@@ -124,12 +123,12 @@
+@@ -124,12 +132,12 @@
      public float func_184643_a(PathNodeType p_184643_1_)
      {
          Float f = this.field_184658_bz.get(p_184643_1_);
@@ -49,15 +81,45 @@
      }
  
      protected EntityBodyHelper func_184650_s()
-@@ -171,6 +170,7 @@
+@@ -170,7 +178,36 @@
+ 
      public void func_70624_b(@Nullable EntityLivingBase p_70624_1_)
      {
-         this.field_70696_bz = p_70624_1_;
-+        net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(this, p_70624_1_);
+-        this.field_70696_bz = p_70624_1_;
++        // CraftBukkit start - fire event
++        setGoalTarget(p_70624_1_, EntityTargetEvent.TargetReason.UNKNOWN, true);
++    }
++
++    public boolean setGoalTarget(@Nullable EntityLivingBase entityliving, EntityTargetEvent.TargetReason reason, boolean fireEvent) {
++        if (func_70638_az() == entityliving) return false;
++        if (fireEvent) {
++            if (reason == EntityTargetEvent.TargetReason.UNKNOWN && func_70638_az() != null && entityliving == null) {
++                reason = func_70638_az().func_70089_S() ? EntityTargetEvent.TargetReason.FORGOT_TARGET : EntityTargetEvent.TargetReason.TARGET_DIED;
++            }
++            CraftLivingEntity ctarget = null;
++            if (entityliving != null) {
++                ctarget = (CraftLivingEntity) entityliving.getBukkitEntity();
++            }
++            EntityTargetLivingEntityEvent event = new EntityTargetLivingEntityEvent(this.getBukkitEntity(), ctarget, reason);
++            field_70170_p.getServer().getPluginManager().callEvent(event);
++            if (event.isCancelled()) {
++                return false;
++            }
++
++            if (event.getTarget() != null) {
++                entityliving = ((CraftLivingEntity) event.getTarget()).getHandle();
++            } else {
++                entityliving = null;
++            }
++        }
++        this.field_70696_bz = entityliving;
++        net.minecraftforge.common.ForgeHooks.onLivingSetAttackTarget(this, entityliving); // CatServer
++        return true;
++        // CraftBukkit end
      }
  
      public boolean func_70686_a(Class <? extends EntityLivingBase > p_70686_1_)
-@@ -182,11 +182,10 @@
+@@ -182,11 +219,10 @@
      {
      }
  
@@ -70,7 +132,7 @@
      }
  
      public int func_70627_aG()
-@@ -204,7 +203,6 @@
+@@ -204,7 +240,6 @@
          }
      }
  
@@ -78,7 +140,7 @@
      public void func_70030_z()
      {
          super.func_70030_z();
-@@ -219,7 +217,6 @@
+@@ -219,7 +254,6 @@
          this.field_70170_p.field_72984_F.func_76319_b();
      }
  
@@ -86,7 +148,7 @@
      protected void func_184581_c(DamageSource p_184581_1_)
      {
          this.func_175456_n();
-@@ -231,7 +228,6 @@
+@@ -231,7 +265,6 @@
          this.field_70757_a = -this.func_70627_aG();
      }
  
@@ -94,7 +156,7 @@
      protected int func_70693_a(EntityPlayer p_70693_1_)
      {
          if (this.field_70728_aV > 0)
-@@ -240,7 +236,7 @@
+@@ -240,7 +273,7 @@
  
              for (int j = 0; j < this.field_184657_bw.size(); ++j)
              {
@@ -103,7 +165,7 @@
                  {
                      i += 1 + this.field_70146_Z.nextInt(3);
                  }
-@@ -248,7 +244,7 @@
+@@ -248,7 +281,7 @@
  
              for (int k = 0; k < this.field_184656_bv.size(); ++k)
              {
@@ -112,7 +174,7 @@
                  {
                      i += 1 + this.field_70146_Z.nextInt(3);
                  }
-@@ -268,20 +264,11 @@
+@@ -268,20 +301,11 @@
          {
              for (int i = 0; i < 20; ++i)
              {
@@ -138,7 +200,7 @@
              }
          }
          else
-@@ -291,7 +278,6 @@
+@@ -291,7 +315,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -146,7 +208,7 @@
      public void func_70103_a(byte p_70103_1_)
      {
          if (p_70103_1_ == 20)
-@@ -304,7 +290,6 @@
+@@ -304,7 +327,6 @@
          }
      }
  
@@ -154,7 +216,7 @@
      public void func_70071_h_()
      {
          super.func_70071_h_();
-@@ -324,7 +309,6 @@
+@@ -324,7 +346,6 @@
          }
      }
  
@@ -162,7 +224,7 @@
      protected float func_110146_f(float p_110146_1_, float p_110146_2_)
      {
          this.field_70762_j.func_75664_a();
-@@ -343,7 +327,6 @@
+@@ -343,7 +364,6 @@
          return null;
      }
  
@@ -170,7 +232,7 @@
      protected void func_70628_a(boolean p_70628_1_, int p_70628_2_)
      {
          Item item = this.func_146068_u();
-@@ -366,10 +349,9 @@
+@@ -366,10 +386,9 @@
  
      public static void func_189752_a(DataFixer p_189752_0_, Class<?> p_189752_1_)
      {
@@ -182,7 +244,7 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          super.func_70014_b(p_70014_1_);
-@@ -461,7 +443,6 @@
+@@ -461,17 +480,25 @@
          }
      }
  
@@ -190,7 +252,28 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          super.func_70037_a(p_70037_1_);
-@@ -537,7 +518,6 @@
+ 
++        // CraftBukkit start - If looting or persistence is false only use it if it was set after we started using it
+         if (p_70037_1_.func_150297_b("CanPickUpLoot", 1))
+         {
+-            this.func_98053_h(p_70037_1_.func_74767_n("CanPickUpLoot"));
++            // this.setCanPickUpLoot(compound.getBoolean("CanPickUpLoot"));
++            boolean data = p_70037_1_.func_74767_n("CanPickUpLoot");
++            if (isLevelAtLeast(p_70037_1_, 1) || data) {
++                this.func_98053_h(data);
++            }
+         }
+ 
+-        this.field_82179_bU = p_70037_1_.func_74767_n("PersistenceRequired");
++        // this.persistenceRequired = compound.getBoolean("PersistenceRequired");
++        boolean data = p_70037_1_.func_74767_n("PersistenceRequired");
++        if (isLevelAtLeast(p_70037_1_, 1) || data) {
++            this.field_82179_bU = data;
++        }
+ 
+         if (p_70037_1_.func_150297_b("ArmorItems", 9))
+         {
+@@ -537,7 +564,6 @@
          return null;
      }
  
@@ -198,7 +281,7 @@
      protected void func_184610_a(boolean p_184610_1_, int p_184610_2_, DamageSource p_184610_3_)
      {
          ResourceLocation resourcelocation = this.field_184659_bA;
-@@ -551,16 +531,14 @@
+@@ -551,16 +577,14 @@
          {
              LootTable loottable = this.field_70170_p.func_184146_ak().func_186521_a(resourcelocation);
              this.field_184659_bA = null;
@@ -217,7 +300,7 @@
              {
                  this.func_70099_a(itemstack, 0.0F);
              }
-@@ -588,22 +566,20 @@
+@@ -588,22 +612,20 @@
          this.field_70702_br = p_184646_1_;
      }
  
@@ -242,7 +325,7 @@
              {
                  if (!entityitem.field_70128_L && !entityitem.func_92059_d().func_190926_b() && !entityitem.func_174874_s())
                  {
-@@ -657,9 +633,7 @@
+@@ -657,9 +679,7 @@
              {
                  flag = true;
              }
@@ -253,7 +336,24 @@
              {
                  ItemArmor itemarmor = (ItemArmor)itemstack.func_77973_b();
                  ItemArmor itemarmor1 = (ItemArmor)itemstack1.func_77973_b();
-@@ -692,7 +666,7 @@
+@@ -679,8 +699,14 @@
+             }
+         }
+ 
+-        if (flag && this.func_175448_a(itemstack))
+-        {
++        // if (flag && this.canEquipItem(itemstack)) {
++        boolean canPickup = flag && this.func_175448_a(itemstack);
++
++        EntityPickupItemEvent entityEvent = new EntityPickupItemEvent((LivingEntity) getBukkitEntity(), (org.bukkit.entity.Item) p_175445_1_.getBukkitEntity(), 0);
++        entityEvent.setCancelled(!canPickup);
++        this.field_70170_p.getServer().getPluginManager().callEvent(entityEvent);
++        canPickup = !entityEvent.isCancelled();
++        if (canPickup) {
+             double d0;
+ 
+             switch (entityequipmentslot.func_188453_a())
+@@ -692,12 +718,14 @@
                      d0 = (double)this.field_184655_bs[entityequipmentslot.func_188454_b()];
                      break;
                  default:
@@ -262,7 +362,22 @@
              }
  
              if (!itemstack1.func_190926_b() && (double)(this.field_70146_Z.nextFloat() - 0.1F) < d0)
-@@ -729,13 +703,25 @@
+             {
++                this.forceDrops = true;
+                 this.func_70099_a(itemstack1, 0.0F);
++                this.forceDrops = false;
+             }
+ 
+             this.func_184201_a(entityequipmentslot, itemstack);
+@@ -722,20 +750,32 @@
+         return true;
+     }
+ 
+-    protected boolean func_70692_ba()
++    public boolean func_70692_ba()
+     {
+         return true;
+     }
  
      protected void func_70623_bb()
      {
@@ -289,7 +404,7 @@
  
              if (entity != null)
              {
-@@ -744,16 +730,16 @@
+@@ -744,16 +784,16 @@
                  double d2 = entity.field_70161_v - this.field_70161_v;
                  double d3 = d0 * d0 + d1 * d1 + d2 * d2;
  
@@ -309,7 +424,7 @@
                  {
                      this.field_70708_bq = 0;
                  }
-@@ -761,7 +747,6 @@
+@@ -761,13 +801,18 @@
          }
      }
  
@@ -317,7 +432,19 @@
      protected final void func_70626_be()
      {
          ++this.field_70708_bq;
-@@ -787,7 +772,7 @@
+         this.field_70170_p.field_72984_F.func_76320_a("checkDespawn");
+         this.func_70623_bb();
+         this.field_70170_p.field_72984_F.func_76319_b();
++        // Spigot Start
++        if (this.fromMobSpawner)
++        {
++            return;
++        }
++        // Spigot End
+         this.field_70170_p.field_72984_F.func_76320_a("sensing");
+         this.field_70723_bA.func_75523_a();
+         this.field_70170_p.field_72984_F.func_76319_b();
+@@ -787,7 +832,7 @@
          if (this.func_184218_aH() && this.func_184187_bx() instanceof EntityLiving)
          {
              EntityLiving entityliving = (EntityLiving)this.func_184187_bx();
@@ -326,7 +453,7 @@
              entityliving.func_70605_aq().func_188487_a(this.func_70605_aq());
          }
  
-@@ -829,13 +814,12 @@
+@@ -829,13 +874,12 @@
          }
          else
          {
@@ -343,7 +470,7 @@
          this.field_70125_A = this.func_70663_b(this.field_70125_A, f1, p_70625_3_);
          this.field_70177_z = this.func_70663_b(this.field_70177_z, f, p_70625_2_);
      }
-@@ -859,18 +843,15 @@
+@@ -859,18 +903,15 @@
  
      public boolean func_70601_bi()
      {
@@ -364,7 +491,7 @@
      public float func_70603_bj()
      {
          return 1.0F;
-@@ -881,7 +862,6 @@
+@@ -881,7 +922,6 @@
          return 4;
      }
  
@@ -372,7 +499,7 @@
      public int func_82143_as()
      {
          if (this.func_70638_az() == null)
-@@ -891,7 +871,7 @@
+@@ -891,7 +931,7 @@
          else
          {
              int i = (int)(this.func_110143_aJ() - this.func_110138_aP() * 0.33F);
@@ -381,7 +508,7 @@
  
              if (i < 0)
              {
-@@ -902,19 +882,16 @@
+@@ -902,19 +942,16 @@
          }
      }
  
@@ -401,7 +528,7 @@
      public ItemStack func_184582_a(EntityEquipmentSlot p_184582_1_)
      {
          switch (p_184582_1_.func_188453_a())
-@@ -928,7 +905,6 @@
+@@ -928,7 +965,6 @@
          }
      }
  
@@ -409,7 +536,7 @@
      public void func_184201_a(EntityEquipmentSlot p_184201_1_, ItemStack p_184201_2_)
      {
          switch (p_184201_1_.func_188453_a())
-@@ -941,7 +917,6 @@
+@@ -941,7 +977,6 @@
          }
      }
  
@@ -417,7 +544,7 @@
      protected void func_82160_b(boolean p_82160_1_, int p_82160_2_)
      {
          for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values())
-@@ -958,21 +933,16 @@
+@@ -958,21 +993,16 @@
                      d0 = (double)this.field_184655_bs[entityequipmentslot.func_188454_b()];
                      break;
                  default:
@@ -443,7 +570,7 @@
                  }
  
                  this.func_70099_a(itemstack, 0.0F);
-@@ -1033,22 +1003,27 @@
+@@ -1033,22 +1063,27 @@
  
      public static EntityEquipmentSlot func_184640_d(ItemStack p_184640_0_)
      {
@@ -484,7 +611,7 @@
      }
  
      @Nullable
-@@ -1159,10 +1134,7 @@
+@@ -1159,10 +1194,7 @@
  
          if (!this.func_184614_ca().func_190926_b() && this.field_70146_Z.nextFloat() < 0.25F * f)
          {
@@ -496,7 +623,7 @@
          }
  
          for (EntityEquipmentSlot entityequipmentslot : EntityEquipmentSlot.values())
-@@ -1173,10 +1145,7 @@
+@@ -1173,10 +1205,7 @@
  
                  if (!itemstack.func_190926_b() && this.field_70146_Z.nextFloat() < 0.5F * f)
                  {
@@ -508,7 +635,7 @@
                  }
              }
          }
-@@ -1185,8 +1154,7 @@
+@@ -1185,8 +1214,7 @@
      @Nullable
      public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_)
      {
@@ -518,7 +645,22 @@
  
          if (this.field_70146_Z.nextFloat() < 0.05F)
          {
-@@ -1237,7 +1205,6 @@
+@@ -1224,12 +1252,12 @@
+ 
+     public boolean func_98052_bS()
+     {
+-        return this.field_82172_bs;
++        return super.canPickUpLoot;
+     }
+ 
+     public void func_98053_h(boolean p_98053_1_)
+     {
+-        this.field_82172_bs = p_98053_1_;
++        super.canPickUpLoot = p_98053_1_;
+     }
+ 
+     public boolean func_104002_bU()
+@@ -1237,11 +1265,14 @@
          return this.field_82179_bU;
      }
  
@@ -526,7 +668,47 @@
      public final boolean func_184230_a(EntityPlayer p_184230_1_, EnumHand p_184230_2_)
      {
          if (this.func_110167_bD() && this.func_110166_bE() == p_184230_1_)
-@@ -1302,7 +1269,7 @@
+         {
++            if (CraftEventFactory.callPlayerUnleashEntityEvent(this, p_184230_1_).isCancelled()) {
++                ((EntityPlayerMP) p_184230_1_).field_71135_a.func_147359_a(new SPacketEntityAttach(this, this.func_110166_bE()));
++                return false;
++            }
+             this.func_110160_i(true, !p_184230_1_.field_71075_bZ.field_75098_d);
+             return true;
+         }
+@@ -1251,6 +1282,10 @@
+ 
+             if (itemstack.func_77973_b() == Items.field_151058_ca && this.func_184652_a(p_184230_1_))
+             {
++                if (CraftEventFactory.callPlayerLeashEntityEvent(this, p_184230_1_, p_184230_1_).isCancelled()) {
++                    ((EntityPlayerMP) p_184230_1_).field_71135_a.func_147359_a(new SPacketEntityAttach(this, this.func_110166_bE()));
++                    return false;
++                }
+                 this.func_110162_b(p_184230_1_, true);
+                 itemstack.func_190918_g(1);
+                 return true;
+@@ -1278,11 +1313,13 @@
+         {
+             if (!this.func_70089_S())
+             {
++                this.field_70170_p.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), EntityUnleashEvent.UnleashReason.PLAYER_UNLEASH));
+                 this.func_110160_i(true, true);
+             }
+ 
+             if (this.field_110168_bw == null || this.field_110168_bw.field_70128_L)
+             {
++                this.field_70170_p.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), EntityUnleashEvent.UnleashReason.HOLDER_GONE));
+                 this.func_110160_i(true, true);
+             }
+         }
+@@ -1297,12 +1334,14 @@
+ 
+             if (!this.field_70170_p.field_72995_K && p_110160_2_)
+             {
++                this.forceDrops = true;
+                 this.func_145779_a(Items.field_151058_ca, 1);
++                this.forceDrops = false;
+             }
  
              if (!this.field_70170_p.field_72995_K && p_110160_1_ && this.field_70170_p instanceof WorldServer)
              {
@@ -535,7 +717,7 @@
              }
          }
      }
-@@ -1338,7 +1305,6 @@
+@@ -1338,7 +1377,6 @@
          }
      }
  
@@ -543,7 +725,7 @@
      public boolean func_184205_a(Entity p_184205_1_, boolean p_184205_2_)
      {
          boolean flag = super.func_184205_a(p_184205_1_, p_184205_2_);
-@@ -1359,7 +1325,7 @@
+@@ -1359,7 +1397,7 @@
              {
                  UUID uuid = this.field_110170_bx.func_186857_a("UUID");
  
@@ -552,7 +734,7 @@
                  {
                      if (entitylivingbase.func_110124_au().equals(uuid))
                      {
-@@ -1370,9 +1336,7 @@
+@@ -1370,9 +1408,7 @@
              }
              else if (this.field_110170_bx.func_150297_b("X", 99) && this.field_110170_bx.func_150297_b("Y", 99) && this.field_110170_bx.func_150297_b("Z", 99))
              {
@@ -563,7 +745,15 @@
                  EntityLeashKnot entityleashknot = EntityLeashKnot.func_174863_b(this.field_70170_p, blockpos);
  
                  if (entityleashknot == null)
-@@ -1391,7 +1355,6 @@
+@@ -1384,6 +1420,7 @@
+             }
+             else
+             {
++                this.field_70170_p.getServer().getPluginManager().callEvent(new EntityUnleashEvent(this.getBukkitEntity(), EntityUnleashEvent.UnleashReason.UNKNOWN));
+                 this.func_110160_i(false, true);
+             }
+         }
+@@ -1391,7 +1428,6 @@
          this.field_110170_bx = null;
      }
  
@@ -571,7 +761,7 @@
      public boolean func_174820_d(int p_174820_1_, ItemStack p_174820_2_)
      {
          EntityEquipmentSlot entityequipmentslot;
-@@ -1437,7 +1400,6 @@
+@@ -1437,7 +1473,6 @@
          }
      }
  
@@ -579,7 +769,7 @@
      public boolean func_184186_bw()
      {
          return this.func_82171_bF() && super.func_184186_bw();
-@@ -1446,12 +1408,9 @@
+@@ -1446,12 +1481,9 @@
      public static boolean func_184648_b(EntityEquipmentSlot p_184648_0_, ItemStack p_184648_1_)
      {
          EntityEquipmentSlot entityequipmentslot = func_184640_d(p_184648_1_);
@@ -593,7 +783,7 @@
      public boolean func_70613_aW()
      {
          return super.func_70613_aW() && !this.func_175446_cd();
-@@ -1459,27 +1418,26 @@
+@@ -1459,27 +1491,26 @@
  
      public void func_94061_f(boolean p_94061_1_)
      {
@@ -627,7 +817,7 @@
      public EnumHandSide func_184591_cq()
      {
          return this.func_184638_cS() ? EnumHandSide.LEFT : EnumHandSide.RIGHT;
-@@ -1490,5 +1448,19 @@
+@@ -1490,5 +1521,19 @@
          ON_GROUND,
          IN_AIR,
          IN_WATER;

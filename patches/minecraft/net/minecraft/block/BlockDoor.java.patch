@@ -8,7 +8,13 @@
  import net.minecraft.block.properties.PropertyBool;
  import net.minecraft.block.properties.PropertyDirection;
  import net.minecraft.block.properties.PropertyEnum;
-@@ -33,34 +34,25 @@
+@@ -28,39 +29,31 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class BlockDoor extends Block
  {
      public static final PropertyDirection field_176520_a = BlockHorizontal.field_185512_D;
      public static final PropertyBool field_176519_b = PropertyBool.func_177716_a("open");
@@ -52,7 +58,7 @@
          boolean flag1 = p_185496_1_.func_177229_b(field_176521_M) == BlockDoor.EnumHingePosition.RIGHT;
  
          switch (enumfacing)
-@@ -77,25 +69,21 @@
+@@ -77,25 +70,21 @@
          }
      }
  
@@ -78,7 +84,7 @@
      public boolean func_149686_d(IBlockState p_149686_1_)
      {
          return false;
-@@ -111,7 +99,6 @@
+@@ -111,7 +100,6 @@
          return this.field_149764_J == Material.field_151573_f ? 1005 : 1006;
      }
  
@@ -86,7 +92,7 @@
      public MapColor func_180659_g(IBlockState p_180659_1_, IBlockAccess p_180659_2_, BlockPos p_180659_3_)
      {
          if (p_180659_1_.func_177230_c() == Blocks.field_150454_av)
-@@ -140,24 +127,11 @@
+@@ -140,24 +128,11 @@
          }
          else
          {
@@ -113,7 +119,7 @@
      {
          if (this.field_149764_J == Material.field_151573_f)
          {
-@@ -177,7 +151,7 @@
+@@ -177,7 +152,7 @@
                  p_180639_3_ = iblockstate.func_177231_a(field_176519_b);
                  p_180639_1_.func_180501_a(blockpos, p_180639_3_, 10);
                  p_180639_1_.func_175704_b(blockpos, p_180639_2_);
@@ -122,7 +128,7 @@
                  return true;
              }
          }
-@@ -192,16 +166,15 @@
+@@ -192,16 +167,15 @@
              BlockPos blockpos = iblockstate.func_177229_b(field_176523_O) == BlockDoor.EnumDoorHalf.LOWER ? p_176512_2_ : p_176512_2_.func_177977_b();
              IBlockState iblockstate1 = p_176512_2_ == blockpos ? iblockstate : p_176512_1_.func_180495_p(blockpos);
  
@@ -142,7 +148,7 @@
      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
      {
          if (p_189540_1_.func_177229_b(field_176523_O) == BlockDoor.EnumDoorHalf.UPPER)
-@@ -230,7 +203,7 @@
+@@ -230,7 +204,7 @@
                  flag1 = true;
              }
  
@@ -151,24 +157,40 @@
              {
                  p_189540_2_.func_175698_g(p_189540_3_);
                  flag1 = true;
-@@ -252,43 +225,39 @@
+@@ -250,45 +224,51 @@
+             }
+             else
              {
-                 boolean flag = p_189540_2_.func_175640_z(p_189540_3_) || p_189540_2_.func_175640_z(blockpos1);
- 
+-                boolean flag = p_189540_2_.func_175640_z(p_189540_3_) || p_189540_2_.func_175640_z(blockpos1);
+-
 -                if (p_189540_4_ != this && (flag || p_189540_4_.func_176223_P().func_185897_m()) && flag != iblockstate1.func_177229_b(field_176522_N))
-+                if (p_189540_4_ != this && (flag || p_189540_4_.func_176223_P().func_185897_m()) && flag != ((Boolean)iblockstate1.func_177229_b(field_176522_N)).booleanValue())
-                 {
+-                {
 -                    p_189540_2_.func_180501_a(blockpos1, iblockstate1.func_177226_a(field_176522_N, flag), 2);
-+                    p_189540_2_.func_180501_a(blockpos1, iblockstate1.func_177226_a(field_176522_N, Boolean.valueOf(flag)), 2);
- 
+-
 -                    if (flag != p_189540_1_.func_177229_b(field_176519_b))
-+                    if (flag != ((Boolean)p_189540_1_.func_177229_b(field_176519_b)).booleanValue())
++                org.bukkit.World bworld = p_189540_2_.getWorld();
++                org.bukkit.block.Block bukkitBlock = bworld.getBlockAt(p_189540_3_.func_177958_n(), p_189540_3_.func_177956_o(), p_189540_3_.func_177952_p());
++                org.bukkit.block.Block blockTop = bworld.getBlockAt(blockpos1.func_177958_n(), blockpos1.func_177956_o(), blockpos1.func_177952_p());
++
++                int power = bukkitBlock.getBlockPower();
++                int powerTop = blockTop.getBlockPower();
++                if (powerTop > power) power = powerTop;
++                int oldPower = iblockstate1.func_177229_b(BlockDoor.field_176522_N) ? 15 : 0;
++
++                if (oldPower == 0 ^ power == 0) {
++                    BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(bukkitBlock, oldPower, power);
++                    p_189540_2_.getServer().getPluginManager().callEvent(eventRedstone);
++
++                    boolean flag2 = eventRedstone.getNewCurrent() > 0;
++                    p_189540_2_.func_180501_a(blockpos1, iblockstate1.func_177226_a(field_176522_N, Boolean.valueOf(flag2)), 2);
++
++                    if (flag2 != p_189540_1_.func_177229_b(field_176519_b))
                      {
 -                        p_189540_2_.func_180501_a(p_189540_3_, p_189540_1_.func_177226_a(field_176519_b, flag), 2);
-+                        p_189540_2_.func_180501_a(p_189540_3_, p_189540_1_.func_177226_a(field_176519_b, Boolean.valueOf(flag)), 2);
++                        p_189540_2_.func_180501_a(p_189540_3_, p_189540_1_.func_177226_a(field_176519_b, Boolean.valueOf(flag2)), 2);
                          p_189540_2_.func_175704_b(p_189540_3_, p_189540_3_);
 -                        p_189540_2_.func_180498_a(null, flag ? this.func_185655_g() : this.func_185654_e(), p_189540_3_, 0);
-+                        p_189540_2_.func_180498_a((EntityPlayer)null, flag ? this.func_185655_g() : this.func_185654_e(), p_189540_3_, 0);
++                        p_189540_2_.func_180498_a(null, flag2 ? this.func_185655_g() : this.func_185654_e(), p_189540_3_, 0);
                      }
                  }
              }
@@ -203,7 +225,7 @@
      public EnumPushReaction func_149656_h(IBlockState p_149656_1_)
      {
          return EnumPushReaction.DESTROY;
-@@ -310,7 +279,6 @@
+@@ -310,7 +290,6 @@
          return func_176510_b(k) | (flag ? 8 : 0) | (flag1 ? 16 : 0) | (flag2 ? 32 : 0);
      }
  
@@ -211,7 +233,7 @@
      public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_)
      {
          return new ItemStack(this.func_176509_j());
-@@ -344,15 +312,12 @@
+@@ -344,15 +323,12 @@
          }
      }
  
@@ -228,7 +250,7 @@
          {
              p_176208_1_.func_175698_g(blockpos);
          }
-@@ -369,13 +334,11 @@
+@@ -369,13 +345,11 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -242,7 +264,7 @@
      public IBlockState func_176221_a(IBlockState p_176221_1_, IBlockAccess p_176221_2_, BlockPos p_176221_3_)
      {
          if (p_176221_1_.func_177229_b(field_176523_O) == BlockDoor.EnumDoorHalf.LOWER)
-@@ -384,8 +347,7 @@
+@@ -384,8 +358,7 @@
  
              if (iblockstate.func_177230_c() == this)
              {
@@ -252,7 +274,7 @@
              }
          }
          else
-@@ -394,68 +356,51 @@
+@@ -394,68 +367,51 @@
  
              if (iblockstate1.func_177230_c() == this)
              {
@@ -329,7 +351,7 @@
              {
                  i |= 4;
              }
-@@ -494,13 +439,11 @@
+@@ -494,13 +450,11 @@
          return (p_176518_0_ & 8) != 0;
      }
  
@@ -344,7 +366,7 @@
      public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
      {
          return BlockFaceShape.UNDEFINED;
-@@ -511,13 +454,11 @@
+@@ -511,13 +465,11 @@
          UPPER,
          LOWER;
  
@@ -358,7 +380,7 @@
          public String func_176610_l()
          {
              return this == UPPER ? "upper" : "lower";
-@@ -529,13 +470,11 @@
+@@ -529,13 +481,11 @@
          LEFT,
          RIGHT;
  

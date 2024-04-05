@@ -1,0 +1,19 @@
+--- before/net/minecraft/world/WorldProviderHell.java
++++ after/net/minecraft/world/WorldProviderHell.java
+@@ -83,12 +83,14 @@
+             @Override
+             public double func_177731_f()
+             {
+-                return super.func_177731_f() / 8.0;
++                // return super.getCenterX() / 8.0D;
++                return super.func_177731_f(); // CraftBukkit
+             }
+             @Override
+             public double func_177721_g()
+             {
+-                return super.func_177721_g() / 8.0;
++                // return super.getCenterZ() / 8.0D;
++                return super.func_177721_g(); // CraftBukkit
+             }
+         };
+     }

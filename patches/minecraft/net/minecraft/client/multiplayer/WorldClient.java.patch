@@ -39,7 +39,7 @@
      public void func_72835_b()
      {
          super.func_72835_b();
-@@ -106,14 +109,12 @@
+@@ -106,15 +109,13 @@
      {
      }
  
@@ -51,9 +51,11 @@
      }
  
 -    @Override
-     protected boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_)
+-    protected boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_)
++    public boolean func_175680_a(int p_175680_1_, int p_175680_2_, boolean p_175680_3_)
      {
          return p_175680_3_ || !this.func_72863_F().func_186025_d(p_175680_1_, p_175680_2_).func_76621_g();
+     }
 @@ -124,8 +125,8 @@
          this.field_184157_a.clear();
          int i = this.field_73037_M.field_71474_y.field_151451_c;

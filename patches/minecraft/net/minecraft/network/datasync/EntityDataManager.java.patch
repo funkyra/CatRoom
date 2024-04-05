@@ -1,6 +1,15 @@
 --- before/net/minecraft/network/datasync/EntityDataManager.java
 +++ after/net/minecraft/network/datasync/EntityDataManager.java
-@@ -24,9 +24,9 @@
+@@ -10,6 +10,8 @@
+ import java.util.concurrent.locks.ReadWriteLock;
+ import java.util.concurrent.locks.ReentrantReadWriteLock;
+ import javax.annotation.Nullable;
++
++import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+ import net.minecraft.crash.CrashReport;
+ import net.minecraft.crash.CrashReportCategory;
+ import net.minecraft.entity.Entity;
+@@ -24,9 +26,9 @@
  public class EntityDataManager
  {
      private static final Logger field_190303_a = LogManager.getLogger();
@@ -8,11 +17,11 @@
 +    private static final Map < Class <? extends Entity > , Integer > field_187232_a = Maps. < Class <? extends Entity > , Integer > newHashMap();
      private final Entity field_187233_b;
 -    private final Map < Integer, EntityDataManager.DataEntry<? >> field_187234_c = Maps.newHashMap();
-+    private final Map < Integer, EntityDataManager.DataEntry<? >> field_187234_c = Maps. < Integer, EntityDataManager.DataEntry<? >> newHashMap();
++    private final Map < Integer, DataEntry<? >> field_187234_c = new Int2ObjectOpenHashMap<>(); // Paper
      private final ReadWriteLock field_187235_d = new ReentrantReadWriteLock();
      private boolean field_187236_e = true;
      private boolean field_187237_f;
-@@ -38,7 +38,7 @@
+@@ -38,7 +40,7 @@
  
      public static <T> DataParameter<T> func_187226_a(Class <? extends Entity > p_187226_0_, DataSerializer<T> p_187226_1_)
      {
@@ -21,7 +30,7 @@
          {
              try
              {
-@@ -46,11 +46,14 @@
+@@ -46,11 +48,14 @@
  
                  if (!oclass.equals(p_187226_0_))
                  {
@@ -38,7 +47,7 @@
              }
          }
  
-@@ -58,7 +61,7 @@
+@@ -58,7 +63,7 @@
  
          if (field_187232_a.containsKey(p_187226_0_))
          {
@@ -47,7 +56,7 @@
          }
          else
          {
-@@ -71,7 +74,7 @@
+@@ -71,7 +76,7 @@
  
                  if (field_187232_a.containsKey(oclass1))
                  {
@@ -56,7 +65,7 @@
                      break;
                  }
              }
-@@ -85,7 +88,7 @@
+@@ -85,7 +90,7 @@
          }
          else
          {
@@ -65,7 +74,7 @@
              return p_187226_1_.func_187161_a(j);
          }
      }
-@@ -98,7 +101,7 @@
+@@ -98,7 +103,7 @@
          {
              throw new IllegalArgumentException("Data value id is too big with " + i + "! (Max is " + 254 + ")");
          }
@@ -74,7 +83,7 @@
          {
              throw new IllegalArgumentException("Duplicate id value for " + i + "!");
          }
-@@ -114,9 +117,9 @@
+@@ -114,9 +119,9 @@
  
      private <T> void func_187222_c(DataParameter<T> p_187222_1_, T p_187222_2_)
      {
@@ -86,7 +95,7 @@
          this.field_187236_e = false;
          this.field_187235_d.writeLock().unlock();
      }
-@@ -124,11 +127,11 @@
+@@ -124,11 +129,11 @@
      private <T> EntityDataManager.DataEntry<T> func_187219_c(DataParameter<T> p_187219_1_)
      {
          this.field_187235_d.readLock().lock();
@@ -100,7 +109,7 @@
          }
          catch (Throwable throwable)
          {
-@@ -144,12 +147,12 @@
+@@ -144,12 +149,12 @@
  
      public <T> T func_187225_a(DataParameter<T> p_187225_1_)
      {
@@ -115,7 +124,7 @@
  
          if (ObjectUtils.notEqual(p_187227_2_, dataentry.func_187206_b()))
          {
-@@ -179,7 +182,7 @@
+@@ -179,7 +184,7 @@
  
              for (int j = p_187229_0_.size(); i < j; ++i)
              {
@@ -124,7 +133,7 @@
                  func_187220_a(p_187229_1_, dataentry);
              }
          }
-@@ -204,7 +207,7 @@
+@@ -204,7 +209,7 @@
  
                      if (list == null)
                      {
@@ -133,7 +142,7 @@
                      }
  
                      list.add(dataentry.func_192735_d());
-@@ -241,7 +244,7 @@
+@@ -241,7 +246,7 @@
          {
              if (list == null)
              {
@@ -142,7 +151,7 @@
              }
  
              list.add(dataentry.func_192735_d());
-@@ -278,7 +281,7 @@
+@@ -278,7 +283,7 @@
          {
              if (list == null)
              {
@@ -151,7 +160,7 @@
              }
  
              int j = p_187215_0_.func_150792_a();
-@@ -302,7 +305,7 @@
+@@ -302,7 +307,7 @@
  
          for (EntityDataManager.DataEntry<?> dataentry : p_187218_1_)
          {
@@ -160,7 +169,7 @@
  
              if (dataentry1 != null)
              {
-@@ -379,7 +382,7 @@
+@@ -379,7 +384,7 @@
  
              public EntityDataManager.DataEntry<T> func_192735_d()
              {

@@ -1,0 +1,11 @@
+--- before/net/minecraft/entity/monster/EntityGolem.java
++++ after/net/minecraft/entity/monster/EntityGolem.java
+@@ -47,7 +47,7 @@
+     }
+ 
+     @Override
+-    protected boolean func_70692_ba()
++    public boolean func_70692_ba()
+     {
+         return false;
+     }

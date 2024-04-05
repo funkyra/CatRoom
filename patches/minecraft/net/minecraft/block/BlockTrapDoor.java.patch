@@ -8,7 +8,13 @@
  import net.minecraft.block.properties.PropertyBool;
  import net.minecraft.block.properties.PropertyDirection;
  import net.minecraft.block.properties.PropertyEnum;
-@@ -28,33 +29,26 @@
+@@ -23,38 +24,32 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class BlockTrapDoor extends Block
  {
      public static final PropertyDirection field_176284_a = BlockHorizontal.field_185512_D;
      public static final PropertyBool field_176283_b = PropertyBool.func_177716_a("open");
@@ -51,7 +57,7 @@
          {
              switch ((EnumFacing)p_185496_1_.func_177229_b(field_176284_a))
              {
-@@ -84,36 +78,22 @@
+@@ -84,36 +79,22 @@
          return axisalignedbb;
      }
  
@@ -90,7 +96,7 @@
      {
          if (this.field_149764_J == Material.field_151573_f)
          {
-@@ -123,7 +103,7 @@
+@@ -123,7 +104,7 @@
          {
              p_180639_3_ = p_180639_3_.func_177231_a(field_176283_b);
              p_180639_1_.func_180501_a(p_180639_2_, p_180639_3_, 2);
@@ -99,7 +105,7 @@
              return true;
          }
      }
-@@ -142,7 +122,6 @@
+@@ -142,7 +123,6 @@
          }
      }
  
@@ -107,11 +113,23 @@
      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
      {
          if (!p_189540_2_.field_72995_K)
-@@ -151,51 +130,40 @@
+@@ -151,51 +131,52 @@
  
              if (flag || p_189540_4_.func_176223_P().func_185897_m())
              {
 -                boolean flag1 = p_189540_1_.func_177229_b(field_176283_b);
++                org.bukkit.World bworld = p_189540_2_.getWorld();
++                org.bukkit.block.Block bblock = bworld.getBlockAt(p_189540_3_.func_177958_n(), p_189540_3_.func_177956_o(), p_189540_3_.func_177952_p());
++
++                int power = bblock.getBlockPower();
++                int oldPower = p_189540_1_.func_177229_b(field_176283_b) ? 15 : 0;
++
++                if (oldPower == 0 ^ power == 0 || p_189540_4_.func_176223_P().func_185912_n()) {
++                    BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(bblock, oldPower, power);
++                    p_189540_2_.getServer().getPluginManager().callEvent(eventRedstone);
++                    flag = eventRedstone.getNewCurrent() > 0;
++                }
++
 +                boolean flag1 = ((Boolean)p_189540_1_.func_177229_b(field_176283_b)).booleanValue();
  
                  if (flag1 != flag)
@@ -166,7 +184,7 @@
      public boolean func_176198_a(World p_176198_1_, BlockPos p_176198_2_, EnumFacing p_176198_3_)
      {
          return true;
-@@ -233,29 +201,23 @@
+@@ -233,29 +214,23 @@
          }
      }
  
@@ -203,7 +221,7 @@
          {
              i |= 4;
          }
-@@ -268,34 +230,36 @@
+@@ -268,34 +243,36 @@
          return i;
      }
  
@@ -254,7 +272,7 @@
      }
  
      public static enum DoorHalf implements IStringSerializable
-@@ -310,13 +274,11 @@
+@@ -310,13 +287,11 @@
              this.field_176671_c = p_i45674_3_;
          }
  

@@ -1,0 +1,11 @@
+--- before/net/minecraft/command/CommandSenderWrapper.java
++++ after/net/minecraft/command/CommandSenderWrapper.java
+@@ -11,7 +11,7 @@
+ 
+ public class CommandSenderWrapper implements ICommandSender
+ {
+-    private final ICommandSender field_193043_a;
++    public final ICommandSender field_193043_a;
+     @Nullable
+     private final Vec3d field_194002_b;
+     @Nullable

@@ -1,0 +1,28 @@
+--- before/net/minecraft/block/BlockLever.java
++++ after/net/minecraft/block/BlockLever.java
+@@ -21,6 +21,7 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.IBlockAccess;
+ import net.minecraft.world.World;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class BlockLever extends Block
+ {
+@@ -187,6 +188,17 @@
+         }
+         else
+         {
++            boolean powered = p_180639_3_.func_177229_b(field_176359_b);
++            org.bukkit.block.Block block = p_180639_1_.getWorld().getBlockAt(p_180639_2_.func_177958_n(), p_180639_2_.func_177956_o(), p_180639_2_.func_177952_p());
++            int old = (powered) ? 15 : 0;
++            int current = (!powered) ? 15 : 0;
++
++            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, old, current);
++            p_180639_1_.getServer().getPluginManager().callEvent(eventRedstone);
++
++            if ((eventRedstone.getNewCurrent() > 0) == powered) {
++                return true;
++            }
+             p_180639_3_ = p_180639_3_.func_177231_a(field_176359_b);
+             p_180639_1_.func_180501_a(p_180639_2_, p_180639_3_, 3);
+             float f = p_180639_3_.func_177229_b(field_176359_b) ? 0.6F : 0.5F;

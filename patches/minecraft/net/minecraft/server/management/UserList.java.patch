@@ -1,0 +1,13 @@
+--- before/net/minecraft/server/management/UserList.java
++++ after/net/minecraft/server/management/UserList.java
+@@ -165,6 +165,10 @@
+         return this.field_152696_d;
+     }
+ 
++    public Collection<V> getValuesCB() {
++        return this.field_152696_d.values();
++    }
++
+     public void func_152678_f() throws IOException
+     {
+         Collection<V> collection = this.field_152696_d.values();

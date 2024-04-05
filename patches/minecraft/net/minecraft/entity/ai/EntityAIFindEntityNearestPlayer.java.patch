@@ -1,0 +1,11 @@
+--- before/net/minecraft/entity/ai/EntityAIFindEntityNearestPlayer.java
++++ after/net/minecraft/entity/ai/EntityAIFindEntityNearestPlayer.java
+@@ -140,7 +140,7 @@
+     @Override
+     public void func_75249_e()
+     {
+-        this.field_179434_b.func_70624_b(this.field_179433_e);
++        this.field_179434_b.setGoalTarget(this.field_179433_e, org.bukkit.event.entity.EntityTargetEvent.TargetReason.CLOSEST_PLAYER, true);
+         super.func_75249_e();
+     }
+ 

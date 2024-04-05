@@ -1,6 +1,25 @@
 --- before/net/minecraft/entity/EntityLeashKnot.java
 +++ after/net/minecraft/entity/EntityLeashKnot.java
-@@ -25,94 +25,70 @@
+@@ -4,8 +4,10 @@
+ import javax.annotation.Nullable;
+ import net.minecraft.block.BlockFence;
+ import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.init.SoundEvents;
+ import net.minecraft.nbt.NBTTagCompound;
++import net.minecraft.network.play.server.SPacketEntityAttach;
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.EnumHand;
+ import net.minecraft.util.math.AxisAlignedBB;
+@@ -14,6 +16,7 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
+ 
+ public class EntityLeashKnot extends EntityHanging
+ {
+@@ -25,94 +28,70 @@
      public EntityLeashKnot(World p_i45851_1_, BlockPos p_i45851_2_)
      {
          super(p_i45851_1_, p_i45851_2_);
@@ -103,7 +122,7 @@
      public boolean func_184230_a(EntityPlayer p_184230_1_, EnumHand p_184230_2_)
      {
          if (this.field_70170_p.field_72995_K)
-@@ -122,19 +98,8 @@
+@@ -122,24 +101,17 @@
          else
          {
              boolean flag = false;
@@ -125,7 +144,47 @@
  
              for (EntityLiving entityliving : list)
              {
-@@ -165,7 +130,6 @@
+                 if (entityliving.func_110167_bD() && entityliving.func_110166_bE() == p_184230_1_)
+                 {
++                    if (CraftEventFactory.callPlayerLeashEntityEvent(entityliving, this, p_184230_1_).isCancelled()) {
++                        ((EntityPlayerMP) p_184230_1_).field_71135_a.func_147359_a(new SPacketEntityAttach(entityliving, entityliving.func_110166_bE()));
++                        continue;
++                    }
+                     entityliving.func_110162_b(this, true);
+                     flag = true;
+                 }
+@@ -147,17 +119,25 @@
+ 
+             if (!flag)
+             {
+-                this.func_70106_y();
+-
+-                if (p_184230_1_.field_71075_bZ.field_75098_d)
+-                {
++                // CraftBukkit start - Move below
++                // this.setDead();
++                if (true || p_184230_1_.field_71075_bZ.field_75098_d) { // CraftBukkit - Process for non-creative as well
++                boolean die = true;
+                     for (EntityLiving entityliving1 : list)
+                     {
+                         if (entityliving1.func_110167_bD() && entityliving1.func_110166_bE() == this)
+                         {
+-                            entityliving1.func_110160_i(true, false);
++                            // entityliving1.clearLeashed(true, false);
++                            if (CraftEventFactory.callPlayerUnleashEntityEvent(entityliving1, p_184230_1_).isCancelled()) {
++                                die = false;
++                                continue;
++                            }
++                            entityliving1.func_110160_i(true, !p_184230_1_.field_71075_bZ.field_75098_d); // false -> survival mode boolean
+                         }
+                     }
++                    if (die) {
++                        this.func_70106_y();
++                    }
+                 }
+             }
+ 
+@@ -165,7 +145,6 @@
          }
      }
  
@@ -133,7 +192,7 @@
      public boolean func_70518_d()
      {
          return this.field_70170_p.func_180495_p(this.field_174861_a).func_177230_c() instanceof BlockFence;
-@@ -186,9 +150,7 @@
+@@ -186,9 +165,7 @@
          int j = p_174863_1_.func_177956_o();
          int k = p_174863_1_.func_177952_p();
  
@@ -144,7 +203,7 @@
          {
              if (entityleashknot.func_174857_n().equals(p_174863_1_))
              {
-@@ -199,7 +161,6 @@
+@@ -199,7 +176,6 @@
          return null;
      }
  

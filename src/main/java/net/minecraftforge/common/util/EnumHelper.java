@@ -23,6 +23,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiPredicate;
 
+import catserver.server.launch.Java11Support;
 import com.cleanroommc.hackery.ReflectionHackery;
 import com.cleanroommc.hackery.enums.EnumHackery;
 import com.google.common.base.Predicate;
@@ -54,6 +55,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.gen.structure.StructureStrongholdPieces.Stronghold.Door;
 import net.minecraftforge.classloading.FMLForgePlugin;
 import org.apache.commons.lang3.ArrayUtils;
+import org.bukkit.World;
 
 import javax.annotation.Nullable;
 
@@ -296,5 +298,7 @@ public class EnumHelper
         return (T) EnumHackery.addEnumEntry((Class<? extends Enum>) enumType, enumName, paramTypes, paramValues);
     }
 
-
+    public static World.Environment _addBukkitEnvironment(int id, String name) {
+        return addEnum(World.Environment.class, name, new Class[]{int.class}, new Object[]{id});
+    }
 }

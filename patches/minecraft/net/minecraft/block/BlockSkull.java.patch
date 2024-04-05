@@ -8,7 +8,16 @@
  import net.minecraft.block.properties.PropertyBool;
  import net.minecraft.block.properties.PropertyDirection;
  import net.minecraft.block.state.BlockFaceShape;
-@@ -48,52 +49,44 @@
+@@ -39,6 +40,8 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.util.BlockStateListPopulator;
++import org.bukkit.event.entity.CreatureSpawnEvent;
+ 
+ public class BlockSkull extends BlockContainer
+ {
+@@ -48,52 +51,44 @@
      {
          public boolean apply(@Nullable BlockWorldState p_apply_1_)
          {
@@ -68,7 +77,7 @@
      public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_)
      {
          switch ((EnumFacing)p_185496_1_.func_177229_b(field_176418_a))
-@@ -112,28 +105,16 @@
+@@ -112,28 +107,16 @@
          }
      }
  
@@ -99,7 +108,7 @@
      public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_)
      {
          int i = 0;
-@@ -147,36 +128,33 @@
+@@ -147,36 +130,33 @@
          return new ItemStack(Items.field_151144_bL, 1, i);
      }
  
@@ -144,7 +153,7 @@
  
                      if (tileentityskull.func_145904_a() == 3 && tileentityskull.func_152108_a() != null)
                      {
-@@ -186,15 +164,12 @@
+@@ -186,15 +166,12 @@
                          itemstack.func_77978_p().func_74782_a("SkullOwner", nbttagcompound);
                      }
  
@@ -161,7 +170,7 @@
      public Item func_180660_a(IBlockState p_180660_1_, Random p_180660_2_, int p_180660_3_)
      {
          return Items.field_151144_bL;
-@@ -202,10 +177,7 @@
+@@ -202,10 +179,7 @@
  
      public boolean func_176415_b(World p_176415_1_, BlockPos p_176415_2_, ItemStack p_176415_3_)
      {
@@ -173,7 +182,7 @@
          {
              return this.func_176414_j().func_177681_a(p_176415_1_, p_176415_2_) != null;
          }
-@@ -217,10 +189,7 @@
+@@ -217,20 +191,22 @@
  
      public void func_180679_a(World p_180679_1_, BlockPos p_180679_2_, TileEntitySkull p_180679_3_)
      {
@@ -181,20 +190,38 @@
 -                && p_180679_2_.func_177956_o() >= 2
 -                && p_180679_1_.func_175659_aa() != EnumDifficulty.PEACEFUL
 -                && !p_180679_1_.field_72995_K)
++        if (p_180679_1_.captureBlockSnapshots) return;
 +        if (p_180679_3_.func_145904_a() == 1 && p_180679_2_.func_177956_o() >= 2 && p_180679_1_.func_175659_aa() != EnumDifficulty.PEACEFUL && !p_180679_1_.field_72995_K)
          {
              BlockPattern blockpattern = this.func_176416_l();
              BlockPattern.PatternHelper blockpattern$patternhelper = blockpattern.func_177681_a(p_180679_1_, p_180679_2_);
-@@ -230,7 +199,7 @@
+ 
+             if (blockpattern$patternhelper != null)
+             {
++                BlockStateListPopulator blockList = new BlockStateListPopulator(p_180679_1_.getWorld());
                  for (int i = 0; i < 3; ++i)
                  {
                      BlockWorldState blockworldstate = blockpattern$patternhelper.func_177670_a(i, 0, 0);
 -                    p_180679_1_.func_180501_a(blockworldstate.func_177508_d(), blockworldstate.func_177509_a().func_177226_a(field_176417_b, true), 2);
-+                    p_180679_1_.func_180501_a(blockworldstate.func_177508_d(), blockworldstate.func_177509_a().func_177226_a(field_176417_b, Boolean.valueOf(true)), 2);
++                    BlockPos pos1 = blockworldstate.func_177508_d();
++                    IBlockState data = blockworldstate.func_177509_a().func_177226_a(BlockSkull.field_176417_b, true);
++                    blockList.setTypeAndData(pos1.func_177958_n(), pos1.func_177956_o(), pos1.func_177952_p(), data.func_177230_c(), data.func_177230_c().func_176201_c(data), 2);
++//                    worldIn.setBlockState(blockworldstate.getPos(), blockworldstate.getBlockState().withProperty(NODROP, Boolean.valueOf(true)), 2);
                  }
  
                  for (int j = 0; j < blockpattern.func_177684_c(); ++j)
-@@ -245,17 +214,11 @@
+@@ -238,68 +214,54 @@
+                     for (int k = 0; k < blockpattern.func_177685_b(); ++k)
+                     {
+                         BlockWorldState blockworldstate1 = blockpattern$patternhelper.func_177670_a(j, k, 0);
+-                        p_180679_1_.func_180501_a(blockworldstate1.func_177508_d(), Blocks.field_150350_a.func_176223_P(), 2);
++                        BlockPos pos1 = blockworldstate1.func_177508_d();
++                        blockList.setTypeAndData(pos1.func_177958_n(), pos1.func_177956_o(), pos1.func_177952_p(), Blocks.field_150350_a, 0, 2);
++//                        worldIn.setBlockState(blockworldstate1.getPos(), Blocks.AIR.getDefaultState(), 2);
++
+                     }
+                 }
+ 
                  BlockPos blockpos = blockpattern$patternhelper.func_177670_a(1, 0, 0).func_177508_d();
                  EntityWither entitywither = new EntityWither(p_180679_1_);
                  BlockPos blockpos1 = blockpattern$patternhelper.func_177670_a(1, 2, 0).func_177508_d();
@@ -208,16 +235,16 @@
 +                entitywither.func_70012_b((double)blockpos1.func_177958_n() + 0.5D, (double)blockpos1.func_177956_o() + 0.55D, (double)blockpos1.func_177952_p() + 0.5D, blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X ? 0.0F : 90.0F, 0.0F);
                  entitywither.field_70761_aq = blockpattern$patternhelper.func_177669_b().func_176740_k() == EnumFacing.Axis.X ? 0.0F : 90.0F;
                  entitywither.func_82206_m();
- 
+-
 -                for (EntityPlayerMP entityplayermp : p_180679_1_.func_72872_a(EntityPlayerMP.class, entitywither.func_174813_aQ().func_186662_g(50.0)))
-+                for (EntityPlayerMP entityplayermp : p_180679_1_.func_72872_a(EntityPlayerMP.class, entitywither.func_174813_aQ().func_186662_g(50.0D)))
-                 {
-                     CriteriaTriggers.field_192133_m.func_192229_a(entityplayermp, entitywither);
-                 }
-@@ -264,15 +227,7 @@
- 
-                 for (int l = 0; l < 120; ++l)
-                 {
+-                {
+-                    CriteriaTriggers.field_192133_m.func_192229_a(entityplayermp, entitywither);
+-                }
+-
+-                p_180679_1_.func_72838_d(entitywither);
+-
+-                for (int l = 0; l < 120; ++l)
+-                {
 -                    p_180679_1_.func_175688_a(
 -                        EnumParticleTypes.SNOWBALL,
 -                        (double)blockpos.func_177958_n() + p_180679_1_.field_73012_v.nextDouble(),
@@ -227,11 +254,35 @@
 -                        0.0,
 -                        0.0
 -                    );
-+                    p_180679_1_.func_175688_a(EnumParticleTypes.SNOWBALL, (double)blockpos.func_177958_n() + p_180679_1_.field_73012_v.nextDouble(), (double)(blockpos.func_177956_o() - 2) + p_180679_1_.field_73012_v.nextDouble() * 3.9D, (double)blockpos.func_177952_p() + p_180679_1_.field_73012_v.nextDouble(), 0.0D, 0.0D, 0.0D);
+-                }
+-
+-                for (int i1 = 0; i1 < blockpattern.func_177684_c(); ++i1)
+-                {
+-                    for (int j1 = 0; j1 < blockpattern.func_177685_b(); ++j1)
+-                    {
+-                        BlockWorldState blockworldstate2 = blockpattern$patternhelper.func_177670_a(i1, j1, 0);
+-                        p_180679_1_.func_175722_b(blockworldstate2.func_177508_d(), Blocks.field_150350_a, false);
++                if (p_180679_1_.addEntity(entitywither, CreatureSpawnEvent.SpawnReason.BUILD_WITHER)) {
++                    blockList.updateList();
++
++                    for (EntityPlayerMP entityplayermp : p_180679_1_.func_72872_a(EntityPlayerMP.class, entitywither.func_174813_aQ().func_186662_g(50.0D))) {
++                        CriteriaTriggers.field_192133_m.func_192229_a(entityplayermp, entitywither);
++                    }
++
++//                worldIn.spawnEntity(entitywither);
++
++                    for (int l = 0; l < 120; ++l) {
++                        p_180679_1_.func_175688_a(EnumParticleTypes.SNOWBALL, (double) blockpos.func_177958_n() + p_180679_1_.field_73012_v.nextDouble(), (double) (blockpos.func_177956_o() - 2) + p_180679_1_.field_73012_v.nextDouble() * 3.9D, (double) blockpos.func_177952_p() + p_180679_1_.field_73012_v.nextDouble(), 0.0D, 0.0D, 0.0D);
++                    }
++
++                    for (int i1 = 0; i1 < blockpattern.func_177684_c(); ++i1) {
++                        for (int j1 = 0; j1 < blockpattern.func_177685_b(); ++j1) {
++                            BlockWorldState blockworldstate2 = blockpattern$patternhelper.func_177670_a(i1, j1, 0);
++                            p_180679_1_.func_175722_b(blockworldstate2.func_177508_d(), Blocks.field_150350_a, false);
++                        }
+                     }
                  }
- 
-                 for (int i1 = 0; i1 < blockpattern.func_177684_c(); ++i1)
-@@ -287,19 +242,17 @@
+             }
          }
      }
  
@@ -254,7 +305,7 @@
          {
              i |= 8;
          }
-@@ -307,33 +260,26 @@
+@@ -307,33 +269,26 @@
          return i;
      }
  
@@ -292,7 +343,7 @@
          }
  
          return this.field_176420_N;
-@@ -343,18 +289,12 @@
+@@ -343,18 +298,12 @@
      {
          if (this.field_176421_O == null)
          {

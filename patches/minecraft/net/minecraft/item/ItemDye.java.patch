@@ -1,6 +1,10 @@
 --- before/net/minecraft/item/ItemDye.java
 +++ after/net/minecraft/item/ItemDye.java
-@@ -23,10 +23,7 @@
+@@ -20,13 +20,11 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.entity.SheepDyeWoolEvent;
  
  public class ItemDye extends Item
  {
@@ -12,7 +16,7 @@
  
      public ItemDye()
      {
-@@ -35,24 +32,13 @@
+@@ -35,24 +33,13 @@
          this.func_77637_a(CreativeTabs.field_78035_l);
      }
  
@@ -38,7 +42,7 @@
      {
          ItemStack itemstack = p_180614_1_.func_184586_b(p_180614_4_);
  
-@@ -66,7 +52,7 @@
+@@ -66,7 +53,7 @@
  
              if (enumdyecolor == EnumDyeColor.WHITE)
              {
@@ -47,7 +51,7 @@
                  {
                      if (!p_180614_2_.field_72995_K)
                      {
-@@ -92,8 +78,7 @@
+@@ -92,8 +79,7 @@
  
                      if (p_180614_2_.func_175623_d(p_180614_3_))
                      {
@@ -57,7 +61,7 @@
                          p_180614_2_.func_180501_a(p_180614_3_, iblockstate1, 10);
  
                          if (!p_180614_1_.field_71075_bZ.field_75098_d)
-@@ -114,8 +99,18 @@
+@@ -114,8 +100,18 @@
  
      public static boolean func_179234_a(ItemStack p_179234_0_, World p_179234_1_, BlockPos p_179234_2_)
      {
@@ -76,7 +80,7 @@
          if (iblockstate.func_177230_c() instanceof IGrowable)
          {
              IGrowable igrowable = (IGrowable)iblockstate.func_177230_c();
-@@ -153,23 +148,24 @@
+@@ -153,23 +149,24 @@
          {
              for (int i = 0; i < p_180617_2_; ++i)
              {
@@ -114,7 +118,23 @@
      public boolean func_111207_a(ItemStack p_111207_1_, EntityPlayer p_111207_2_, EntityLivingBase p_111207_3_, EnumHand p_111207_4_)
      {
          if (p_111207_3_ instanceof EntitySheep)
-@@ -191,7 +187,6 @@
+@@ -179,6 +176,15 @@
+ 
+             if (!entitysheep.func_70892_o() && entitysheep.func_175509_cj() != enumdyecolor)
+             {
++                byte bColor = (byte) enumdyecolor.func_176765_a();
++                SheepDyeWoolEvent event = new SheepDyeWoolEvent((org.bukkit.entity.Sheep) entitysheep.getBukkitEntity(), org.bukkit.DyeColor.getByWoolData(bColor));
++                entitysheep.field_70170_p.getServer().getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    return false;
++                }
++
++                enumdyecolor = EnumDyeColor.func_176764_b(event.getColor().getWoolData());
+                 entitysheep.func_175512_b(enumdyecolor);
+                 p_111207_1_.func_190918_g(1);
+             }
+@@ -191,7 +197,6 @@
          }
      }
  

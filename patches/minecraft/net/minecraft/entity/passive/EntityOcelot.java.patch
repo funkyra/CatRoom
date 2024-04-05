@@ -75,9 +75,11 @@
      }
  
 -    @Override
-     protected boolean func_70692_ba()
+-    protected boolean func_70692_ba()
++    public boolean func_70692_ba()
      {
-         return !this.func_70909_n() && this.field_70173_aa > 2400;
+-        return !this.func_70909_n() && this.field_70173_aa > 2400;
++        return !this.func_70909_n() /*&& this.ticksExisted > 2400*/; // CraftBukkit
      }
  
 -    @Override
@@ -149,7 +151,17 @@
      public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_)
      {
          if (this.func_180431_b(p_70097_1_))
-@@ -210,13 +197,11 @@
+@@ -202,7 +189,8 @@
+         {
+             if (this.field_70911_d != null)
+             {
+-                this.field_70911_d.func_75270_a(false);
++                // CraftBukkit - moved into EntityLiving.damageEntity(DamageSource, float)
++                // this.aiSit.setSitting(false);
+             }
+ 
+             return super.func_70097_a(p_70097_1_, p_70097_2_);
+@@ -210,13 +198,11 @@
      }
  
      @Nullable
@@ -163,7 +175,7 @@
      public boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_)
      {
          ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
-@@ -228,9 +213,7 @@
+@@ -228,9 +214,7 @@
                  this.field_70911_d.func_75270_a(!this.func_70906_o());
              }
          }
@@ -174,16 +186,17 @@
          {
              if (!p_184645_1_.field_71075_bZ.field_75098_d)
              {
-@@ -239,7 +222,7 @@
+@@ -239,7 +223,8 @@
  
              if (!this.field_70170_p.field_72995_K)
              {
 -                if (this.field_70146_Z.nextInt(3) == 0)
-+                if (this.field_70146_Z.nextInt(3) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, p_184645_1_))
++                // CraftBukkit - added event call and isCancelled check
++                if (this.field_70146_Z.nextInt(3) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, p_184645_1_) && !org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityTameEvent(this, p_184645_1_).isCancelled())
                  {
                      this.func_193101_c(p_184645_1_);
                      this.func_70912_b(1 + this.field_70170_p.field_73012_v.nextInt(3));
-@@ -274,13 +257,11 @@
+@@ -274,13 +259,11 @@
          return entityocelot;
      }
  
@@ -197,7 +210,7 @@
      public boolean func_70878_b(EntityAnimal p_70878_1_)
      {
          if (p_70878_1_ == this)
-@@ -312,26 +293,22 @@
+@@ -312,26 +295,22 @@
  
      public int func_70913_u()
      {
@@ -227,7 +240,7 @@
          {
              BlockPos blockpos = new BlockPos(this.field_70165_t, this.func_174813_aQ().field_72338_b, this.field_70161_v);
  
-@@ -343,7 +320,7 @@
+@@ -343,7 +322,7 @@
              IBlockState iblockstate = this.field_70170_p.func_180495_p(blockpos.func_177977_b());
              Block block = iblockstate.func_177230_c();
  
@@ -236,7 +249,7 @@
              {
                  return true;
              }
-@@ -352,7 +329,6 @@
+@@ -352,7 +331,6 @@
          return false;
      }
  
@@ -244,7 +257,7 @@
      public String func_70005_c_()
      {
          if (this.func_145818_k_())
-@@ -365,12 +341,11 @@
+@@ -365,12 +343,11 @@
          }
      }
  
@@ -258,7 +271,7 @@
          }
  
          this.field_70714_bg.func_85156_a(this.field_175545_bm);
-@@ -382,7 +357,6 @@
+@@ -382,7 +359,6 @@
      }
  
      @Nullable
@@ -266,3 +279,12 @@
      public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_)
      {
          p_180482_2_ = super.func_180482_a(p_180482_1_, p_180482_2_);
+@@ -394,7 +370,7 @@
+                 EntityOcelot entityocelot = new EntityOcelot(this.field_70170_p);
+                 entityocelot.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, 0.0F);
+                 entityocelot.func_70873_a(-24000);
+-                this.field_70170_p.func_72838_d(entityocelot);
++                this.field_70170_p.addEntity(entityocelot, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.OCELOT_BABY);
+             }
+         }
+ 

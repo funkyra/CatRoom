@@ -71,7 +71,7 @@ import net.minecraftforge.registries.ForgeRegistry;
 // TODO build test suites to validate the behaviour of this stuff and make it less annoyingly magical
 public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet<?>> implements ChannelOutboundHandler {
     private static boolean DEBUG_HANDSHAKE = Boolean.parseBoolean(System.getProperty("fml.debugNetworkHandshake", "false"));
-    private static enum ConnectionState {
+    public static enum ConnectionState {
         OPENING, AWAITING_HANDSHAKE, HANDSHAKING, HANDSHAKECOMPLETE, FINALIZING, CONNECTED
     }
 
@@ -104,7 +104,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet<?>> im
     public final NetworkManager manager;
     private final PlayerList scm;
     private EntityPlayerMP player;
-    private ConnectionState state;
+    public ConnectionState state;
     private ConnectionType connectionType;
     private final Side side;
     private final EmbeddedChannel handshakeChannel;
@@ -195,20 +195,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet<?>> im
         // This will be ignored by vanilla clients
         this.state = ConnectionState.AWAITING_HANDSHAKE;
         // Need to start the handler here, so we can send custompayload packets
-        serverHandler = new NetHandlerPlayServer(scm.getServerInstance(), manager, player)
-        {
-            @Override
-            public void update()
-            {
-                if (NetworkDispatcher.this.state == ConnectionState.FINALIZING)
-                {
-                    completeServerSideConnection(ConnectionType.MODDED);
-                }
-                // FORGE: sometimes the netqueue will tick while login is occurring, causing an NPE. We shouldn't tick until the connection is complete
-                if (this.player.connection != this) return;
-                super.update();
-            }
-        };
+        serverHandler = new NetHandlerPlayServer(scm.getServerInstance(), manager, player, this);
         this.netHandler = serverHandler;
         // NULL the play server here - we restore it further on. If not, there are packets sent before the login
         player.connection = null;
@@ -245,7 +232,7 @@ public class NetworkDispatcher extends SimpleChannelInboundHandler<Packet<?>> im
         MinecraftForge.EVENT_BUS.post(new FMLNetworkEvent.ClientConnectedToServerEvent(manager, this.connectionType.name()));
     }
 
-    private synchronized void completeServerSideConnection(ConnectionType type)
+    public synchronized void completeServerSideConnection(ConnectionType type)
     {
         this.connectionType = type;
         FMLLog.log.info("[{}] Server side {} connection established", Thread.currentThread().getName(), this.connectionType.name().toLowerCase(Locale.ENGLISH));

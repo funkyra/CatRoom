@@ -1,6 +1,12 @@
 --- before/net/minecraft/block/BlockMushroom.java
 +++ after/net/minecraft/block/BlockMushroom.java
-@@ -12,20 +12,18 @@
+@@ -9,26 +9,28 @@
+ import net.minecraft.world.World;
+ import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+ import net.minecraft.world.gen.feature.WorldGenerator;
++import org.bukkit.TreeType;
++import org.bukkit.block.BlockState;
++import org.bukkit.event.block.BlockSpreadEvent;
  
  public class BlockMushroom extends BlockBush implements IGrowable
  {
@@ -21,8 +27,13 @@
 -    @Override
      public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_)
      {
-         if (p_180650_4_.nextInt(25) == 0)
-@@ -37,7 +35,9 @@
+-        if (p_180650_4_.nextInt(25) == 0)
++        final int sourceX = p_180650_2_.func_177958_n(), sourceY = p_180650_2_.func_177956_o(), sourceZ = p_180650_2_.func_177952_p();
++        if (p_180650_4_.nextInt(Math.max(1, (int) (100.0F / p_180650_1_.spigotConfig.mushroomModifier) * 25)) == 0) // Spigot
+         {
+             int i = 5;
+             int j = 4;
+@@ -37,7 +39,9 @@
              {
                  if (p_180650_1_.func_180495_p(blockpos).func_177230_c() == this)
                  {
@@ -33,7 +44,23 @@
                      {
                          return;
                      }
-@@ -63,19 +63,16 @@
+@@ -58,24 +62,31 @@
+ 
+             if (p_180650_1_.func_175623_d(blockpos1) && this.func_180671_f(p_180650_1_, blockpos1, this.func_176223_P()))
+             {
+-                p_180650_1_.func_180501_a(blockpos1, this.func_176223_P(), 2);
++//                worldIn.setBlockState(blockpos1, this.getDefaultState(), 2);
++                org.bukkit.World bworld = p_180650_1_.getWorld();
++                BlockState blockState = bworld.getBlockAt(blockpos1.func_177958_n(), blockpos1.func_177956_o(), blockpos1.func_177952_p()).getState();
++                blockState.setType(org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers.getMaterial(this)); // nms: this.id, 0, 2
++
++                BlockSpreadEvent event = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(sourceX, sourceY, sourceZ), blockState);
++                p_180650_1_.getServer().getPluginManager().callEvent(event);
++
++                if (!event.isCancelled()) {
++                    blockState.update(true);
++                }
+             }
          }
      }
  
@@ -53,7 +80,7 @@
      public boolean func_180671_f(World p_180671_1_, BlockPos p_180671_2_, IBlockState p_180671_3_)
      {
          if (p_180671_2_.func_177956_o() >= 0 && p_180671_2_.func_177956_o() < 256)
-@@ -92,7 +89,7 @@
+@@ -92,7 +103,7 @@
              }
              else
              {
@@ -62,7 +89,20 @@
              }
          }
          else
-@@ -126,19 +123,16 @@
+@@ -108,10 +119,12 @@
+ 
+         if (this == Blocks.field_150338_P)
+         {
++            BlockSapling.treeType = TreeType.BROWN_MUSHROOM;
+             worldgenerator = new WorldGenBigMushroom(Blocks.field_150420_aW);
+         }
+         else if (this == Blocks.field_150337_Q)
+         {
++            BlockSapling.treeType = TreeType.RED_MUSHROOM;
+             worldgenerator = new WorldGenBigMushroom(Blocks.field_150419_aX);
+         }
+ 
+@@ -126,19 +139,16 @@
          }
      }
  

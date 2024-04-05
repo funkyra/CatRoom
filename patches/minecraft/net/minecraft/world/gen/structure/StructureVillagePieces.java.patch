@@ -1067,7 +1067,8 @@
 +                            entityzombievillager.func_180482_a(p_74893_1_.func_175649_E(new BlockPos(entityzombievillager)), (IEntityLivingData)null);
 +                            entityzombievillager.setForgeProfession(this.chooseForgeProfession(i, net.minecraftforge.fml.common.registry.VillagerRegistry.FARMER));
                              entityzombievillager.func_110163_bv();
-                             p_74893_1_.func_72838_d(entityzombievillager);
+-                            p_74893_1_.func_72838_d(entityzombievillager);
++                            p_74893_1_.addEntity(entityzombievillager, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CHUNK_GEN);
                          }
                          else
                          {
@@ -1075,11 +1076,12 @@
 -                            entityvillager.func_70012_b((double)j + 0.5, (double)k, (double)l + 0.5, 0.0F, 0.0F);
 -                            entityvillager.func_70938_b(this.func_180779_c(i, p_74893_1_.field_73012_v.nextInt(6)));
 -                            entityvillager.func_190672_a(p_74893_1_.func_175649_E(new BlockPos(entityvillager)), null, false);
+-                            p_74893_1_.func_72838_d(entityvillager);
 +                            entityvillager.func_70012_b((double)j + 0.5D, (double)k, (double)l + 0.5D, 0.0F, 0.0F);
 +                            net.minecraftforge.fml.common.registry.VillagerRegistry.setRandomProfession(entityvillager, p_74893_1_.field_73012_v);
 +                            entityvillager.setProfession(this.chooseForgeProfession(i, entityvillager.getProfessionForge()));
 +                            entityvillager.func_190672_a(p_74893_1_.func_175649_E(new BlockPos(entityvillager)), (IEntityLivingData)null, false);
-                             p_74893_1_.func_72838_d(entityvillager);
++                            p_74893_1_.addEntity(entityvillager, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CHUNK_GEN);
                          }
                      }
                  }

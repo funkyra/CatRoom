@@ -1,6 +1,10 @@
 --- before/net/minecraft/block/BlockDragonEgg.java
 +++ after/net/minecraft/block/BlockDragonEgg.java
-@@ -19,32 +19,28 @@
+@@ -16,35 +16,32 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.block.BlockFromToEvent;
  
  public class BlockDragonEgg extends Block
  {
@@ -34,7 +38,7 @@
      public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_)
      {
          this.func_180683_d(p_180650_1_, p_180650_2_);
-@@ -52,30 +48,22 @@
+@@ -52,30 +49,22 @@
  
      private void func_180683_d(World p_180683_1_, BlockPos p_180683_2_)
      {
@@ -70,7 +74,7 @@
                  }
  
                  if (blockpos.func_177956_o() > 0)
-@@ -86,24 +74,12 @@
+@@ -86,24 +75,12 @@
          }
      }
  
@@ -96,7 +100,7 @@
      public void func_180649_a(World p_180649_1_, BlockPos p_180649_2_, EntityPlayer p_180649_3_)
      {
          this.func_180684_e(p_180649_1_, p_180649_2_);
-@@ -117,13 +93,9 @@
+@@ -117,14 +94,20 @@
          {
              for (int i = 0; i < 1000; ++i)
              {
@@ -110,9 +114,20 @@
 -                if (p_180684_1_.func_180495_p(blockpos).func_177230_c().field_149764_J == Material.field_151579_a)
 +                if (p_180684_1_.func_175623_d(blockpos))
                  {
++                    org.bukkit.block.Block from = p_180684_1_.getWorld().getBlockAt(p_180684_2_.func_177958_n(), p_180684_2_.func_177956_o(), p_180684_2_.func_177952_p());
++                    org.bukkit.block.Block to = p_180684_1_.getWorld().getBlockAt(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p());
++                    BlockFromToEvent event = new BlockFromToEvent(from, to);
++                    org.bukkit.Bukkit.getPluginManager().callEvent(event);
++
++                    if (event.isCancelled()) {
++                        return;
++                    }
++
++                    blockpos = new BlockPos(event.getToBlock().getX(), event.getToBlock().getY(), event.getToBlock().getZ());
                      if (p_180684_1_.field_72995_K)
                      {
-@@ -133,18 +105,9 @@
+                         for (int j = 0; j < 128; ++j)
+@@ -133,18 +116,9 @@
                              float f = (p_180684_1_.field_73012_v.nextFloat() - 0.5F) * 0.2F;
                              float f1 = (p_180684_1_.field_73012_v.nextFloat() - 0.5F) * 0.2F;
                              float f2 = (p_180684_1_.field_73012_v.nextFloat() - 0.5F) * 0.2F;
@@ -134,7 +149,7 @@
                              p_180684_1_.func_175688_a(EnumParticleTypes.PORTAL, d1, d2, d3, (double)f, (double)f1, (double)f2);
                          }
                      }
-@@ -160,32 +123,27 @@
+@@ -160,32 +134,27 @@
          }
      }
  

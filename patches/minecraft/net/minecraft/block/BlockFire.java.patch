@@ -8,7 +8,17 @@
  import net.minecraft.block.properties.PropertyBool;
  import net.minecraft.block.properties.PropertyInteger;
  import net.minecraft.block.state.BlockFaceShape;
-@@ -33,35 +34,26 @@
+@@ -24,6 +25,9 @@
+ import net.minecraft.world.WorldProviderEnd;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
++import org.bukkit.event.block.BlockBurnEvent;
++import org.bukkit.event.block.BlockSpreadEvent;
+ 
+ public class BlockFire extends Block
+ {
+@@ -33,35 +37,26 @@
      public static final PropertyBool field_176541_P = PropertyBool.func_177716_a("south");
      public static final PropertyBool field_176539_Q = PropertyBool.func_177716_a("west");
      public static final PropertyBool field_176542_R = PropertyBool.func_177716_a("up");
@@ -56,7 +66,7 @@
          this.func_149675_a(true);
      }
  
-@@ -108,60 +100,51 @@
+@@ -108,70 +103,61 @@
  
      public void func_180686_a(Block p_180686_1_, int p_180686_2_, int p_180686_3_)
      {
@@ -106,7 +116,8 @@
 +            if (!p_180650_1_.func_175697_a(p_180650_2_, 2)) return; // Forge: prevent loading unloaded chunks when spreading fire
              if (!this.func_176196_c(p_180650_1_, p_180650_2_))
              {
-                 p_180650_1_.func_175698_g(p_180650_2_);
+-                p_180650_1_.func_175698_g(p_180650_2_);
++                fireExtinguished(p_180650_1_, p_180650_2_); // CraftBukkit - invalid place location
              }
  
              Block block = p_180650_1_.func_180495_p(p_180650_2_.func_177977_b()).func_177230_c();
@@ -124,7 +135,10 @@
  
              if (!flag && p_180650_1_.func_72896_J() && this.func_176537_d(p_180650_1_, p_180650_2_) && p_180650_4_.nextFloat() < 0.2F + (float)i * 0.03F)
              {
-@@ -171,7 +154,7 @@
+-                p_180650_1_.func_175698_g(p_180650_2_);
++                fireExtinguished(p_180650_1_, p_180650_2_); // CraftBukkit - invalid place location
+             }
+             else
              {
                  if (i < 15)
                  {
@@ -133,25 +147,29 @@
                      p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_, 4);
                  }
  
-@@ -181,7 +164,7 @@
+@@ -181,17 +167,17 @@
                  {
                      if (!this.func_176533_e(p_180650_1_, p_180650_2_))
                      {
 -                        if (!p_180650_1_.func_180495_p(p_180650_2_.func_177977_b()).func_185896_q() || i > 3)
 +                        if (!p_180650_1_.func_180495_p(p_180650_2_.func_177977_b()).isSideSolid(p_180650_1_, p_180650_2_.func_177977_b(), EnumFacing.UP) || i > 3)
                          {
-                             p_180650_1_.func_175698_g(p_180650_2_);
+-                            p_180650_1_.func_175698_g(p_180650_2_);
++                            fireExtinguished(p_180650_1_, p_180650_2_);
                          }
-@@ -189,7 +172,7 @@
+ 
                          return;
                      }
  
 -                    if (!this.func_176535_e(p_180650_1_, p_180650_2_.func_177977_b()) && i == 15 && p_180650_4_.nextInt(4) == 0)
 +                    if (!this.canCatchFire(p_180650_1_, p_180650_2_.func_177977_b(), EnumFacing.UP) && i == 15 && p_180650_4_.nextInt(4) == 0)
                      {
-                         p_180650_1_.func_175698_g(p_180650_2_);
+-                        p_180650_1_.func_175698_g(p_180650_2_);
++                        fireExtinguished(p_180650_1_, p_180650_2_);
                          return;
-@@ -204,12 +187,12 @@
+                     }
+                 }
+@@ -204,12 +190,14 @@
                      j = -50;
                  }
  
@@ -161,25 +179,46 @@
 -                this.func_176536_a(p_180650_1_, p_180650_2_.func_177984_a(), 250 + j, p_180650_4_, i);
 -                this.func_176536_a(p_180650_1_, p_180650_2_.func_177978_c(), 300 + j, p_180650_4_, i);
 -                this.func_176536_a(p_180650_1_, p_180650_2_.func_177968_d(), 300 + j, p_180650_4_, i);
-+                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177974_f(), 300 + j, p_180650_4_, i, EnumFacing.WEST);
-+                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177976_e(), 300 + j, p_180650_4_, i, EnumFacing.EAST);
-+                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177977_b(), 250 + j, p_180650_4_, i, EnumFacing.UP);
-+                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177984_a(), 250 + j, p_180650_4_, i, EnumFacing.DOWN);
-+                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177978_c(), 300 + j, p_180650_4_, i, EnumFacing.SOUTH);
-+                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177968_d(), 300 + j, p_180650_4_, i, EnumFacing.NORTH);
++                // CraftBukkit start - add source blockposition to burn calls
++                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177974_f(), 300 + j, p_180650_4_, i, EnumFacing.WEST, p_180650_2_);
++                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177976_e(), 300 + j, p_180650_4_, i, EnumFacing.EAST, p_180650_2_);
++                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177977_b(), 250 + j, p_180650_4_, i, EnumFacing.UP, p_180650_2_);
++                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177984_a(), 250 + j, p_180650_4_, i, EnumFacing.DOWN, p_180650_2_);
++                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177978_c(), 300 + j, p_180650_4_, i, EnumFacing.SOUTH, p_180650_2_);
++                this.tryCatchFire(p_180650_1_, p_180650_2_.func_177968_d(), 300 + j, p_180650_4_, i, EnumFacing.NORTH, p_180650_2_);
++                // CraftBukkit end
  
                  for (int k = -1; k <= 1; ++k)
                  {
-@@ -247,7 +230,7 @@
+@@ -247,7 +235,26 @@
                                              i2 = 15;
                                          }
  
 -                                        p_180650_1_.func_180501_a(blockpos, p_180650_3_.func_177226_a(field_176543_a, i2), 3);
-+                                        p_180650_1_.func_180501_a(blockpos, p_180650_3_.func_177226_a(field_176543_a, Integer.valueOf(i2)), 3);
++                                        // CraftBukkit start - Call to stop spread of fire
++                                        if (p_180650_1_.func_180495_p(blockpos) != Blocks.field_150480_ab) {
++                                            if (CraftEventFactory.callBlockIgniteEvent(p_180650_1_, blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p()).isCancelled()) {
++                                                continue;
++                                            }
++
++                                            org.bukkit.Server server = p_180650_1_.getServer();
++                                            org.bukkit.World bworld = p_180650_1_.getWorld();
++                                            org.bukkit.block.BlockState blockState = bworld.getBlockAt(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p()).getState();
++                                            blockState.setTypeId(Block.func_149682_b(this));
++                                            blockState.setData(new org.bukkit.material.MaterialData(Block.func_149682_b(this), (byte) i2));
++
++                                            BlockSpreadEvent spreadEvent = new BlockSpreadEvent(blockState.getBlock(), bworld.getBlockAt(p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p()), blockState);
++                                            server.getPluginManager().callEvent(spreadEvent);
++
++                                            if (!spreadEvent.isCancelled()) {
++                                                blockState.update(true);
++                                            }
++                                        }
++                                        // CraftBukkit end
                                      }
                                  }
                              }
-@@ -260,34 +243,37 @@
+@@ -260,34 +267,37 @@
  
      protected boolean func_176537_d(World p_176537_1_, BlockPos p_176537_2_)
      {
@@ -226,7 +265,7 @@
  
          if (p_176536_4_.nextInt(p_176536_3_) < i)
          {
-@@ -302,7 +288,7 @@
+@@ -302,7 +312,7 @@
                      j = 15;
                  }
  
@@ -235,16 +274,57 @@
              }
              else
              {
-@@ -311,7 +297,7 @@
+@@ -311,7 +321,48 @@
  
              if (iblockstate.func_177230_c() == Blocks.field_150335_W)
              {
 -                Blocks.field_150335_W.func_176206_d(p_176536_1_, p_176536_2_, iblockstate.func_177226_a(BlockTNT.field_176246_a, true));
 +                Blocks.field_150335_W.func_176206_d(p_176536_1_, p_176536_2_, iblockstate.func_177226_a(BlockTNT.field_176246_a, Boolean.valueOf(true)));
++            }
++        }
++    }
++
++    // Atom: Create a new method, instead of the method modification above for sanity
++    private void tryCatchFire(World worldIn, BlockPos pos, int chance, Random random, int age, EnumFacing face, BlockPos sourcePos)
++    {
++        int i = worldIn.func_180495_p(pos).func_177230_c().getFlammability(worldIn, pos, face);
++
++        if (random.nextInt(chance) < i)
++        {
++            IBlockState iblockstate = worldIn.func_180495_p(pos);
++            org.bukkit.block.Block theBlock = worldIn.getWorld().getBlockAt(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p());
++            org.bukkit.block.Block sourceBlock = worldIn.getWorld().getBlockAt(sourcePos.func_177958_n(), sourcePos.func_177956_o(), sourcePos.func_177952_p());
++
++            BlockBurnEvent event = new BlockBurnEvent(theBlock, sourceBlock);
++            worldIn.getServer().getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                return;
++            }
++
++            if (random.nextInt(age + 10) < 5 && !worldIn.func_175727_C(pos))
++            {
++                int j = age + random.nextInt(5) / 4;
++
++                if (j > 15)
++                {
++                    j = 15;
++                }
++
++                worldIn.func_180501_a(pos, this.func_176223_P().func_177226_a(field_176543_a, Integer.valueOf(j)), 3);
++            }
++            else
++            {
++                worldIn.func_175698_g(pos);
++            }
++
++            if (iblockstate.func_177230_c() == Blocks.field_150335_W)
++            {
++                Blocks.field_150335_W.func_176206_d(worldIn, pos, iblockstate.func_177226_a(BlockTNT.field_176246_a, Boolean.valueOf(true)));
              }
          }
      }
-@@ -320,7 +306,7 @@
+@@ -320,7 +371,7 @@
      {
          for (EnumFacing enumfacing : EnumFacing.values())
          {
@@ -253,7 +333,7 @@
              {
                  return true;
              }
-@@ -341,31 +327,29 @@
+@@ -341,47 +392,44 @@
  
              for (EnumFacing enumfacing : EnumFacing.values())
              {
@@ -288,7 +368,9 @@
      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
      {
          if (!p_189540_2_.func_180495_p(p_189540_3_.func_177977_b()).func_185896_q() && !this.func_176533_e(p_189540_2_, p_189540_3_))
-@@ -374,7 +358,6 @@
+         {
+-            p_189540_2_.func_175698_g(p_189540_3_);
++            fireExtinguished(p_189540_2_, p_189540_3_); // CraftBukkit - fuel block gone
          }
      }
  
@@ -296,7 +378,15 @@
      public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_)
      {
          if (p_176213_1_.field_73011_w.func_186058_p().func_186068_a() > 0 || !Blocks.field_150427_aO.func_176548_d(p_176213_1_, p_176213_2_))
-@@ -390,79 +373,73 @@
+         {
+             if (!p_176213_1_.func_180495_p(p_176213_2_.func_177977_b()).func_185896_q() && !this.func_176533_e(p_176213_1_, p_176213_2_))
+             {
+-                p_176213_1_.func_175698_g(p_176213_2_);
++                fireExtinguished(p_176213_1_, p_176213_2_); // CraftBukkit - fuel block broke
+             }
+             else
+             {
+@@ -390,79 +438,73 @@
          }
      }
  
@@ -398,7 +488,7 @@
                  }
              }
          }
-@@ -471,45 +448,49 @@
+@@ -471,47 +513,57 @@
              for (int i = 0; i < 3; ++i)
              {
                  double d0 = (double)p_180655_3_.func_177958_n() + p_180655_4_.nextDouble();
@@ -467,3 +557,11 @@
      public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
      {
          return BlockFaceShape.UNDEFINED;
++    }
++
++    private void fireExtinguished(World world, BlockPos position) {
++        if (!CraftEventFactory.callBlockFadeEvent(world.getWorld().getBlockAt(position.func_177958_n(), position.func_177956_o(), position.func_177952_p()), Blocks.field_150350_a).isCancelled()) {
++            world.func_175698_g(position);
++        }
+     }
+ }

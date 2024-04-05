@@ -21,7 +21,7 @@
  
      protected BlockReed()
      {
-@@ -32,49 +33,51 @@
+@@ -32,49 +33,53 @@
          this.func_149675_a(true);
      }
  
@@ -55,12 +55,17 @@
 -                    int j = p_180650_3_.func_177229_b(field_176355_a);
 +                    int j = ((Integer)p_180650_3_.func_177229_b(field_176355_a)).intValue();
  
+-                    if (j == 15)
+-                    {
+-                        p_180650_1_.func_175656_a(p_180650_2_.func_177984_a(), this.func_176223_P());
+-                        p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_.func_177226_a(field_176355_a, 0), 4);
 +                    if(net.minecraftforge.common.ForgeHooks.onCropsGrowPre(p_180650_1_, p_180650_2_, p_180650_3_, true))
 +                    {
-                     if (j == 15)
-                     {
-                         p_180650_1_.func_175656_a(p_180650_2_.func_177984_a(), this.func_176223_P());
--                        p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_.func_177226_a(field_176355_a, 0), 4);
++                    if (j >= (byte) range(3, ((100.0F / p_180650_1_.spigotConfig.caneModifier) * 15) + 0.5F, 15)) // Spigot
++                    {
++//                        worldIn.setBlockState(pos.up(), this.getDefaultState());
++                        BlockPos upPos = p_180650_2_.func_177984_a();
++                        org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleBlockGrowEvent(p_180650_1_, upPos.func_177958_n(), upPos.func_177956_o(), upPos.func_177952_p(), this, 0);
 +                        p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_.func_177226_a(field_176355_a, Integer.valueOf(0)), 4);
                      }
                      else
@@ -85,7 +90,7 @@
  
          if (block == this)
          {
-@@ -102,7 +105,6 @@
+@@ -102,7 +107,6 @@
          }
      }
  
@@ -93,7 +98,7 @@
      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
      {
          this.func_176353_e(p_189540_2_, p_189540_3_, p_189540_1_);
-@@ -128,62 +130,60 @@
+@@ -128,62 +132,60 @@
      }
  
      @Nullable

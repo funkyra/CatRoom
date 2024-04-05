@@ -1,6 +1,15 @@
 --- before/net/minecraft/entity/item/EntityMinecart.java
 +++ after/net/minecraft/entity/item/EntityMinecart.java
-@@ -38,26 +38,14 @@
+@@ -35,29 +35,23 @@
+ import net.minecraft.world.WorldServer;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.Location;
++import org.bukkit.entity.Vehicle;
++import org.bukkit.event.vehicle.VehicleDamageEvent;
++import org.bukkit.event.vehicle.VehicleDestroyEvent;
++import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
++import org.bukkit.util.Vector;
  
  public abstract class EntityMinecart extends Entity implements IWorldNameable
  {
@@ -34,7 +43,7 @@
      private int field_70510_h;
      private double field_70511_i;
      private double field_70509_j;
-@@ -71,6 +59,20 @@
+@@ -71,6 +65,31 @@
      @SideOnly(Side.CLIENT)
      private double field_70506_as;
  
@@ -52,10 +61,21 @@
 +    protected float maxSpeedAirVertical = defaultMaxSpeedAirVertical;
 +    protected double dragAir = defaultDragAir;
 +
++    // CraftBukkit start - Use Forge vars from above
++    public boolean slowWhenEmpty = true;
++    private double derailedX = 0.5;
++    private double derailedY = 0.5;
++    private double derailedZ = 0.5;
++    private double flyingX = dragAir;
++    private double flyingY = dragAir;
++    private double flyingZ = dragAir;
++    public double maxSpeed = 0.4D;
++    // CraftBukkit end
++
      public EntityMinecart(World p_i1712_1_)
      {
          super(p_i1712_1_);
-@@ -99,94 +101,92 @@
+@@ -99,94 +118,110 @@
          }
      }
  
@@ -145,6 +165,17 @@
 +            }
 +            else
 +            {
++                Vehicle vehicle = (Vehicle) this.getBukkitEntity();
++                org.bukkit.entity.Entity passenger = (p_70097_1_.func_76346_g() == null) ? null : p_70097_1_.func_76346_g().getBukkitEntity();
++
++                VehicleDamageEvent event = new VehicleDamageEvent(vehicle, passenger, p_70097_2_);
++                this.field_70170_p.getServer().getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    return true;
++                }
++
++                p_70097_2_ = (float) event.getDamage();
 +                this.func_70494_i(-this.func_70493_k());
 +                this.func_70497_h(10);
 +                this.func_70018_K();
@@ -153,6 +184,13 @@
 +
 +                if (flag || this.func_70491_i() > 40.0F)
 +                {
++                    VehicleDestroyEvent destroyEvent = new VehicleDestroyEvent(vehicle, passenger);
++                    this.field_70170_p.getServer().getPluginManager().callEvent(destroyEvent);
++
++                    if (destroyEvent.isCancelled()) {
++                        this.func_70492_c(40); // Maximize damage so this doesn't get triggered again right away
++                        return true;
++                    }
 +                    this.func_184226_ay();
 +
 +                    if (flag && !this.func_145818_k_())
@@ -193,7 +231,7 @@
              return true;
          }
      }
-@@ -209,7 +209,6 @@
+@@ -209,7 +244,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -201,7 +239,7 @@
      public void func_70057_ab()
      {
          this.func_70494_i(-this.func_70493_k());
-@@ -217,19 +216,16 @@
+@@ -217,21 +251,23 @@
          this.func_70492_c(this.func_70491_i() + this.func_70491_i() * 10.0F);
      }
  
@@ -220,8 +258,15 @@
 -    @Override
      public void func_70071_h_()
      {
++        double prevX = this.field_70165_t;
++        double prevY = this.field_70163_u;
++        double prevZ = this.field_70161_v;
++        float prevYaw = this.field_70177_z;
++        float prevPitch = this.field_70125_A;
          if (this.func_70496_j() > 0)
-@@ -242,7 +238,7 @@
+         {
+             this.func_70497_h(this.func_70496_j() - 1);
+@@ -242,28 +278,29 @@
              this.func_70492_c(this.func_70491_i() - 1.0F);
          }
  
@@ -230,7 +275,83 @@
          {
              this.func_70076_C();
          }
-@@ -327,7 +323,7 @@
+-
+-        if (!this.field_70170_p.field_72995_K && this.field_70170_p instanceof WorldServer)
++        // CraftBukkit - handled in postTick
++        /*
++        if (!this.world.isRemote && this.world instanceof WorldServer)
+         {
+-            this.field_70170_p.field_72984_F.func_76320_a("portal");
+-            MinecraftServer minecraftserver = this.field_70170_p.func_73046_m();
+-            int i = this.func_82145_z();
++            this.world.profiler.startSection("portal");
++            MinecraftServer minecraftserver = this.world.getMinecraftServer();
++            int i = this.getMaxInPortalTime();
+ 
+-            if (this.field_71087_bX)
++            if (this.inPortal)
+             {
+-                if (minecraftserver.func_71255_r())
++                if (minecraftserver.getAllowNether())
+                 {
+-                    if (!this.func_184218_aH() && this.field_82153_h++ >= i)
++                    if (!this.isRiding() && this.portalCounter++ >= i)
+                     {
+-                        this.field_82153_h = i;
+-                        this.field_71088_bW = this.func_82147_ab();
++                        this.portalCounter = i;
++                        this.timeUntilPortal = this.getPortalCooldown();
+                         int j;
+ 
+-                        if (this.field_70170_p.field_73011_w.func_186058_p().func_186068_a() == -1)
++                        if (this.world.provider.getDimensionType().getId() == -1)
+                         {
+                             j = 0;
+                         }
+@@ -272,32 +309,33 @@
+                             j = -1;
+                         }
+ 
+-                        this.func_184204_a(j);
++                        this.changeDimension(j);
+                     }
+ 
+-                    this.field_71087_bX = false;
++                    this.inPortal = false;
+                 }
+             }
+             else
+             {
+-                if (this.field_82153_h > 0)
++                if (this.portalCounter > 0)
+                 {
+-                    this.field_82153_h -= 4;
++                    this.portalCounter -= 4;
+                 }
+ 
+-                if (this.field_82153_h < 0)
++                if (this.portalCounter < 0)
+                 {
+-                    this.field_82153_h = 0;
++                    this.portalCounter = 0;
+                 }
+             }
+ 
+-            if (this.field_71088_bW > 0)
++            if (this.timeUntilPortal > 0)
+             {
+-                --this.field_71088_bW;
++                --this.timeUntilPortal;
+             }
+ 
+-            this.field_70170_p.field_72984_F.func_76319_b();
++            this.world.profiler.endSection();
+         }
++        */
+ 
+         if (this.field_70170_p.field_72995_K)
+         {
+@@ -327,7 +365,7 @@
  
              if (!this.func_189652_ae())
              {
@@ -239,7 +360,7 @@
              }
  
              int k = MathHelper.func_76128_c(this.field_70165_t);
-@@ -342,13 +338,13 @@
+@@ -342,13 +380,13 @@
              BlockPos blockpos = new BlockPos(k, l, i1);
              IBlockState iblockstate = this.field_70170_p.func_180495_p(blockpos);
  
@@ -255,7 +376,7 @@
                  }
              }
              else
-@@ -361,9 +357,9 @@
+@@ -361,9 +399,9 @@
              double d0 = this.field_70169_q - this.field_70165_t;
              double d2 = this.field_70166_s - this.field_70161_v;
  
@@ -267,7 +388,7 @@
  
                  if (this.field_70499_f)
                  {
-@@ -373,7 +369,7 @@
+@@ -373,7 +411,7 @@
  
              double d3 = (double)MathHelper.func_76142_g(this.field_70177_z - this.field_70126_B);
  
@@ -276,7 +397,7 @@
              {
                  this.field_70177_z += 180.0F;
                  this.field_70499_f = !this.field_70499_f;
-@@ -381,10 +377,13 @@
+@@ -381,10 +419,23 @@
  
              this.func_70101_b(this.field_70177_z, this.field_70125_A);
  
@@ -285,6 +406,16 @@
 +            if (getCollisionHandler() != null) box = getCollisionHandler().getMinecartCollisionBox(this);
 +            else                               box = this.func_174813_aQ().func_72314_b(0.20000000298023224D, 0.0D, 0.20000000298023224D);
 +
++            org.bukkit.World bworld = this.field_70170_p.getWorld();
++            Location from = new Location(bworld, prevX, prevY, prevZ, prevYaw, prevPitch);
++            Location to = new Location(bworld, this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
++            Vehicle vehicle = (Vehicle) this.getBukkitEntity();
++
++            this.field_70170_p.getServer().getPluginManager().callEvent(new org.bukkit.event.vehicle.VehicleUpdateEvent(vehicle));
++
++            if (!from.equals(to)) {
++                this.field_70170_p.getServer().getPluginManager().callEvent(new org.bukkit.event.vehicle.VehicleMoveEvent(vehicle, from, to));
++            }
 +            if (canBeRidden() && this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y > 0.01D)
              {
 -                List<Entity> list = this.field_70170_p
@@ -293,7 +424,7 @@
  
                  if (!list.isEmpty())
                  {
-@@ -392,11 +391,7 @@
+@@ -392,16 +443,24 @@
                      {
                          Entity entity1 = list.get(j1);
  
@@ -304,9 +435,26 @@
 -                                && !entity1.func_184218_aH())
 +                        if (!(entity1 instanceof EntityPlayer) && !(entity1 instanceof EntityIronGolem) && !(entity1 instanceof EntityMinecart) && !this.func_184207_aI() && !entity1.func_184218_aH())
                          {
++                            VehicleEntityCollisionEvent collisionEvent = new VehicleEntityCollisionEvent(vehicle, entity1.getBukkitEntity());
++                            this.field_70170_p.getServer().getPluginManager().callEvent(collisionEvent);
++
++                            if (collisionEvent.isCancelled()) {
++                                continue;
++                            }
                              entity1.func_184220_m(this);
                          }
-@@ -409,7 +404,7 @@
+                         else
+                         {
++                            VehicleEntityCollisionEvent collisionEvent = new VehicleEntityCollisionEvent(vehicle, entity1.getBukkitEntity());
++                            this.field_70170_p.getServer().getPluginManager().callEvent(collisionEvent);
++
++                            if (collisionEvent.isCancelled()) {
++                                continue;
++                            }
+                             entity1.func_70108_f(this);
+                         }
+                     }
+@@ -409,22 +468,30 @@
              }
              else
              {
@@ -315,7 +463,15 @@
                  {
                      if (!this.func_184196_w(entity) && entity.func_70104_M() && entity instanceof EntityMinecart)
                      {
-@@ -419,12 +414,13 @@
++                        VehicleEntityCollisionEvent collisionEvent = new VehicleEntityCollisionEvent(vehicle, entity.getBukkitEntity());
++                        this.field_70170_p.getServer().getPluginManager().callEvent(collisionEvent);
++
++                        if (collisionEvent.isCancelled()) {
++                            continue;
++                        }
+                         entity.func_70108_f(this);
+                     }
+                 }
              }
  
              this.func_70072_I();
@@ -326,11 +482,12 @@
      protected double func_174898_m()
      {
 -        return 0.4;
-+        return 0.4D;
++        // return 0.4D;
++        return this.maxSpeed;
      }
  
      public void func_96095_a(int p_96095_1_, int p_96095_2_, int p_96095_3_, boolean p_96095_4_)
-@@ -433,24 +429,35 @@
+@@ -433,24 +500,45 @@
  
      protected void func_180459_n()
      {
@@ -355,9 +512,14 @@
 -            this.field_70159_w *= 0.5;
 -            this.field_70181_x *= 0.5;
 -            this.field_70179_y *= 0.5;
-+            this.field_70159_w *= 0.5D;
-+            this.field_70181_x *= 0.5D;
-+            this.field_70179_y *= 0.5D;
++            // CraftBukkit start - replace magic numbers with our variables
++            // this.motionX *= 0.5D;
++            // this.motionY *= 0.5D;
++            // this.motionZ *= 0.5D;
++            this.field_70159_w *= this.derailedX;
++            this.field_70181_x *= this.derailedY;
++            this.field_70179_y *= this.derailedZ;
++            // CraftBukkit end
          }
  
 -        this.func_70091_d(MoverType.SELF, this.field_70159_w, this.field_70181_x, this.field_70179_y);
@@ -368,13 +530,18 @@
 -            this.field_70159_w *= 0.95F;
 -            this.field_70181_x *= 0.95F;
 -            this.field_70179_y *= 0.95F;
-+            this.field_70159_w *= getDragAir();
-+            this.field_70181_x *= getDragAir();
-+            this.field_70179_y *= getDragAir();
++            // CraftBukkit start - replace magic numbers with our variables
++            // this.motionX *= getDragAir();
++            // this.motionY *= getDragAir();
++            // this.motionZ *= getDragAir();
++            this.field_70159_w *= this.flyingX;
++            this.field_70181_x *= this.flyingY;
++            this.field_70179_y *= this.flyingZ;
++            // CraftBukkit end
          }
      }
  
-@@ -466,29 +473,29 @@
+@@ -466,29 +554,29 @@
  
          if (blockrailbase == Blocks.field_150318_D)
          {
@@ -411,7 +578,7 @@
                  ++this.field_70163_u;
          }
  
-@@ -498,7 +505,7 @@
+@@ -498,7 +586,7 @@
          double d3 = Math.sqrt(d1 * d1 + d2 * d2);
          double d4 = this.field_70159_w * d1 + this.field_70179_y * d2;
  
@@ -420,7 +587,7 @@
          {
              d1 = -d1;
              d2 = -d2;
-@@ -506,103 +513,87 @@
+@@ -506,103 +594,87 @@
  
          double d5 = Math.sqrt(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
  
@@ -554,7 +721,7 @@
          {
              this.func_70107_b(this.field_70165_t, this.field_70163_u + (double)aint[1][1], this.field_70161_v);
          }
-@@ -612,10 +603,10 @@
+@@ -612,10 +684,10 @@
  
          if (vec3d1 != null && vec3d != null)
          {
@@ -567,7 +734,7 @@
              {
                  this.field_70159_w = this.field_70159_w / d5 * (d5 + d14);
                  this.field_70179_y = this.field_70179_y / d5 * (d5 + d14);
-@@ -634,36 +625,42 @@
+@@ -634,36 +706,42 @@
              this.field_70179_y = d5 * (double)(i - p_180460_1_.func_177952_p());
          }
  
@@ -619,9 +786,12 @@
                  }
              }
          }
-@@ -673,19 +670,18 @@
+@@ -671,21 +749,20 @@
+ 
+     protected void func_94101_h()
      {
-         if (this.func_184207_aI())
+-        if (this.func_184207_aI())
++        if (this.func_184207_aI() || !this.slowWhenEmpty)
          {
 -            this.field_70159_w *= 0.997F;
 -            this.field_70181_x *= 0.0;
@@ -645,7 +815,7 @@
      public void func_70107_b(double p_70107_1_, double p_70107_3_, double p_70107_5_)
      {
          this.field_70165_t = p_70107_1_;
-@@ -693,9 +689,7 @@
+@@ -693,9 +770,7 @@
          this.field_70161_v = p_70107_5_;
          float f = this.field_70130_N / 2.0F;
          float f1 = this.field_70131_O;
@@ -656,7 +826,7 @@
      }
  
      @Nullable
-@@ -715,9 +709,7 @@
+@@ -715,9 +790,7 @@
  
          if (BlockRailBase.func_176563_d(iblockstate))
          {
@@ -667,7 +837,7 @@
              p_70495_3_ = (double)j;
  
              if (blockrailbase$enumraildirection.func_177018_c())
-@@ -729,10 +721,10 @@
+@@ -729,10 +802,10 @@
              double d0 = (double)(aint[1][0] - aint[0][0]);
              double d1 = (double)(aint[1][2] - aint[0][2]);
              double d2 = Math.sqrt(d0 * d0 + d1 * d1);
@@ -682,7 +852,7 @@
  
              if (aint[0][1] != 0 && MathHelper.func_76128_c(p_70495_1_) - i == aint[0][0] && MathHelper.func_76128_c(p_70495_5_) - k == aint[0][2])
              {
-@@ -767,26 +759,24 @@
+@@ -767,26 +840,24 @@
  
          if (BlockRailBase.func_176563_d(iblockstate))
          {
@@ -719,7 +889,7 @@
              {
                  d9 = p_70489_1_ - (double)i;
              }
-@@ -794,21 +784,21 @@
+@@ -794,21 +865,21 @@
              {
                  double d10 = p_70489_1_ - d0;
                  double d11 = p_70489_5_ - d2;
@@ -745,7 +915,7 @@
              }
  
              return new Vec3d(p_70489_1_, p_70489_3_, p_70489_5_);
-@@ -820,18 +810,16 @@
+@@ -820,18 +891,16 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -765,7 +935,7 @@
      protected void func_70037_a(NBTTagCompound p_70037_1_)
      {
          if (p_70037_1_.func_74767_n("CustomDisplayTile"))
-@@ -853,7 +841,6 @@
+@@ -853,7 +922,6 @@
          }
      }
  
@@ -773,7 +943,7 @@
      protected void func_70014_b(NBTTagCompound p_70014_1_)
      {
          if (this.func_94100_s())
-@@ -867,9 +854,14 @@
+@@ -867,54 +935,60 @@
          }
      }
  
@@ -789,7 +959,16 @@
          if (!this.field_70170_p.field_72995_K)
          {
              if (!p_70108_1_.field_70145_X && !this.field_70145_X)
-@@ -880,41 +872,36 @@
+             {
+                 if (!this.func_184196_w(p_70108_1_))
+                 {
++                    VehicleEntityCollisionEvent collisionEvent = new VehicleEntityCollisionEvent((Vehicle) this.getBukkitEntity(), p_70108_1_.getBukkitEntity());
++                    this.field_70170_p.getServer().getPluginManager().callEvent(collisionEvent);
++
++                    if (collisionEvent.isCancelled()) {
++                        return;
++                    }
+                     double d0 = p_70108_1_.field_70165_t - this.field_70165_t;
                      double d1 = p_70108_1_.field_70161_v - this.field_70161_v;
                      double d2 = d0 * d0 + d1 * d1;
  
@@ -848,7 +1027,7 @@
                              {
                                  return;
                              }
-@@ -922,39 +909,38 @@
+@@ -922,39 +996,38 @@
                              double d7 = p_70108_1_.field_70159_w + this.field_70159_w;
                              double d8 = p_70108_1_.field_70179_y + this.field_70179_y;
  
@@ -910,7 +1089,7 @@
                          }
                      }
                  }
-@@ -963,10 +949,7 @@
+@@ -963,10 +1036,7 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -922,7 +1101,7 @@
      {
          this.field_70511_i = p_180426_1_;
          this.field_70509_j = p_180426_3_;
-@@ -979,8 +962,12 @@
+@@ -979,8 +1049,12 @@
          this.field_70179_y = this.field_70506_as;
      }
  
@@ -936,7 +1115,7 @@
      public void func_70016_h(double p_70016_1_, double p_70016_3_, double p_70016_5_)
      {
          this.field_70159_w = p_70016_1_;
-@@ -991,41 +978,36 @@
+@@ -991,41 +1065,36 @@
          this.field_70506_as = this.field_70179_y;
      }
  
@@ -984,7 +1163,7 @@
      }
  
      public IBlockState func_180457_u()
-@@ -1035,7 +1017,7 @@
+@@ -1035,7 +1104,7 @@
  
      public int func_94099_q()
      {
@@ -993,7 +1172,7 @@
      }
  
      public int func_94085_r()
-@@ -1045,25 +1027,255 @@
+@@ -1045,25 +1114,258 @@
  
      public void func_174899_a(IBlockState p_174899_1_)
      {
@@ -1235,6 +1414,9 @@
 +    public void setDragAir(double value)
 +    {
 +        dragAir = value;
++        flyingX = dragAir;
++        flyingY = dragAir;
++        flyingZ = dragAir;
 +    }
 +
 +    public double getSlopeAdjustment()
@@ -1254,7 +1436,7 @@
  
      public static enum Type
      {
-@@ -1075,7 +1287,7 @@
+@@ -1075,7 +1377,7 @@
          HOPPER(5, "MinecartHopper"),
          COMMAND_BLOCK(6, "MinecartCommandBlock");
  
@@ -1263,7 +1445,7 @@
          private final int field_184966_i;
          private final String field_184967_j;
  
-@@ -1098,7 +1310,7 @@
+@@ -1098,7 +1400,7 @@
          @SideOnly(Side.CLIENT)
          public static EntityMinecart.Type func_184955_a(int p_184955_0_)
          {
@@ -1272,7 +1454,7 @@
              return entityminecart$type == null ? RIDEABLE : entityminecart$type;
          }
  
-@@ -1106,7 +1318,7 @@
+@@ -1106,8 +1408,30 @@
          {
              for (EntityMinecart.Type entityminecart$type : values())
              {
@@ -1281,3 +1463,26 @@
              }
          }
      }
++
++    // CraftBukkit start - Methods for getting and setting flying and derailed velocity modifiers
++    public Vector getFlyingVelocityMod() {
++        return new Vector(flyingX, flyingY, flyingZ);
++    }
++
++    public void setFlyingVelocityMod(Vector flying) {
++        flyingX = flying.getX();
++        flyingY = flying.getY();
++        flyingZ = flying.getZ();
++    }
++
++    public Vector getDerailedVelocityMod() {
++        return new Vector(derailedX, derailedY, derailedZ);
++    }
++
++    public void setDerailedVelocityMod(Vector derailed) {
++        derailedX = derailed.getX();
++        derailedY = derailed.getY();
++        derailedZ = derailed.getZ();
++    }
++    // CraftBukkit end
+ }

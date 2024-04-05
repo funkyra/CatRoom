@@ -9,7 +9,11 @@
  import net.minecraft.init.Blocks;
  import net.minecraft.init.SoundEvents;
  import net.minecraft.item.Item;
-@@ -21,7 +23,7 @@
+@@ -18,10 +20,11 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.block.BlockRedstoneEvent;
  
  public class BlockRedstoneTorch extends BlockTorch
  {
@@ -18,7 +22,7 @@
      private final boolean field_150113_a;
  
      private boolean func_176598_a(World p_176598_1_, BlockPos p_176598_2_, boolean p_176598_3_)
-@@ -31,7 +33,7 @@
+@@ -31,7 +34,7 @@
              field_150112_b.put(p_176598_1_, Lists.newArrayList());
          }
  
@@ -27,7 +31,7 @@
  
          if (p_176598_3_)
          {
-@@ -46,7 +48,9 @@
+@@ -46,7 +49,9 @@
  
              if (blockredstonetorch$toggle.field_180111_a.equals(p_176598_2_))
              {
@@ -38,7 +42,7 @@
                  {
                      return true;
                  }
-@@ -60,16 +64,14 @@
+@@ -60,16 +65,14 @@
      {
          this.field_150113_a = p_i45423_1_;
          this.func_149675_a(true);
@@ -56,7 +60,7 @@
      public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_)
      {
          if (this.field_150113_a)
-@@ -81,7 +83,6 @@
+@@ -81,7 +84,6 @@
          }
      }
  
@@ -64,7 +68,7 @@
      public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_)
      {
          if (this.field_150113_a)
-@@ -93,7 +94,6 @@
+@@ -93,7 +95,6 @@
          }
      }
  
@@ -72,7 +76,7 @@
      public int func_180656_a(IBlockState p_180656_1_, IBlockAccess p_180656_2_, BlockPos p_180656_3_, EnumFacing p_180656_4_)
      {
          return this.field_150113_a && p_180656_1_.func_177229_b(field_176596_a) != p_180656_4_ ? 15 : 0;
-@@ -101,22 +101,20 @@
+@@ -101,51 +102,60 @@
  
      private boolean func_176597_g(World p_176597_1_, BlockPos p_176597_2_, IBlockState p_176597_3_)
      {
@@ -94,17 +98,40 @@
 +        List<BlockRedstoneTorch.Toggle> list = (List)field_150112_b.get(p_180650_1_);
  
 -        while (list != null && !list.isEmpty() && p_180650_1_.func_82737_E() - list.get(0).field_150844_d > 60L)
-+        while (list != null && !list.isEmpty() && p_180650_1_.func_82737_E() - (list.get(0)).field_150844_d > 60L)
-         {
-             list.remove(0);
+-        {
+-            list.remove(0);
++        // Paper start
++        if (list != null) {
++            int index = 0;
++            while (index < list.size() && p_180650_1_.func_82737_E() - list.get(index).getTime() > 60L) {
++                index++;
++            }
++            if (index > 0) {
++                list.subList(0, index).clear();
++            }
          }
-@@ -125,27 +123,18 @@
++        // Paper end
++
++        org.bukkit.plugin.PluginManager manager = p_180650_1_.getServer().getPluginManager();
++        org.bukkit.block.Block block = p_180650_1_.getWorld().getBlockAt(p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p());
++        int oldCurrent = this.field_150113_a ? 15 : 0;
++
++        BlockRedstoneEvent event = new BlockRedstoneEvent(block, oldCurrent, oldCurrent);
+ 
+         if (this.field_150113_a)
          {
              if (flag)
              {
 -                p_180650_1_.func_180501_a(
 -                    p_180650_2_, Blocks.field_150437_az.func_176223_P().func_177226_a(field_176596_a, p_180650_3_.func_177229_b(field_176596_a)), 3
 -                );
++                if (oldCurrent != 0) {
++                    event.setNewCurrent(0);
++                    manager.callEvent(event);
++                    if (event.getNewCurrent() != 0) {
++                        return;
++                    }
++                }
 +                p_180650_1_.func_180501_a(p_180650_2_, Blocks.field_150437_az.func_176223_P().func_177226_a(field_176596_a, p_180650_3_.func_177229_b(field_176596_a)), 3);
  
                  if (this.func_176598_a(p_180650_1_, p_180650_2_, true))
@@ -132,13 +159,20 @@
                      }
  
                      p_180650_1_.func_175684_a(p_180650_2_, p_180650_1_.func_180495_p(p_180650_2_).func_177230_c(), 160);
-@@ -154,13 +143,10 @@
+@@ -154,13 +164,17 @@
          }
          else if (!flag && !this.func_176598_a(p_180650_1_, p_180650_2_, false))
          {
 -            p_180650_1_.func_180501_a(
 -                p_180650_2_, Blocks.field_150429_aA.func_176223_P().func_177226_a(field_176596_a, p_180650_3_.func_177229_b(field_176596_a)), 3
 -            );
++            if (oldCurrent != 15) {
++                event.setNewCurrent(15);
++                manager.callEvent(event);
++                if (event.getNewCurrent() != 15) {
++                    return;
++                }
++            }
 +            p_180650_1_.func_180501_a(p_180650_2_, Blocks.field_150429_aA.func_176223_P().func_177226_a(field_176596_a, p_180650_3_.func_177229_b(field_176596_a)), 3);
          }
      }
@@ -147,7 +181,7 @@
      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
      {
          if (!this.func_176592_e(p_189540_2_, p_189540_3_, p_189540_1_))
-@@ -172,55 +158,49 @@
+@@ -172,55 +186,49 @@
          }
      }
  
@@ -212,3 +246,12 @@
      public boolean func_149667_c(Block p_149667_1_)
      {
          return p_149667_1_ == Blocks.field_150437_az || p_149667_1_ == Blocks.field_150429_aA;
+@@ -229,7 +237,7 @@
+     static class Toggle
+         {
+             BlockPos field_180111_a;
+-            long field_150844_d;
++            long field_150844_d; final long getTime() { return this.field_150844_d; } // Paper - OBFHELPER;
+ 
+             public Toggle(BlockPos p_i45688_1_, long p_i45688_2_)
+             {

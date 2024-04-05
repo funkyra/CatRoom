@@ -1,15 +1,67 @@
 --- before/net/minecraft/entity/item/EntityMinecartContainer.java
 +++ after/net/minecraft/entity/item/EntityMinecartContainer.java
-@@ -26,7 +26,7 @@
+@@ -1,5 +1,6 @@
+ package net.minecraft.entity.item;
+ 
++import java.util.List;
+ import java.util.Random;
+ import javax.annotation.Nullable;
+ import net.minecraft.entity.Entity;
+@@ -23,13 +24,52 @@
+ import net.minecraft.world.storage.loot.ILootContainer;
+ import net.minecraft.world.storage.loot.LootContext;
+ import net.minecraft.world.storage.loot.LootTable;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.v1_12_R1.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
++import org.bukkit.inventory.InventoryHolder;
  
  public abstract class EntityMinecartContainer extends EntityMinecart implements ILockableContainer, ILootContainer
  {
 -    private NonNullList<ItemStack> field_94113_a = NonNullList.func_191197_a(36, ItemStack.field_190927_a);
-+    private NonNullList<ItemStack> field_94113_a = NonNullList.<ItemStack>func_191197_a(36, ItemStack.field_190927_a);
++    private NonNullList<ItemStack> field_94113_a = NonNullList.<ItemStack>func_191197_a(this.func_70302_i_(), ItemStack.field_190927_a); // CraftBukkit - SPIGOT-3513
      public boolean field_94112_b = true;
      private ResourceLocation field_184290_c;
      private long field_184291_d;
-@@ -41,7 +41,6 @@
++    // CraftBukkit start
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++    
++    public List<ItemStack> getContents() {
++        return this.field_94113_a;
++    }
++    
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++    
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++    
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++    
++    public InventoryHolder getOwner() {
++        org.bukkit.entity.Entity cart = getBukkitEntity();
++        if (cart instanceof InventoryHolder) return (InventoryHolder) cart;
++        return new catserver.server.inventory.CatCustomInventory(this);
++    }
++    
++    public void setMaxStackSize(int size) {
++        maxStack = size;
++    }
++    
++    @Override
++    public Location getLocation() {
++        return getBukkitEntity().getLocation();
++    }
++    // CraftBukkit end
+ 
+     public EntityMinecartContainer(World p_i1716_1_)
+     {
+@@ -41,7 +81,6 @@
          super(p_i1717_1_, p_i1717_2_, p_i1717_4_, p_i1717_6_);
      }
  
@@ -17,7 +69,7 @@
      public void func_94095_a(DamageSource p_94095_1_)
      {
          super.func_94095_a(p_94095_1_);
-@@ -52,7 +51,6 @@
+@@ -52,7 +91,6 @@
          }
      }
  
@@ -25,7 +77,7 @@
      public boolean func_191420_l()
      {
          for (ItemStack itemstack : this.field_94113_a)
-@@ -66,24 +64,21 @@
+@@ -66,24 +104,21 @@
          return true;
      }
  
@@ -53,7 +105,7 @@
          ItemStack itemstack = this.field_94113_a.get(p_70304_1_);
  
          if (itemstack.func_190926_b())
-@@ -97,10 +92,9 @@
+@@ -97,10 +132,9 @@
          }
      }
  
@@ -65,7 +117,7 @@
          this.field_94113_a.set(p_70299_1_, p_70299_2_);
  
          if (!p_70299_2_.func_190926_b() && p_70299_2_.func_190916_E() > this.func_70297_j_())
-@@ -109,12 +103,10 @@
+@@ -109,12 +143,10 @@
          }
      }
  
@@ -78,7 +130,7 @@
      public boolean func_70300_a(EntityPlayer p_70300_1_)
      {
          if (this.field_70128_L)
-@@ -123,41 +115,35 @@
+@@ -123,41 +155,35 @@
          }
          else
          {
@@ -106,7 +158,8 @@
 -    @Override
      public int func_70297_j_()
      {
-         return 64;
+-        return 64;
++        return maxStack;
      }
  
      @Nullable
@@ -123,7 +176,7 @@
      public void func_70106_y()
      {
          if (this.field_94112_b)
-@@ -168,7 +154,6 @@
+@@ -168,7 +194,6 @@
          super.func_70106_y();
      }
  
@@ -131,7 +184,7 @@
      public void func_184174_b(boolean p_184174_1_)
      {
          this.field_94112_b = p_184174_1_;
-@@ -177,10 +162,9 @@
+@@ -177,10 +202,9 @@
      public static void func_190574_b(DataFixer p_190574_0_, Class<?> p_190574_1_)
      {
          EntityMinecart.func_189669_a(p_190574_0_, p_190574_1_);
@@ -143,7 +196,7 @@
      protected void func_70014_b(NBTTagCompound p_70014_1_)
      {
          super.func_70014_b(p_70014_1_);
-@@ -200,11 +184,10 @@
+@@ -200,11 +224,10 @@
          }
      }
  
@@ -156,7 +209,7 @@
  
          if (p_70037_1_.func_150297_b("LootTable", 8))
          {
-@@ -217,9 +200,9 @@
+@@ -217,9 +240,9 @@
          }
      }
  
@@ -167,7 +220,7 @@
          if (!this.field_70170_p.field_72995_K)
          {
              p_184230_1_.func_71007_a(this);
-@@ -228,7 +211,6 @@
+@@ -228,7 +251,6 @@
          return true;
      }
  
@@ -175,7 +228,7 @@
      protected void func_94101_h()
      {
          float f = 0.98F;
-@@ -240,39 +222,33 @@
+@@ -240,39 +262,33 @@
          }
  
          this.field_70159_w *= (double)f;
@@ -216,7 +269,7 @@
      public LockCode func_174891_i()
      {
          return LockCode.field_180162_a;
-@@ -295,21 +271,40 @@
+@@ -295,21 +311,40 @@
                  random = new Random(this.field_184291_d);
              }
  
@@ -261,7 +314,7 @@
          this.field_94113_a.clear();
      }
  
-@@ -319,7 +314,6 @@
+@@ -319,7 +354,6 @@
          this.field_184291_d = p_184289_2_;
      }
  

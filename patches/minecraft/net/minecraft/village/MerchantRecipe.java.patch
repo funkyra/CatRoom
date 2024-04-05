@@ -1,0 +1,52 @@
+--- before/net/minecraft/village/MerchantRecipe.java
++++ after/net/minecraft/village/MerchantRecipe.java
+@@ -5,18 +5,33 @@
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftMerchantRecipe;
+ 
+ public class MerchantRecipe
+ {
+-    private ItemStack field_77403_a = ItemStack.field_190927_a;
+-    private ItemStack field_77401_b = ItemStack.field_190927_a;
+-    private ItemStack field_77402_c = ItemStack.field_190927_a;
+-    private int field_77400_d;
+-    private int field_82786_e;
+-    private boolean field_180323_f;
++    public ItemStack field_77403_a;
++    public ItemStack field_77401_b;
++    public ItemStack field_77402_c;
++    public int field_77400_d;
++    public int field_82786_e;
++    public boolean field_180323_f;
++
++    private CraftMerchantRecipe bukkitHandle;
++
++    public CraftMerchantRecipe asBukkit() {
++        return (bukkitHandle == null) ? bukkitHandle = new CraftMerchantRecipe(this) : bukkitHandle;
++    }
++
++    public MerchantRecipe(ItemStack itemstack, ItemStack itemstack1, ItemStack itemstack2, int i, int j, CraftMerchantRecipe bukkit) {
++        this(itemstack, itemstack1, itemstack2, i, j);
++        this.bukkitHandle = bukkit;
++    }
+ 
+     public MerchantRecipe(NBTTagCompound p_i1940_1_)
+     {
++        this.field_77403_a = ItemStack.field_190927_a;
++        this.field_77401_b = ItemStack.field_190927_a;
++        this.field_77402_c = ItemStack.field_190927_a;
+         this.func_77390_a(p_i1940_1_);
+     }
+ 
+@@ -27,6 +42,9 @@
+ 
+     public MerchantRecipe(ItemStack p_i45760_1_, ItemStack p_i45760_2_, ItemStack p_i45760_3_, int p_i45760_4_, int p_i45760_5_)
+     {
++        this.field_77403_a = ItemStack.field_190927_a;
++        this.field_77401_b = ItemStack.field_190927_a;
++        this.field_77402_c = ItemStack.field_190927_a;
+         this.field_77403_a = p_i45760_1_;
+         this.field_77401_b = p_i45760_2_;
+         this.field_77402_c = p_i45760_3_;

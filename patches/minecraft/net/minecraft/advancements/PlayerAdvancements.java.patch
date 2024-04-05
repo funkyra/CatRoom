@@ -57,16 +57,17 @@
  
                  if (map == null)
                  {
-@@ -170,7 +167,7 @@
+@@ -170,7 +167,8 @@
  
      public void func_192749_b()
      {
 -        Map<ResourceLocation, AdvancementProgress> map = Maps.newHashMap();
++        if (org.spigotmc.SpigotConfig.disableAdvancementSaving) return;
 +        Map<ResourceLocation, AdvancementProgress> map = Maps.<ResourceLocation, AdvancementProgress>newHashMap();
  
          for (Entry<Advancement, AdvancementProgress> entry : this.field_192758_f.entrySet())
          {
-@@ -178,7 +175,7 @@
+@@ -178,7 +176,7 @@
  
              if (advancementprogress.func_192108_b())
              {
@@ -75,7 +76,7 @@
              }
          }
  
-@@ -199,6 +196,9 @@
+@@ -199,6 +197,9 @@
  
      public boolean func_192750_a(Advancement p_192750_1_, String p_192750_2_)
      {
@@ -85,8 +86,11 @@
          boolean flag = false;
          AdvancementProgress advancementprogress = this.func_192747_a(p_192750_1_);
          boolean flag1 = advancementprogress.func_192105_a();
-@@ -213,20 +213,12 @@
+@@ -211,22 +212,15 @@
+ 
+             if (!flag1 && advancementprogress.func_192105_a())
              {
++                this.field_192762_j.field_70170_p.getServer().getPluginManager().callEvent(new org.bukkit.event.player.PlayerAdvancementDoneEvent(this.field_192762_j.getBukkitEntity(), p_192750_1_.bukkit));
                  p_192750_1_.func_192072_d().func_192113_a(this.field_192762_j);
  
 -                if (p_192750_1_.func_192068_c() != null
@@ -110,7 +114,7 @@
              }
          }
  
-@@ -270,15 +262,15 @@
+@@ -270,15 +264,15 @@
  
                  if (criterionprogress != null && !criterionprogress.func_192151_a())
                  {
@@ -129,7 +133,7 @@
                          }
                      }
                  }
-@@ -296,15 +288,15 @@
+@@ -296,15 +290,15 @@
  
              if (criterionprogress != null && (criterionprogress.func_192151_a() || advancementprogress.func_192105_a()))
              {
@@ -148,7 +152,7 @@
                      }
                  }
              }
-@@ -315,9 +307,9 @@
+@@ -315,9 +309,9 @@
      {
          if (!this.field_192760_h.isEmpty() || !this.field_192761_i.isEmpty())
          {
@@ -161,7 +165,7 @@
  
              for (Advancement advancement : this.field_192761_i)
              {
-@@ -365,9 +357,7 @@
+@@ -365,9 +359,7 @@
  
          if (advancement != this.field_194221_k)
          {

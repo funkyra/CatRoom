@@ -8,16 +8,23 @@
  import java.io.IOException;
  import java.io.Reader;
  import java.net.URI;
-@@ -35,7 +36,7 @@
+@@ -35,12 +36,14 @@
  {
      private static final Logger field_192422_a = LogManager.getLogger();
      private static int field_193381_c;
 -    public static final RegistryNamespaced<ResourceLocation, IRecipe> field_193380_a = new RegistryNamespaced<>();
-+    public static final RegistryNamespaced<ResourceLocation, IRecipe> field_193380_a = net.minecraftforge.registries.GameData.getWrapper(IRecipe.class);
++    public static RegistryNamespaced<ResourceLocation, IRecipe> field_193380_a = net.minecraftforge.registries.GameData.getWrapper(IRecipe.class);
++    private static final IRecipe[] cachedRecipe = new IRecipe[3]; // CatServer
  
      public static boolean func_193377_a()
      {
-@@ -54,7 +55,7 @@
+         try
+         {
++            CraftingManager.field_193381_c = 0; // Reset recipe ID count
+             func_193379_a("armordye", new RecipesArmorDyes());
+             func_193379_a("bookcloning", new RecipeBookCloning());
+             func_193379_a("mapcloning", new RecipesMapCloning());
+@@ -54,7 +57,7 @@
              func_193379_a("shulkerboxcoloring", new ShulkerBoxRecipes.ShulkerBoxColoring());
              return func_192420_c();
          }
@@ -26,7 +33,7 @@
          {
              return false;
          }
-@@ -63,18 +64,14 @@
+@@ -63,18 +66,14 @@
      private static boolean func_192420_c()
      {
          FileSystem filesystem = null;
@@ -48,7 +55,7 @@
              {
                  URI uri = url.toURI();
                  Path path;
-@@ -88,7 +85,8 @@
+@@ -88,7 +87,8 @@
                      if (!"jar".equals(uri.getScheme()))
                      {
                          field_192422_a.error("Unsupported scheme " + uri + " trying to list all recipes");
@@ -58,7 +65,7 @@
                      }
  
                      filesystem = FileSystems.newFileSystem(uri, Collections.emptyMap());
-@@ -110,18 +108,25 @@
+@@ -110,18 +110,25 @@
  
                          try
                          {
@@ -96,7 +103,7 @@
                          }
                          finally
                          {
-@@ -132,16 +137,22 @@
+@@ -132,16 +139,22 @@
  
                  return true;
              }
@@ -121,7 +128,7 @@
      }
  
      private static IRecipe func_193376_a(JsonObject p_193376_0_)
-@@ -162,12 +173,14 @@
+@@ -162,12 +175,14 @@
          }
      }
  
@@ -138,7 +145,58 @@
      {
          if (field_193380_a.func_148741_d(p_193372_0_))
          {
-@@ -216,7 +229,7 @@
+@@ -175,48 +190,57 @@
+         }
+         else
+         {
++            p_193372_1_.setKey(p_193372_0_);
+             field_193380_a.func_177775_a(field_193381_c++, p_193372_0_, p_193372_1_);
+         }
+     }
+ 
+     public static ItemStack func_82787_a(InventoryCrafting p_82787_0_, World p_82787_1_)
+     {
++        synchronized (cachedRecipe) { if (cachedRecipe[0] != null && cachedRecipe[0].func_77569_a(p_82787_0_, p_82787_1_)) return cachedRecipe[0].func_77572_b(p_82787_0_); } // CatServer
+         for (IRecipe irecipe : field_193380_a)
+         {
+             if (irecipe.func_77569_a(p_82787_0_, p_82787_1_))
+             {
++                synchronized (cachedRecipe) { cachedRecipe[0] = irecipe; } // CatServer
+                 return irecipe.func_77572_b(p_82787_0_);
+             }
+         }
+-
++        p_82787_0_.currentRecipe = null; // CraftBukkit - Clear recipe when no recipe is found
+         return ItemStack.field_190927_a;
+     }
+ 
+     @Nullable
+     public static IRecipe func_192413_b(InventoryCrafting p_192413_0_, World p_192413_1_)
+     {
++        synchronized (cachedRecipe) { if (cachedRecipe[1] != null && cachedRecipe[1].func_77569_a(p_192413_0_, p_192413_1_)) { p_192413_0_.currentRecipe = cachedRecipe[1]; return cachedRecipe[1];} } // CatServer
+         for (IRecipe irecipe : field_193380_a)
+         {
+             if (irecipe.func_77569_a(p_192413_0_, p_192413_1_))
+             {
++                synchronized (cachedRecipe) { cachedRecipe[1] = irecipe; } // CatServer
++                p_192413_0_.currentRecipe = irecipe; // CraftBukkit
+                 return irecipe;
+             }
+         }
+ 
++        p_192413_0_.currentRecipe = null; // CraftBukkit - Clear recipe when no recipe is found
+         return null;
+     }
+ 
+     public static NonNullList<ItemStack> func_180303_b(InventoryCrafting p_180303_0_, World p_180303_1_)
+     {
++        synchronized (cachedRecipe) { if (cachedRecipe[2] != null && cachedRecipe[2].func_77569_a(p_180303_0_, p_180303_1_)) return cachedRecipe[2].func_179532_b(p_180303_0_); } // CatServer
+         for (IRecipe irecipe : field_193380_a)
+         {
+             if (irecipe.func_77569_a(p_180303_0_, p_180303_1_))
+             {
++                synchronized (cachedRecipe) { cachedRecipe[2] = irecipe; } // CatServer
+                 return irecipe.func_179532_b(p_180303_0_);
              }
          }
  
@@ -147,7 +205,7 @@
  
          for (int i = 0; i < nonnulllist.size(); ++i)
          {
-@@ -232,11 +245,13 @@
+@@ -232,11 +256,13 @@
          return field_193380_a.func_82594_a(p_193373_0_);
      }
  

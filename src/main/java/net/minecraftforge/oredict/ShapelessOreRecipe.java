@@ -43,6 +43,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
+import org.bukkit.inventory.Recipe;
+
 public class ShapelessOreRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
 {
     @Nonnull
@@ -50,6 +52,7 @@ public class ShapelessOreRecipe extends IForgeRegistryEntry.Impl<IRecipe> implem
     protected NonNullList<Ingredient> input = NonNullList.create();
     protected ResourceLocation group;
     protected boolean isSimple = true;
+    private Recipe bukkitRecip; // CatServer - bukkit compatibility
 
     public ShapelessOreRecipe(ResourceLocation group, Block result, Object... recipe){ this(group, new ItemStack(result), recipe); }
     public ShapelessOreRecipe(ResourceLocation group, Item  result, Object... recipe){ this(group, new ItemStack(result), recipe); }
@@ -156,5 +159,18 @@ public class ShapelessOreRecipe extends IForgeRegistryEntry.Impl<IRecipe> implem
 
         ItemStack itemstack = CraftingHelper.getItemStack(JsonUtils.getJsonObject(json, "result"), context);
         return new ShapelessOreRecipe(group.isEmpty() ? null : new ResourceLocation(group), ings, itemstack);
+    }
+
+
+    @Override
+    public Recipe toBukkitRecipe() {
+        if (bukkitRecip == null)
+            bukkitRecip = new catserver.server.inventory.CustomModRecipe(this, this.getRegistryName());
+        return this.bukkitRecip;
+    }
+
+    @Override
+    public void setKey(ResourceLocation key) {
+
     }
 }

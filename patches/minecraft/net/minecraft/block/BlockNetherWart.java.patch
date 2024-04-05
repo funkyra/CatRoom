@@ -12,7 +12,7 @@
  import net.minecraft.init.Blocks;
  import net.minecraft.init.Items;
  import net.minecraft.item.Item;
-@@ -18,62 +20,54 @@
+@@ -18,62 +20,55 @@
  public class BlockNetherWart extends BlockBush
  {
      public static final PropertyInteger field_176486_a = PropertyInteger.func_177719_a("age", 0, 3);
@@ -62,12 +62,13 @@
 +        int i = ((Integer)p_180650_3_.func_177229_b(field_176486_a)).intValue();
  
 -        if (i < 3 && p_180650_4_.nextInt(10) == 0)
-+        if (i < 3 && net.minecraftforge.common.ForgeHooks.onCropsGrowPre(p_180650_1_, p_180650_2_, p_180650_3_, p_180650_4_.nextInt(10) == 0))
++        if (i < 3 && net.minecraftforge.common.ForgeHooks.onCropsGrowPre(p_180650_1_, p_180650_2_, p_180650_3_, p_180650_4_.nextInt(Math.max(1, (int) (100.0F / p_180650_1_.spigotConfig.wartModifier) * 10)) == 0))
          {
 -            p_180650_3_ = p_180650_3_.func_177226_a(field_176486_a, i + 1);
 -            p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_, 2);
 +            IBlockState newState = p_180650_3_.func_177226_a(field_176486_a, Integer.valueOf(i + 1));
-+            p_180650_1_.func_180501_a(p_180650_2_, newState, 2);
++//            worldIn.setBlockState(pos, newState, 2);
++            org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleBlockGrowEvent(p_180650_1_, p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p(), this, func_176201_c(newState));
 +            net.minecraftforge.common.ForgeHooks.onCropsGrowPost(p_180650_1_, p_180650_2_, p_180650_3_, newState);
          }
  
@@ -89,7 +90,7 @@
              {
                  i = 2 + p_180653_1_.field_73012_v.nextInt(3);
  
-@@ -90,39 +84,50 @@
+@@ -90,39 +85,50 @@
          }
      }
  

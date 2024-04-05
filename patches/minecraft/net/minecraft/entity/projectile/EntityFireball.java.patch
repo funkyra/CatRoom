@@ -1,6 +1,23 @@
 --- before/net/minecraft/entity/projectile/EntityFireball.java
 +++ after/net/minecraft/entity/projectile/EntityFireball.java
-@@ -30,23 +30,21 @@
+@@ -14,6 +14,7 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
+ 
+ public abstract class EntityFireball extends Entity
+ {
+@@ -24,29 +25,30 @@
+     public double field_70233_c;
+     public double field_70230_d;
+ 
++    public float bukkitYield = 1;
++    public boolean isIncendiary = true;
++
+     public EntityFireball(World p_i1759_1_)
+     {
+         super(p_i1759_1_);
          this.func_70105_a(1.0F, 1.0F);
      }
  
@@ -27,7 +44,7 @@
          return p_70112_1_ < d0 * d0;
      }
  
-@@ -57,9 +55,9 @@
+@@ -57,35 +59,39 @@
          this.func_70012_b(p_i1760_2_, p_i1760_4_, p_i1760_6_, this.field_70177_z, this.field_70125_A);
          this.func_70107_b(p_i1760_2_, p_i1760_4_, p_i1760_6_);
          double d0 = (double)MathHelper.func_76133_a(p_i1760_8_ * p_i1760_8_ + p_i1760_10_ * p_i1760_10_ + p_i1760_12_ * p_i1760_12_);
@@ -40,7 +57,10 @@
      }
  
      public EntityFireball(World p_i1761_1_, EntityLivingBase p_i1761_2_, double p_i1761_3_, double p_i1761_5_, double p_i1761_7_)
-@@ -69,23 +67,21 @@
+     {
+         super(p_i1761_1_);
+         this.field_70235_a = p_i1761_2_;
++        this.projectileSource = (org.bukkit.entity.LivingEntity) p_i1761_2_.getBukkitEntity();
          this.func_70105_a(1.0F, 1.0F);
          this.func_70012_b(p_i1761_2_.field_70165_t, p_i1761_2_.field_70163_u, p_i1761_2_.field_70161_v, p_i1761_2_.field_70177_z, p_i1761_2_.field_70125_A);
          this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
@@ -50,22 +70,30 @@
 -        p_i1761_3_ += this.field_70146_Z.nextGaussian() * 0.4;
 -        p_i1761_5_ += this.field_70146_Z.nextGaussian() * 0.4;
 -        p_i1761_7_ += this.field_70146_Z.nextGaussian() * 0.4;
-+        this.field_70159_w = 0.0D;
-+        this.field_70181_x = 0.0D;
-+        this.field_70179_y = 0.0D;
-+        p_i1761_3_ = p_i1761_3_ + this.field_70146_Z.nextGaussian() * 0.4D;
-+        p_i1761_5_ = p_i1761_5_ + this.field_70146_Z.nextGaussian() * 0.4D;
-+        p_i1761_7_ = p_i1761_7_ + this.field_70146_Z.nextGaussian() * 0.4D;
-         double d0 = (double)MathHelper.func_76133_a(p_i1761_3_ * p_i1761_3_ + p_i1761_5_ * p_i1761_5_ + p_i1761_7_ * p_i1761_7_);
+-        double d0 = (double)MathHelper.func_76133_a(p_i1761_3_ * p_i1761_3_ + p_i1761_5_ * p_i1761_5_ + p_i1761_7_ * p_i1761_7_);
 -        this.field_70232_b = p_i1761_3_ / d0 * 0.1;
 -        this.field_70233_c = p_i1761_5_ / d0 * 0.1;
 -        this.field_70230_d = p_i1761_7_ / d0 * 0.1;
-+        this.field_70232_b = p_i1761_3_ / d0 * 0.1D;
-+        this.field_70233_c = p_i1761_5_ / d0 * 0.1D;
-+        this.field_70230_d = p_i1761_7_ / d0 * 0.1D;
-     }
- 
+-    }
+-
 -    @Override
++        this.field_70159_w = 0.0D;
++        this.field_70181_x = 0.0D;
++        this.field_70179_y = 0.0D;
++        // CraftBukkit start - Added setDirection method
++        this.setDirection(p_i1761_3_, p_i1761_5_, p_i1761_7_);
++    }
++
++    public void setDirection(double accelX, double accelY, double accelZ) {
++        accelX = accelX + this.field_70146_Z.nextGaussian() * 0.4D;
++        accelY = accelY + this.field_70146_Z.nextGaussian() * 0.4D;
++        accelZ = accelZ + this.field_70146_Z.nextGaussian() * 0.4D;
++        double d0 = (double)MathHelper.func_76133_a(accelX * accelX + accelY * accelY + accelZ * accelZ);
++        this.field_70232_b = accelX / d0 * 0.1D;
++        this.field_70233_c = accelY / d0 * 0.1D;
++        this.field_70230_d = accelZ / d0 * 0.1D;
++    }
++
      public void func_70071_h_()
      {
 -        if (this.field_70170_p.field_72995_K
@@ -74,7 +102,7 @@
          {
              super.func_70071_h_();
  
-@@ -97,7 +93,7 @@
+@@ -97,9 +103,12 @@
              ++this.field_70234_an;
              RayTraceResult raytraceresult = ProjectileHelper.func_188802_a(this, true, this.field_70234_an >= 25, this.field_70235_a);
  
@@ -82,8 +110,13 @@
 +            if (raytraceresult != null && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, raytraceresult))
              {
                  this.func_70227_a(raytraceresult);
++                if (this.field_70128_L) {
++                    CraftEventFactory.callProjectileHitEvent(this, raytraceresult);
++                }
              }
-@@ -113,16 +109,7 @@
+ 
+             this.field_70165_t += this.field_70159_w;
+@@ -113,16 +122,7 @@
                  for (int i = 0; i < 4; ++i)
                  {
                      float f1 = 0.25F;
@@ -101,7 +134,7 @@
                  }
  
                  f = 0.8F;
-@@ -134,7 +121,7 @@
+@@ -134,7 +134,7 @@
              this.field_70159_w *= (double)f;
              this.field_70181_x *= (double)f;
              this.field_70179_y *= (double)f;
@@ -110,7 +143,7 @@
              this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
          }
          else
-@@ -164,7 +151,6 @@
+@@ -164,7 +164,6 @@
      {
      }
  
@@ -118,7 +151,7 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          p_70014_1_.func_74782_a("direction", this.func_70087_a(new double[] {this.field_70159_w, this.field_70181_x, this.field_70179_y}));
-@@ -172,7 +158,6 @@
+@@ -172,7 +171,6 @@
          p_70014_1_.func_74768_a("life", this.field_70236_j);
      }
  
@@ -126,7 +159,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          if (p_70037_1_.func_150297_b("power", 9))
-@@ -202,19 +187,16 @@
+@@ -202,19 +200,16 @@
          }
      }
  
@@ -146,7 +179,17 @@
      public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_)
      {
          if (this.func_180431_b(p_70097_1_))
-@@ -234,9 +216,9 @@
+@@ -227,6 +222,9 @@
+ 
+             if (p_70097_1_.func_76346_g() != null)
+             {
++                if (CraftEventFactory.handleNonLivingEntityDamageEvent(this, p_70097_1_, p_70097_2_)) {
++                    return false;
++                }
+                 Vec3d vec3d = p_70097_1_.func_76346_g().func_70040_Z();
+ 
+                 if (vec3d != null)
+@@ -234,14 +232,15 @@
                      this.field_70159_w = vec3d.field_72450_a;
                      this.field_70181_x = vec3d.field_72448_b;
                      this.field_70179_y = vec3d.field_72449_c;
@@ -159,7 +202,13 @@
                  }
  
                  if (p_70097_1_.func_76346_g() instanceof EntityLivingBase)
-@@ -253,14 +235,12 @@
+                 {
+                     this.field_70235_a = (EntityLivingBase)p_70097_1_.func_76346_g();
++                    this.projectileSource = (org.bukkit.projectiles.ProjectileSource) this.field_70235_a.getBukkitEntity();
+                 }
+ 
+                 return true;
+@@ -253,14 +252,12 @@
          }
      }
  

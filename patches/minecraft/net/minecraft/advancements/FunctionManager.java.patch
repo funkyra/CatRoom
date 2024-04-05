@@ -1,0 +1,34 @@
+--- before/net/minecraft/advancements/FunctionManager.java
++++ after/net/minecraft/advancements/FunctionManager.java
+@@ -29,24 +29,23 @@
+     private FunctionObject field_193072_f;
+     private final ArrayDeque<FunctionManager.QueuedCommand> field_194020_g = new ArrayDeque<>();
+     private boolean field_194021_h = false;
+-    private final ICommandSender field_193073_g = new ICommandSender()
+-    {
+-        @Override
++    private final ICommandSender field_193073_g = new CustomFunctionListener();
++
++    public class CustomFunctionListener implements ICommandSender {
++
++        public org.bukkit.command.CommandSender sender = new org.bukkit.craftbukkit.v1_12_R1.command.CraftFunctionCommandSender(this);
+         public String func_70005_c_()
+         {
+             return FunctionManager.this.field_193071_e;
+         }
+-        @Override
+-        public boolean func_70003_b(int p_70003_1_, String p_70003_2_)
++        public boolean func_70003_b(int permLevel, String commandName)
+         {
+-            return p_70003_1_ <= 2;
++            return permLevel <= 2;
+         }
+-        @Override
+         public World func_130014_f_()
+         {
+             return FunctionManager.this.field_193069_c.field_71305_c[0];
+         }
+-        @Override
+         public MinecraftServer func_184102_h()
+         {
+             return FunctionManager.this.field_193069_c;

@@ -1,6 +1,6 @@
 --- before/net/minecraft/item/crafting/RecipesMapCloning.java
 +++ after/net/minecraft/item/crafting/RecipesMapCloning.java
-@@ -5,12 +5,9 @@
+@@ -5,12 +5,15 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.util.NonNullList;
  import net.minecraft.world.World;
@@ -8,13 +8,19 @@
 -import net.minecraftforge.fml.relauncher.SideOnly;
  
 -public class RecipesMapCloning implements IRecipe
-+public class RecipesMapCloning extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
++public class RecipesMapCloning extends ShapelessRecipes implements IRecipe
  {
 -    @Override
++    // CraftBukkit start - Delegate to new parent class
++    public RecipesMapCloning() {
++        super("", new ItemStack(Items.field_151148_bJ, 0, -1), NonNullList.func_193580_a(Ingredient.field_193370_a, Ingredient.func_193367_a(Items.field_151148_bJ)));
++    }
++    // CraftBukkit end
++
      public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
      {
          int i = 0;
-@@ -46,7 +43,6 @@
+@@ -46,7 +49,6 @@
          return !itemstack.func_190926_b() && i > 0;
      }
  
@@ -22,7 +28,7 @@
      public ItemStack func_77572_b(InventoryCrafting p_77572_1_)
      {
          int i = 0;
-@@ -101,38 +97,29 @@
+@@ -101,38 +103,29 @@
          }
      }
  

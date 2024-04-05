@@ -120,7 +120,21 @@
              {
                  field_151275_b.error("Interrupted whilst closing channel");
              }
-@@ -216,7 +199,6 @@
+@@ -182,6 +165,13 @@
+     {
+         synchronized (this.field_151272_f)
+         {
++            // Spigot Start
++            // This prevents players from 'gaming' the server, and strategically relogging to increase their position in the tick order
++            if (org.spigotmc.SpigotConfig.playerShuffle > 0 && MinecraftServer.currentTick % org.spigotmc.SpigotConfig.playerShuffle == 0)
++            {
++                Collections.shuffle(this.field_151272_f);
++            }
++            // Spigot End
+             Iterator<NetworkManager> iterator = this.field_151272_f.iterator();
+ 
+             while (iterator.hasNext())
+@@ -216,7 +206,6 @@
                              final TextComponentString textcomponentstring = new TextComponentString("Internal server error");
                              networkmanager.func_179288_a(new SPacketDisconnect(textcomponentstring), new GenericFutureListener < Future <? super Void >> ()
                              {
@@ -128,3 +142,13 @@
                                  public void operationComplete(Future <? super Void > p_operationComplete_1_) throws Exception
                                  {
                                      networkmanager.func_150718_a(textcomponentstring);
+@@ -227,6 +216,9 @@
+                     }
+                     else
+                     {
++                        // Spigot Start - Fix a race condition where a NetworkManager could be unregistered just before connection.
++                        if (networkmanager.preparing) continue;
++                        // Spigot End
+                         iterator.remove();
+                         networkmanager.func_179293_l();
+                     }

@@ -1,6 +1,28 @@
 --- before/net/minecraft/world/Explosion.java
 +++ after/net/minecraft/world/Explosion.java
-@@ -32,52 +32,35 @@
+@@ -13,9 +13,12 @@
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.enchantment.EnchantmentProtection;
+ import net.minecraft.entity.Entity;
++import net.minecraft.entity.EntityLiving;
+ import net.minecraft.entity.EntityLivingBase;
++import net.minecraft.entity.item.EntityFallingBlock;
+ import net.minecraft.entity.item.EntityTNTPrimed;
+ import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.projectile.EntityFireball;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.init.SoundEvents;
+ import net.minecraft.util.DamageSource;
+@@ -27,70 +30,64 @@
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
++import org.bukkit.event.block.BlockExplodeEvent;
++import org.bukkit.event.entity.EntityExplodeEvent;
+ 
+ public class Explosion
  {
      private final boolean field_77286_a;
      private final boolean field_82755_b;
@@ -10,13 +32,16 @@
      private final double field_77284_b;
      private final double field_77285_c;
      private final double field_77282_d;
-     private final Entity field_77283_e;
+-    private final Entity field_77283_e;
++    public final Entity field_77283_e;
      private final float field_77280_f;
 -    private final List<BlockPos> field_77281_g = Lists.newArrayList();
 -    private final Map<EntityPlayer, Vec3d> field_77288_k = Maps.newHashMap();
 +    private final List<BlockPos> field_77281_g;
 +    private final Map<EntityPlayer, Vec3d> field_77288_k;
 +    private final Vec3d position;
++
++    public boolean wasCanceled = false;
  
      @SideOnly(Side.CLIENT)
 -    public Explosion(
@@ -62,8 +87,11 @@
 +        this.field_77288_k = Maps.<EntityPlayer, Vec3d>newHashMap();
          this.field_77287_j = p_i45754_1_;
          this.field_77283_e = p_i45754_2_;
-         this.field_77280_f = p_i45754_9_;
-@@ -86,11 +69,12 @@
+-        this.field_77280_f = p_i45754_9_;
++        // this.size = size;
++        this.field_77280_f = (float) Math.max(p_i45754_9_, 0.0); // CraftBukkit - clamp bad values
+         this.field_77284_b = p_i45754_3_;
+         this.field_77285_c = p_i45754_5_;
          this.field_77282_d = p_i45754_7_;
          this.field_77286_a = p_i45754_10_;
          this.field_82755_b = p_i45754_11_;
@@ -73,11 +101,14 @@
      public void func_77278_a()
      {
 -        Set<BlockPos> set = Sets.newHashSet();
++        if (this.field_77280_f < 0.1F) {
++            return;
++        }
 +        Set<BlockPos> set = Sets.<BlockPos>newHashSet();
          int i = 16;
  
          for (int j = 0; j < 16; ++j)
-@@ -105,9 +89,9 @@
+@@ -105,9 +102,9 @@
                          double d1 = (double)((float)k / 15.0F * 2.0F - 1.0F);
                          double d2 = (double)((float)l / 15.0F * 2.0F - 1.0F);
                          double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
@@ -90,7 +121,7 @@
                          float f = this.field_77280_f * (0.7F + this.field_77287_j.field_73012_v.nextFloat() * 0.6F);
                          double d4 = this.field_77284_b;
                          double d6 = this.field_77285_c;
-@@ -120,9 +104,7 @@
+@@ -120,20 +117,18 @@
  
                              if (iblockstate.func_185904_a() != Material.field_151579_a)
                              {
@@ -101,7 +132,9 @@
                                  f -= (f2 + 0.3F) * 0.3F;
                              }
  
-@@ -131,9 +113,9 @@
+-                            if (f > 0.0F && (this.field_77283_e == null || this.field_77283_e.func_174816_a(this, this.field_77287_j, blockpos, iblockstate, f)))
++                            if (f > 0.0F && (this.field_77283_e == null || this.field_77283_e.func_174816_a(this, this.field_77287_j, blockpos, iblockstate, f)) && blockpos.func_177956_o() < 256 && blockpos.func_177956_o() >= 0) // CraftBukkit - don't wrap explosions
+                             {
                                  set.add(blockpos);
                              }
  
@@ -114,7 +147,7 @@
                          }
                      }
                  }
-@@ -142,14 +124,14 @@
+@@ -142,14 +137,14 @@
  
          this.field_77281_g.addAll(set);
          float f3 = this.field_77280_f * 2.0F;
@@ -137,7 +170,7 @@
          Vec3d vec3d = new Vec3d(this.field_77284_b, this.field_77285_c, this.field_77282_d);
  
          for (int k2 = 0; k2 < list.size(); ++k2)
-@@ -160,21 +142,21 @@
+@@ -160,21 +155,28 @@
              {
                  double d12 = entity.func_70011_f(this.field_77284_b, this.field_77285_c, this.field_77282_d) / (double)f3;
  
@@ -162,11 +195,18 @@
 -                        double d10 = (1.0 - d12) * d14;
 -                        entity.func_70097_a(DamageSource.func_94539_a(this), (float)((int)((d10 * d10 + d10) / 2.0 * 7.0 * (double)f3 + 1.0)));
 +                        double d10 = (1.0D - d12) * d14;
-+                        entity.func_70097_a(DamageSource.func_94539_a(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
++                        // entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
++                        CraftEventFactory.entityDamage = field_77283_e;
++                        entity.forceExplosionKnockback = false;
++                        boolean wasDamaged = entity.func_70097_a(DamageSource.func_94539_a(this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
++                        CraftEventFactory.entityDamage = null;
++                        if (!wasDamaged && !(entity instanceof EntityTNTPrimed || entity instanceof EntityFallingBlock) && !entity.forceExplosionKnockback) {
++                            continue;
++                        }
                          double d11 = d10;
  
                          if (entity instanceof EntityLivingBase)
-@@ -203,25 +185,15 @@
+@@ -203,29 +205,61 @@
  
      public void func_77279_a(boolean p_77279_1_)
      {
@@ -196,7 +236,53 @@
          }
  
          if (this.field_82755_b)
-@@ -240,24 +212,15 @@
+         {
++            org.bukkit.World bworld = this.field_77287_j.getWorld();
++            org.bukkit.entity.Entity explode = this.field_77283_e == null ? null : this.field_77283_e.getBukkitEntity();
++            Location location = new Location(bworld, this.field_77284_b, this.field_77285_c, this.field_77282_d);
++
++            List<org.bukkit.block.Block> blockList = Lists.newArrayList();
++            for (int i1 = this.field_77281_g.size() - 1; i1 >= 0; i1--) {
++                BlockPos cpos = (BlockPos) this.field_77281_g.get(i1);
++                org.bukkit.block.Block bblock = bworld.getBlockAt(cpos.func_177958_n(), cpos.func_177956_o(), cpos.func_177952_p());
++                if (bblock.getType() != org.bukkit.Material.AIR) {
++                    blockList.add(bblock);
++                }
++            }
++
++            boolean cancelled;
++            List<org.bukkit.block.Block> bukkitBlocks;
++            float yield;
++
++            if (explode != null) {
++                EntityExplodeEvent event = new EntityExplodeEvent(explode, location, blockList, 1.0F / this.field_77280_f);
++                this.field_77287_j.getServer().getPluginManager().callEvent(event);
++                cancelled = event.isCancelled();
++                bukkitBlocks = event.blockList();
++                yield = event.getYield();
++            } else {
++                BlockExplodeEvent event = new BlockExplodeEvent(location.getBlock(), blockList, 1.0F / this.field_77280_f);
++                this.field_77287_j.getServer().getPluginManager().callEvent(event);
++                cancelled = event.isCancelled();
++                bukkitBlocks = event.blockList();
++                yield = event.getYield();
++            }
++
++            this.field_77281_g.clear();
++
++            for (org.bukkit.block.Block bblock : bukkitBlocks) {
++                BlockPos coords = new BlockPos(bblock.getX(), bblock.getY(), bblock.getZ());
++                field_77281_g.add(coords);
++            }
++
++            if (cancelled) {
++                this.wasCanceled = true;
++                return;
++            }
+             for (BlockPos blockpos : this.field_77281_g)
+             {
+                 IBlockState iblockstate = this.field_77287_j.func_180495_p(blockpos);
+@@ -240,24 +274,15 @@
                      double d4 = d1 - this.field_77285_c;
                      double d5 = d2 - this.field_77282_d;
                      double d6 = (double)MathHelper.func_76133_a(d3 * d3 + d4 * d4 + d5 * d5);
@@ -230,8 +316,14 @@
                      this.field_77287_j.func_175688_a(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5);
                  }
  
-@@ -268,8 +231,7 @@
-                         block.func_180653_a(this.field_77287_j, blockpos, this.field_77287_j.func_180495_p(blockpos), 1.0F / this.field_77280_f, 0);
+@@ -265,11 +290,12 @@
+                 {
+                     if (block.func_149659_a(this))
+                     {
+-                        block.func_180653_a(this.field_77287_j, blockpos, this.field_77287_j.func_180495_p(blockpos), 1.0F / this.field_77280_f, 0);
++                        // CraftBukkit - add yield
++                        // block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
++                        block.func_180653_a(this.field_77287_j, blockpos, this.field_77287_j.func_180495_p(blockpos), yield, 0);
                      }
  
 -                    this.field_77287_j.func_180501_a(blockpos, Blocks.field_150350_a.func_176223_P(), 3);
@@ -240,7 +332,7 @@
                  }
              }
          }
-@@ -278,9 +240,7 @@
+@@ -278,11 +304,14 @@
          {
              for (BlockPos blockpos1 : this.field_77281_g)
              {
@@ -249,12 +341,108 @@
 -                        && this.field_77290_i.nextInt(3) == 0)
 +                if (this.field_77287_j.func_180495_p(blockpos1).func_185904_a() == Material.field_151579_a && this.field_77287_j.func_180495_p(blockpos1.func_177977_b()).func_185913_b() && this.field_77290_i.nextInt(3) == 0)
                  {
-                     this.field_77287_j.func_175656_a(blockpos1, Blocks.field_150480_ab.func_176223_P());
+-                    this.field_77287_j.func_175656_a(blockpos1, Blocks.field_150480_ab.func_176223_P());
++                    // this.world.setBlockState(blockpos1, Blocks.FIRE.getDefaultState());
++                    // CraftBukkit start - Ignition by explosion
++                    if (!org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callBlockIgniteEvent(this.field_77287_j, blockpos1.func_177958_n(), blockpos1.func_177956_o(), blockpos1.func_177952_p(), this).isCancelled()) {
++                        this.field_77287_j.func_175656_a(blockpos1, Blocks.field_150480_ab.func_176223_P());
++                    }
++                    // CraftBukkit end
                  }
-@@ -319,4 +279,6 @@
+             }
+         }
+@@ -306,7 +335,8 @@
+         }
+         else
+         {
+-            return this.field_77283_e instanceof EntityLivingBase ? (EntityLivingBase)this.field_77283_e : null;
++            // CraftBukkit start - obtain Fireball shooter for explosion tracking
++            return this.field_77283_e instanceof EntityLivingBase ? (EntityLivingBase)this.field_77283_e : (this.field_77283_e instanceof EntityFireball ? ((EntityFireball) this.field_77283_e).field_70235_a : null);
+         }
+     }
+ 
+@@ -319,4 +349,84 @@
      {
          return this.field_77281_g;
      }
 +
 +    public Vec3d getPosition(){ return this.position; }
++
++    // Paper start - Optimize explosions
++    private float getBlockDensity(Vec3d vec3d, AxisAlignedBB aabb) {
++        CacheKey key = new CacheKey(this, aabb);
++        Float blockDensity = this.field_77287_j.explosionDensityCache.get(key);
++        if (blockDensity == null) {
++            blockDensity = this.field_77287_j.func_72842_a(vec3d, aabb);
++            this.field_77287_j.explosionDensityCache.put(key, blockDensity);
++        }
++
++        return blockDensity;
++    }
++
++    static class CacheKey {
++        private final World world;
++        private final double posX, posY, posZ;
++        private final double minX, minY, minZ;
++        private final double maxX, maxY, maxZ;
++
++        public CacheKey(Explosion explosion, AxisAlignedBB aabb) {
++            this.world = explosion.field_77287_j;
++            this.posX = explosion.field_77284_b;
++            this.posY = explosion.field_77285_c;
++            this.posZ = explosion.field_77282_d;
++            this.minX = aabb.field_72340_a;
++            this.minY = aabb.field_72338_b;
++            this.minZ = aabb.field_72339_c;
++            this.maxX = aabb.field_72336_d;
++            this.maxY = aabb.field_72337_e;
++            this.maxZ = aabb.field_72334_f;
++        }
++
++        @Override
++        public boolean equals(Object o) {
++            if (this == o) return true;
++            if (o == null || getClass() != o.getClass()) return false;
++
++            CacheKey cacheKey = (CacheKey) o;
++
++            if (Double.compare(cacheKey.posX, posX) != 0) return false;
++            if (Double.compare(cacheKey.posY, posY) != 0) return false;
++            if (Double.compare(cacheKey.posZ, posZ) != 0) return false;
++            if (Double.compare(cacheKey.minX, minX) != 0) return false;
++            if (Double.compare(cacheKey.minY, minY) != 0) return false;
++            if (Double.compare(cacheKey.minZ, minZ) != 0) return false;
++            if (Double.compare(cacheKey.maxX, maxX) != 0) return false;
++            if (Double.compare(cacheKey.maxY, maxY) != 0) return false;
++            if (Double.compare(cacheKey.maxZ, maxZ) != 0) return false;
++            return world.equals(cacheKey.world);
++        }
++
++        @Override
++        public int hashCode() {
++            int result;
++            long temp;
++            result = world.hashCode();
++            temp = Double.doubleToLongBits(posX);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(posY);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(posZ);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(minX);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(minY);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(minZ);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(maxX);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(maxY);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            temp = Double.doubleToLongBits(maxZ);
++            result = 31 * result + (int) (temp ^ (temp >>> 32));
++            return result;
++        }
++    }
++    // Paper end
  }

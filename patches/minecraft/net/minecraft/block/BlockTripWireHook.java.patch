@@ -1,0 +1,34 @@
+--- before/net/minecraft/block/BlockTripWireHook.java
++++ after/net/minecraft/block/BlockTripWireHook.java
+@@ -11,6 +11,7 @@
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.creativetab.CreativeTabs;
+ import net.minecraft.entity.EntityLivingBase;
++import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.init.SoundEvents;
+ import net.minecraft.item.ItemStack;
+@@ -25,6 +26,7 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.block.BlockRedstoneEvent;
+ 
+ public class BlockTripWireHook extends Block
+ {
+@@ -228,6 +230,15 @@
+             p_176260_1_.func_180501_a(blockpos1, iblockstate1.func_177226_a(field_176264_a, enumfacing1), 3);
+             this.func_176262_b(p_176260_1_, blockpos1, enumfacing1);
+             this.func_180694_a(p_176260_1_, blockpos1, flag2, flag3, flag, flag1);
++        }
++
++        org.bukkit.block.Block block = p_176260_1_.getWorld().getBlockAt(p_176260_2_.func_177958_n(), p_176260_2_.func_177956_o(), p_176260_2_.func_177952_p());
++
++        BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 15, 0);
++        p_176260_1_.getServer().getPluginManager().callEvent(eventRedstone);
++
++        if (eventRedstone.getNewCurrent() > 0) {
++            return;
+         }
+ 
+         this.func_180694_a(p_176260_1_, p_176260_2_, flag2, flag3, flag, flag1);

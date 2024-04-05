@@ -1,6 +1,10 @@
 --- before/net/minecraft/block/BlockRedstoneDiode.java
 +++ after/net/minecraft/block/BlockRedstoneDiode.java
-@@ -18,7 +18,7 @@
+@@ -15,10 +15,11 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
  
  public abstract class BlockRedstoneDiode extends BlockHorizontal
  {
@@ -9,7 +13,7 @@
      protected final boolean field_149914_a;
  
      protected BlockRedstoneDiode(boolean p_i45400_1_)
-@@ -27,35 +27,32 @@
+@@ -27,35 +28,32 @@
          this.field_149914_a = p_i45400_1_;
      }
  
@@ -49,7 +53,24 @@
      public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_)
      {
          if (!this.func_176405_b(p_180650_1_, p_180650_2_, p_180650_3_))
-@@ -79,7 +76,6 @@
+@@ -64,10 +62,16 @@
+ 
+             if (this.field_149914_a && !flag)
+             {
++                if (CraftEventFactory.callRedstoneChange(p_180650_1_, p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p(), 15, 0).getNewCurrent() != 0) {
++                    return;
++                }
+                 p_180650_1_.func_180501_a(p_180650_2_, this.func_180675_k(p_180650_3_), 2);
+             }
+             else if (!this.field_149914_a)
+             {
++                if (CraftEventFactory.callRedstoneChange(p_180650_1_, p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p(), 0, 15).getNewCurrent() != 15) {
++                    return;
++                }
+                 p_180650_1_.func_180501_a(p_180650_2_, this.func_180674_e(p_180650_3_), 2);
+ 
+                 if (!flag)
+@@ -79,7 +83,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -57,7 +78,7 @@
      public boolean func_176225_a(IBlockState p_176225_1_, IBlockAccess p_176225_2_, BlockPos p_176225_3_, EnumFacing p_176225_4_)
      {
          return p_176225_4_.func_176740_k() != EnumFacing.Axis.Y;
-@@ -90,13 +86,11 @@
+@@ -90,13 +93,11 @@
          return this.field_149914_a;
      }
  
@@ -71,7 +92,7 @@
      public int func_180656_a(IBlockState p_180656_1_, IBlockAccess p_180656_2_, BlockPos p_180656_3_, EnumFacing p_180656_4_)
      {
          if (!this.func_176406_l(p_180656_1_))
-@@ -109,7 +103,6 @@
+@@ -109,7 +110,6 @@
          }
      }
  
@@ -79,7 +100,7 @@
      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
      {
          if (this.func_176409_d(p_189540_2_, p_189540_3_))
-@@ -164,7 +157,7 @@
+@@ -164,7 +164,7 @@
  
      protected int func_176397_f(World p_176397_1_, BlockPos p_176397_2_, IBlockState p_176397_3_)
      {
@@ -88,7 +109,7 @@
          BlockPos blockpos = p_176397_2_.func_177972_a(enumfacing);
          int i = p_176397_1_.func_175651_c(blockpos, enumfacing);
  
-@@ -175,19 +168,16 @@
+@@ -175,19 +175,16 @@
          else
          {
              IBlockState iblockstate = p_176397_1_.func_180495_p(blockpos);
@@ -111,7 +132,7 @@
      }
  
      protected int func_176401_c(IBlockAccess p_176401_1_, BlockPos p_176401_2_, EnumFacing p_176401_3_)
-@@ -203,9 +193,7 @@
+@@ -203,9 +200,7 @@
              }
              else
              {
@@ -122,7 +143,7 @@
              }
          }
          else
-@@ -214,28 +202,16 @@
+@@ -214,28 +209,16 @@
          }
      }
  
@@ -152,7 +173,7 @@
      public void func_180633_a(World p_180633_1_, BlockPos p_180633_2_, IBlockState p_180633_3_, EntityLivingBase p_180633_4_, ItemStack p_180633_5_)
      {
          if (this.func_176404_e(p_180633_1_, p_180633_2_, p_180633_3_))
-@@ -244,7 +220,6 @@
+@@ -244,7 +227,6 @@
          }
      }
  
@@ -160,7 +181,7 @@
      public void func_176213_c(World p_176213_1_, BlockPos p_176213_2_, IBlockState p_176213_3_)
      {
          this.func_176400_h(p_176213_1_, p_176213_2_, p_176213_3_);
-@@ -252,13 +227,14 @@
+@@ -252,13 +234,14 @@
  
      protected void func_176400_h(World p_176400_1_, BlockPos p_176400_2_, IBlockState p_176400_3_)
      {
@@ -177,7 +198,7 @@
      public void func_176206_d(World p_176206_1_, BlockPos p_176206_2_, IBlockState p_176206_3_)
      {
          if (this.field_149914_a)
-@@ -272,7 +248,6 @@
+@@ -272,7 +255,6 @@
          super.func_176206_d(p_176206_1_, p_176206_2_, p_176206_3_);
      }
  
@@ -185,7 +206,7 @@
      public boolean func_149662_c(IBlockState p_149662_1_)
      {
          return false;
-@@ -301,7 +276,7 @@
+@@ -301,7 +283,7 @@
  
      public boolean func_176402_i(World p_176402_1_, BlockPos p_176402_2_, IBlockState p_176402_3_)
      {
@@ -194,7 +215,7 @@
          BlockPos blockpos = p_176402_2_.func_177972_a(enumfacing);
  
          if (func_185546_B(p_176402_1_.func_180495_p(blockpos)))
-@@ -325,20 +300,36 @@
+@@ -325,20 +307,36 @@
  
      protected abstract IBlockState func_180675_k(IBlockState p_180675_1_);
  

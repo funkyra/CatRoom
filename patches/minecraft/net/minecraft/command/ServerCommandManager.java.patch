@@ -1,6 +1,27 @@
 --- before/net/minecraft/command/ServerCommandManager.java
 +++ after/net/minecraft/command/ServerCommandManager.java
-@@ -116,7 +116,6 @@
+@@ -40,6 +40,10 @@
+     public ServerCommandManager(MinecraftServer p_i46985_1_)
+     {
+         this.field_184880_a = p_i46985_1_;
++        CommandBase.func_71529_a(this);
++    }
++
++    public void registerVanillaCommands() {
+         this.func_71560_a(new CommandTime());
+         this.func_71560_a(new CommandGameMode());
+         this.func_71560_a(new CommandDifficulty());
+@@ -89,8 +93,7 @@
+         this.func_71560_a(new CommandLocate());
+         this.func_71560_a(new CommandReload());
+         this.func_71560_a(new CommandFunction());
+-
+-        if (p_i46985_1_.func_71262_S())
++        if (field_184880_a.func_71262_S())
+         {
+             this.func_71560_a(new CommandOp());
+             this.func_71560_a(new CommandDeOp());
+@@ -116,7 +119,6 @@
          CommandBase.func_71529_a(this);
      }
  
@@ -8,7 +29,7 @@
      public void func_152372_a(ICommandSender p_152372_1_, ICommand p_152372_2_, int p_152372_3_, String p_152372_4_, Object... p_152372_5_)
      {
          boolean flag = true;
-@@ -127,19 +126,15 @@
+@@ -127,19 +129,15 @@
              flag = false;
          }
  
@@ -31,7 +52,16 @@
                  {
                      boolean flag1 = p_152372_1_ instanceof MinecraftServer && this.field_184880_a.func_183002_r();
                      boolean flag2 = p_152372_1_ instanceof RConConsoleSource && this.field_184880_a.func_181034_q();
-@@ -170,7 +165,6 @@
+@@ -152,7 +150,7 @@
+             }
+         }
+ 
+-        if (p_152372_1_ != minecraftserver && minecraftserver.field_71305_c[0].func_82736_K().func_82766_b("logAdminCommands"))
++        if (p_152372_1_ != minecraftserver && minecraftserver.field_71305_c[0].func_82736_K().func_82766_b("logAdminCommands") && !org.spigotmc.SpigotConfig.silentCommandBlocks) // Spigot
+         {
+             minecraftserver.func_145747_a(itextcomponent);
+         }
+@@ -170,7 +168,6 @@
          }
      }
  

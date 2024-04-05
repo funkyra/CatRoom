@@ -20,7 +20,8 @@
              return p_apply_1_.func_190926_b();
          }
      };
-     private final ItemStack[] field_193371_b;
+-    private final ItemStack[] field_193371_b;
++    public final ItemStack[] field_193371_b;
 +    private final ItemStack[] matchingStacksExploded;
      private IntList field_194140_c;
 +    private final boolean isSimple;

@@ -1,0 +1,19 @@
+--- before/net/minecraft/world/gen/structure/MapGenScatteredFeature.java
++++ after/net/minecraft/world/gen/structure/MapGenScatteredFeature.java
+@@ -64,11 +64,11 @@
+ 
+         int k = p_75047_1_ / this.field_82669_g;
+         int l = p_75047_2_ / this.field_82669_g;
+-        Random random = this.field_75039_c.func_72843_D(k, l, 14357617);
+-        k *= this.field_82669_g;
+-        l *= this.field_82669_g;
+-        k += random.nextInt(this.field_82669_g - 8);
+-        l += random.nextInt(this.field_82669_g - 8);
++        Random random = this.field_75039_c.func_72843_D(k, l, this.field_75039_c.spigotConfig.largeFeatureSeed); // Spigot
++        k = k * this.field_82669_g;
++        l = l * this.field_82669_g;
++        k = k + random.nextInt(this.field_82669_g - 8);
++        l = l + random.nextInt(this.field_82669_g - 8);
+ 
+         if (i == k && j == l)
+         {

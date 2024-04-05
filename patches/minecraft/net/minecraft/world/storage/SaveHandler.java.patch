@@ -1,6 +1,35 @@
 --- before/net/minecraft/world/storage/SaveHandler.java
 +++ after/net/minecraft/world/storage/SaveHandler.java
-@@ -44,7 +44,7 @@
+@@ -6,8 +6,11 @@
+ import java.io.FileInputStream;
+ import java.io.FileOutputStream;
+ import java.io.IOException;
++import java.io.InputStream;
++import java.util.UUID;
+ import javax.annotation.Nullable;
+ import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.nbt.CompressedStreamTools;
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.server.MinecraftServer;
+@@ -19,6 +22,7 @@
+ import net.minecraft.world.gen.structure.template.TemplateManager;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
+ 
+ public class SaveHandler implements ISaveHandler, IPlayerFileData
+ {
+@@ -31,6 +35,8 @@
+     private final TemplateManager field_186342_h;
+     protected final DataFixer field_186341_a;
+ 
++    private UUID uuid = null;
++
+     public SaveHandler(File p_i46648_1_, String p_i46648_2_, boolean p_i46648_3_, DataFixer p_i46648_4_)
+     {
+         this.field_186341_a = p_i46648_4_;
+@@ -44,7 +50,7 @@
          if (p_i46648_3_)
          {
              this.field_75771_c.mkdirs();
@@ -9,7 +38,12 @@
          }
          else
          {
-@@ -77,13 +77,11 @@
+@@ -73,17 +79,15 @@
+         catch (IOException ioexception)
+         {
+             ioexception.printStackTrace();
+-            throw new RuntimeException("Failed to check session lock, aborting");
++            throw new RuntimeException("Failed to check session lock for world located at " + this.field_75770_b + ", aborting. Stop the server and delete the session.lock in this world to prevent further issues."); // Spigot
          }
      }
  
@@ -23,14 +57,24 @@
      public void func_75762_c() throws MinecraftException
      {
          try
-@@ -103,27 +101,25 @@
+@@ -95,7 +99,7 @@
+             {
+                 if (datainputstream.readLong() != this.field_75769_e)
+                 {
+-                    throw new MinecraftException("The save is being accessed from another location, aborting");
++                    throw new MinecraftException("The save for world located at " + this.field_75770_b + " is being accessed from another location, aborting");  // Spigot
+                 }
+             }
+             finally
+@@ -103,27 +107,25 @@
                  datainputstream.close();
              }
          }
 -        catch (IOException ioexception)
 +        catch (IOException var7)
          {
-             throw new MinecraftException("Failed to check session lock, aborting");
+-            throw new MinecraftException("Failed to check session lock, aborting");
++            throw new MinecraftException("Failed to check session lock for world located at " + this.field_75770_b + ", aborting. Stop the server and delete the session.lock in this world to prevent further issues."); // Spigot
          }
      }
  
@@ -53,7 +97,7 @@
  
              if (worldinfo != null)
              {
-@@ -131,17 +127,19 @@
+@@ -131,17 +133,19 @@
              }
          }
  
@@ -75,7 +119,7 @@
          try
          {
              File file1 = new File(this.field_75770_b, "level.dat_new");
-@@ -174,13 +172,11 @@
+@@ -174,13 +178,11 @@
          }
      }
  
@@ -90,7 +134,7 @@
      public void func_75753_a(EntityPlayer p_75753_1_)
      {
          try
-@@ -196,15 +192,15 @@
+@@ -196,15 +198,15 @@
              }
  
              file1.renameTo(file2);
@@ -109,7 +153,7 @@
      public NBTTagCompound func_75752_b(EntityPlayer p_75752_1_)
      {
          NBTTagCompound nbttagcompound = null;
-@@ -218,9 +214,9 @@
+@@ -218,26 +220,47 @@
                  nbttagcompound = CompressedStreamTools.func_74796_a(new FileInputStream(file1));
              }
          }
@@ -121,7 +165,15 @@
          }
  
          if (nbttagcompound != null)
-@@ -228,16 +224,15 @@
+         {
++            if (p_75752_1_ instanceof EntityPlayerMP) {
++                CraftPlayer playerCB = (CraftPlayer) p_75752_1_.getBukkitEntity();
++                // Only update first played if it is older than the one we have
++                long modified = new File(this.field_75771_c, p_75752_1_.func_110124_au().toString() + ".dat").lastModified();
++                if (modified < playerCB.getFirstPlayed()) {
++                    playerCB.setFirstPlayed(modified);
++                }
++            }
              p_75752_1_.func_70020_e(this.field_186341_a.func_188257_a(FixTypes.PLAYER, nbttagcompound));
          }
  
@@ -130,6 +182,20 @@
      }
  
 -    @Override
++    public NBTTagCompound getPlayerData(String s) {
++        try {
++            File file1 = new File(this.field_75771_c, s + ".dat");
++
++            if (file1.exists()) {
++                return CompressedStreamTools.func_74796_a((InputStream) (new FileInputStream(file1)));
++            }
++        } catch (Exception exception) {
++            field_151478_a.warn("Failed to load player data for " + s);
++        }
++
++        return null;
++    }
++
      public IPlayerFileData func_75756_e()
      {
          return this;
@@ -139,7 +205,7 @@
      public String[] func_75754_f()
      {
          String[] astring = this.field_75771_c.list();
-@@ -258,20 +253,35 @@
+@@ -258,20 +281,79 @@
          return astring;
      }
  
@@ -176,5 +242,49 @@
 +            field_151478_a.warn("Failed to load player data for " + player.func_70005_c_());
 +        }
 +        return null;
++    }
++
++    public UUID getUUID() {
++        if (uuid != null) return uuid;
++        File file1 = new File(this.field_75770_b, "uid.dat");
++        if (file1.exists()) {
++            DataInputStream dis = null;
++            try {
++                dis = new DataInputStream(new FileInputStream(file1));
++                return uuid = new UUID(dis.readLong(), dis.readLong());
++            } catch (IOException ex) {
++                field_151478_a.warn("Failed to read " + file1 + ", generating new random UUID", ex);
++            } finally {
++                if (dis != null) {
++                    try {
++                        dis.close();
++                    } catch (IOException ex) {
++                        // NOOP
++                    }
++                }
++            }
++        }
++        uuid = UUID.randomUUID();
++        DataOutputStream dos = null;
++        try {
++            dos = new DataOutputStream(new FileOutputStream(file1));
++            dos.writeLong(uuid.getMostSignificantBits());
++            dos.writeLong(uuid.getLeastSignificantBits());
++        } catch (IOException ex) {
++            field_151478_a.warn("Failed to write " + file1, ex);
++        } finally {
++            if (dos != null) {
++                try {
++                    dos.close();
++                } catch (IOException ex) {
++                    // NOOP
++                }
++            }
++        }
++        return uuid;
++    }
++
++    public File getPlayerDir() {
++        return field_75771_c;
      }
  }

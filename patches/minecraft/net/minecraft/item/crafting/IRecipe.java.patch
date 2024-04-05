@@ -1,8 +1,10 @@
 --- before/net/minecraft/item/crafting/IRecipe.java
 +++ after/net/minecraft/item/crafting/IRecipe.java
-@@ -4,25 +4,25 @@
+@@ -3,26 +3,27 @@
+ import net.minecraft.inventory.InventoryCrafting;
  import net.minecraft.item.ItemStack;
  import net.minecraft.util.NonNullList;
++import net.minecraft.util.ResourceLocation;
  import net.minecraft.world.World;
 -import net.minecraftforge.fml.relauncher.Side;
 -import net.minecraftforge.fml.relauncher.SideOnly;
@@ -32,7 +34,7 @@
      }
  
  default boolean func_192399_d()
-@@ -30,7 +30,6 @@
+@@ -30,9 +31,12 @@
          return false;
      }
  
@@ -40,3 +42,9 @@
  default String func_193358_e()
      {
          return "";
+     }
++
++    default org.bukkit.inventory.Recipe toBukkitRecipe() { return new catserver.server.inventory.CustomModRecipe(this, this.getRegistryName()); }
++
++    default void setKey(ResourceLocation key) {}
+ }

@@ -30,6 +30,7 @@ import net.minecraft.network.login.server.SPacketLoginSuccess;
 import net.minecraft.network.play.INetHandlerPlayClient;
 import net.minecraft.network.play.server.SPacketJoinGame;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.dedicated.PropertyManager;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldType;
@@ -85,8 +86,13 @@ public class TestNetworkHandshake
     {
         if (true) return;
         barrier = new CyclicBarrier(2);
-        final MinecraftServer minecraftServer = new MinecraftServer(Paths.get(".").toFile(), null, null, null, null, null, null)
+        final MinecraftServer minecraftServer = new MinecraftServer(null, null, null, null, null, null, null)
         {
+            @Override
+            public PropertyManager getPropertyManager() {
+                return null;
+            }
+
             @Override
             public boolean init() throws IOException
             {

@@ -1,15 +1,17 @@
 --- before/net/minecraft/block/BlockLeaves.java
 +++ after/net/minecraft/block/BlockLeaves.java
-@@ -17,7 +17,7 @@
+@@ -16,8 +16,9 @@
+ import net.minecraft.world.World;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.block.LeavesDecayEvent;
  
 -public abstract class BlockLeaves extends Block
 +public abstract class BlockLeaves extends Block implements net.minecraftforge.common.IShearable
  {
      public static final PropertyBool field_176237_a = PropertyBool.func_177716_a("decayable");
      public static final PropertyBool field_176236_b = PropertyBool.func_177716_a("check_decay");
-@@ -34,7 +34,6 @@
+@@ -34,7 +35,6 @@
          this.func_149672_a(SoundType.field_185850_c);
      }
  
@@ -17,7 +19,7 @@
      public void func_180663_b(World p_180663_1_, BlockPos p_180663_2_, IBlockState p_180663_3_)
      {
          int i = 1;
-@@ -54,9 +53,9 @@
+@@ -54,9 +54,9 @@
                          BlockPos blockpos = p_180663_2_.func_177982_a(j1, k1, l1);
                          IBlockState iblockstate = p_180663_1_.func_180495_p(blockpos);
  
@@ -29,7 +31,7 @@
                          }
                      }
                  }
-@@ -64,12 +63,11 @@
+@@ -64,12 +64,11 @@
          }
      }
  
@@ -43,7 +45,7 @@
              {
                  int i = 4;
                  int j = 5;
-@@ -85,7 +83,8 @@
+@@ -85,7 +84,8 @@
                      this.field_150128_a = new int[32768];
                  }
  
@@ -53,7 +55,7 @@
                  {
                      BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
  
-@@ -98,9 +97,9 @@
+@@ -98,9 +98,9 @@
                                  IBlockState iblockstate = p_180650_1_.func_180495_p(blockpos$mutableblockpos.func_181079_c(k + i2, l + j2, i1 + k2));
                                  Block block = iblockstate.func_177230_c();
  
@@ -65,7 +67,7 @@
                                      {
                                          this.field_150128_a[(i2 + 16) * 1024 + (j2 + 16) * 32 + k2 + 16] = -2;
                                      }
-@@ -167,7 +166,7 @@
+@@ -167,7 +167,7 @@
  
                  if (l2 >= 0)
                  {
@@ -74,32 +76,50 @@
                  }
                  else
                  {
-@@ -178,17 +177,14 @@
-     }
- 
-     @SideOnly(Side.CLIENT)
--    @Override
-     public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_)
-     {
--        if (p_180655_2_.func_175727_C(p_180655_3_.func_177984_a())
--                && !p_180655_2_.func_180495_p(p_180655_3_.func_177977_b()).func_185896_q()
--                && p_180655_4_.nextInt(15) == 1)
-+        if (p_180655_2_.func_175727_C(p_180655_3_.func_177984_a()) && !p_180655_2_.func_180495_p(p_180655_3_.func_177977_b()).func_185896_q() && p_180655_4_.nextInt(15) == 1)
-         {
-             double d0 = (double)((float)p_180655_3_.func_177958_n() + p_180655_4_.nextFloat());
--            double d1 = (double)p_180655_3_.func_177956_o() - 0.05;
-+            double d1 = (double)p_180655_3_.func_177956_o() - 0.05D;
-             double d2 = (double)((float)p_180655_3_.func_177952_p() + p_180655_4_.nextFloat());
--            p_180655_2_.func_175688_a(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0, 0.0, 0.0);
-+            p_180655_2_.func_175688_a(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+@@ -177,76 +177,43 @@
          }
      }
  
-@@ -198,55 +194,19 @@
+-    @SideOnly(Side.CLIENT)
+-    @Override
+-    public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_)
+-    {
+-        if (p_180655_2_.func_175727_C(p_180655_3_.func_177984_a())
+-                && !p_180655_2_.func_180495_p(p_180655_3_.func_177977_b()).func_185896_q()
+-                && p_180655_4_.nextInt(15) == 1)
+-        {
+-            double d0 = (double)((float)p_180655_3_.func_177958_n() + p_180655_4_.nextFloat());
+-            double d1 = (double)p_180655_3_.func_177956_o() - 0.05;
+-            double d2 = (double)((float)p_180655_3_.func_177952_p() + p_180655_4_.nextFloat());
+-            p_180655_2_.func_175688_a(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0, 0.0, 0.0);
+-        }
+-    }
+-
+     private void func_176235_d(World p_176235_1_, BlockPos p_176235_2_)
+     {
++        LeavesDecayEvent event = new LeavesDecayEvent(p_176235_1_.getWorld().getBlockAt(p_176235_2_.func_177958_n(), p_176235_2_.func_177956_o(), p_176235_2_.func_177952_p()));
++        p_176235_1_.getServer().getPluginManager().callEvent(event);
++
++        if (event.isCancelled() || p_176235_1_.func_180495_p(p_176235_2_).func_177230_c() != this) {
++            return;
++        }
+         this.func_176226_b(p_176235_1_, p_176235_2_, p_176235_1_.func_180495_p(p_176235_2_), 0);
          p_176235_1_.func_175698_g(p_176235_2_);
      }
  
 -    @Override
++    @SideOnly(Side.CLIENT)
++    public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_)
++    {
++        if (p_180655_2_.func_175727_C(p_180655_3_.func_177984_a()) && !p_180655_2_.func_180495_p(p_180655_3_.func_177977_b()).func_185896_q() && p_180655_4_.nextInt(15) == 1)
++        {
++            double d0 = (double)((float)p_180655_3_.func_177958_n() + p_180655_4_.nextFloat());
++            double d1 = (double)p_180655_3_.func_177956_o() - 0.05D;
++            double d2 = (double)((float)p_180655_3_.func_177952_p() + p_180655_4_.nextFloat());
++            p_180655_2_.func_175688_a(EnumParticleTypes.DRIP_WATER, d0, d1, d2, 0.0D, 0.0D, 0.0D);
++        }
++    }
++
      public int func_149745_a(Random p_149745_1_)
      {
          return p_149745_1_.nextInt(20) == 0 ? 1 : 0;
@@ -152,7 +172,7 @@
      }
  
      protected void func_176234_a(World p_176234_1_, BlockPos p_176234_2_, IBlockState p_176234_3_, int p_176234_4_)
-@@ -258,7 +218,6 @@
+@@ -258,7 +225,6 @@
          return 20;
      }
  
@@ -160,7 +180,7 @@
      public boolean func_149662_c(IBlockState p_149662_1_)
      {
          return !this.field_185686_c;
-@@ -271,13 +230,11 @@
+@@ -271,13 +237,11 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -174,7 +194,7 @@
      public boolean func_176214_u(IBlockState p_176214_1_)
      {
          return false;
-@@ -285,12 +242,54 @@
+@@ -285,12 +249,54 @@
  
      public abstract BlockPlanks.EnumType func_176233_b(int p_176233_1_);
  

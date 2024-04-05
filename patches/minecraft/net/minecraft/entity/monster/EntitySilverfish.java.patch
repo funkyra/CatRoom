@@ -173,7 +173,7 @@
              public void func_75249_e()
              {
                  if (!this.field_179484_c)
-@@ -237,17 +216,12 @@
+@@ -237,17 +216,15 @@
                  else
                  {
                      World world = this.field_75457_a.field_70170_p;
@@ -189,11 +189,14 @@
 -                            Blocks.field_150418_aU.func_176223_P().func_177226_a(BlockSilverfish.field_176378_a, BlockSilverfish.EnumType.func_176878_a(iblockstate)),
 -                            3
 -                        );
++                        if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityChangeBlockEvent(this.field_75457_a, blockpos, Blocks.field_150418_aU, Block.func_149682_b(BlockSilverfish.func_149729_e(iblockstate.func_177230_c().func_176201_c(iblockstate)))).isCancelled()) {
++                            return;
++                        }
 +                        world.func_180501_a(blockpos, Blocks.field_150418_aU.func_176223_P().func_177226_a(BlockSilverfish.field_176378_a, BlockSilverfish.EnumType.func_176878_a(iblockstate)), 3);
                          this.field_75457_a.func_70656_aK();
                          this.field_75457_a.func_70106_y();
                      }
-@@ -273,13 +247,11 @@
+@@ -273,13 +250,11 @@
                  }
              }
  
@@ -207,7 +210,7 @@
              public void func_75246_d()
              {
                  --this.field_179463_b;
-@@ -301,13 +273,13 @@
+@@ -301,13 +276,13 @@
  
                                  if (iblockstate.func_177230_c() == Blocks.field_150418_aU)
                                  {

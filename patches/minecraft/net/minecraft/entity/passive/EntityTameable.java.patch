@@ -1,0 +1,14 @@
+--- before/net/minecraft/entity/passive/EntityTameable.java
++++ after/net/minecraft/entity/passive/EntityTameable.java
+@@ -238,6 +238,11 @@
+         return this.field_70911_d;
+     }
+ 
++    public void setAISit(EntityAISit aiSit)
++    {
++        this.field_70911_d = aiSit;
++    }
++
+     public boolean func_142018_a(EntityLivingBase p_142018_1_, EntityLivingBase p_142018_2_)
+     {
+         return true;

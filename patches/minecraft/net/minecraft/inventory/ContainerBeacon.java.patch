@@ -1,6 +1,34 @@
 --- before/net/minecraft/inventory/ContainerBeacon.java
 +++ after/net/minecraft/inventory/ContainerBeacon.java
-@@ -34,7 +34,6 @@
+@@ -1,19 +1,24 @@
+ package net.minecraft.inventory;
+ 
+ import net.minecraft.entity.player.EntityPlayer;
+-import net.minecraft.init.Items;
+-import net.minecraft.item.Item;
++import net.minecraft.entity.player.InventoryPlayer;
+ import net.minecraft.item.ItemStack;
++import net.minecraft.tileentity.TileEntityBeacon;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
+ 
+ public class ContainerBeacon extends Container
+ {
+     private final IInventory field_82866_e;
+-    private final ContainerBeacon.BeaconSlot field_82864_f;
++    private final BeaconSlot field_82864_f;
++
++    private CraftInventoryView bukkitEntity = null;
++    private InventoryPlayer player;
+ 
+     public ContainerBeacon(IInventory p_i45804_1_, IInventory p_i45804_2_)
+     {
++        player = (InventoryPlayer) p_i45804_1_; // CraftBukkit - TODO: check this
+         this.field_82866_e = p_i45804_2_;
+         this.field_82864_f = new ContainerBeacon.BeaconSlot(p_i45804_2_, 0, 136, 110);
+         this.func_75146_a(this.field_82864_f);
+@@ -34,7 +39,6 @@
          }
      }
  
@@ -8,7 +36,7 @@
      public void func_75132_a(IContainerListener p_75132_1_)
      {
          super.func_75132_a(p_75132_1_);
-@@ -42,7 +41,6 @@
+@@ -42,7 +46,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -16,7 +44,7 @@
      public void func_75137_b(int p_75137_1_, int p_75137_2_)
      {
          this.field_82866_e.func_174885_b(p_75137_1_, p_75137_2_);
-@@ -53,7 +51,6 @@
+@@ -53,7 +56,6 @@
          return this.field_82866_e;
      }
  
@@ -24,13 +52,14 @@
      public void func_75134_a(EntityPlayer p_75134_1_)
      {
          super.func_75134_a(p_75134_1_);
-@@ -69,13 +66,11 @@
+@@ -69,13 +71,12 @@
          }
      }
  
 -    @Override
      public boolean func_75145_c(EntityPlayer p_75145_1_)
      {
++        if (!this.checkReachable) return true;
          return this.field_82866_e.func_70300_a(p_75145_1_);
      }
  
@@ -38,7 +67,7 @@
      public ItemStack func_82846_b(EntityPlayer p_82846_1_, int p_82846_2_)
      {
          ItemStack itemstack = ItemStack.field_190927_a;
-@@ -95,12 +90,9 @@
+@@ -95,12 +96,9 @@
  
                  slot.func_75220_a(itemstack1, itemstack);
              }
@@ -53,7 +82,7 @@
              }
              else if (p_82846_2_ >= 1 && p_82846_2_ < 28)
              {
-@@ -148,14 +140,11 @@
+@@ -148,17 +146,25 @@
              super(p_i1801_2_, p_i1801_3_, p_i1801_4_, p_i1801_5_);
          }
  
@@ -69,3 +98,17 @@
          public int func_75219_a()
          {
              return 1;
+         }
++    }
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventory inventory = new org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryBeacon(this.field_82866_e); // CatServer
++        bukkitEntity = new CraftInventoryView(this.player.field_70458_d.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
+     }
+ }

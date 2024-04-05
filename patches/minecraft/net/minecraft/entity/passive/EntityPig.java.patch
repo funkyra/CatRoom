@@ -1,0 +1,48 @@
+--- before/net/minecraft/entity/passive/EntityPig.java
++++ after/net/minecraft/entity/passive/EntityPig.java
+@@ -37,6 +37,7 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.World;
+ import net.minecraft.world.storage.loot.LootTableList;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
+ 
+ public class EntityPig extends EntityAnimal
+ {
+@@ -202,7 +203,7 @@
+     @Override
+     public void func_70645_a(DamageSource p_70645_1_)
+     {
+-        super.func_70645_a(p_70645_1_);
++        // super.onDeath(cause); // CraftBukkit - Moved to end
+ 
+         if (!this.field_70170_p.field_72995_K)
+         {
+@@ -211,6 +212,7 @@
+                 this.func_145779_a(Items.field_151141_av, 1);
+             }
+         }
++        super.func_70645_a(p_70645_1_);
+     }
+ 
+     @Nullable
+@@ -242,7 +244,11 @@
+     {
+         if (!this.field_70170_p.field_72995_K && !this.field_70128_L)
+         {
++            if (p_70077_1_ == null) p_70077_1_ = new EntityLightningBolt(this.field_70170_p, this.field_70165_t, this.field_70163_u, this.field_70161_v, true); // CatServer - if null, create EntityLightningBolt for Bukkit
+             EntityPigZombie entitypigzombie = new EntityPigZombie(this.field_70170_p);
++            if (CraftEventFactory.callPigZapEvent(this, p_70077_1_, entitypigzombie).isCancelled()) {
++                return;
++            }
+             entitypigzombie.func_184201_a(EntityEquipmentSlot.MAINHAND, new ItemStack(Items.field_151010_B));
+             entitypigzombie.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
+             entitypigzombie.func_94061_f(this.func_175446_cd());
+@@ -253,7 +259,7 @@
+                 entitypigzombie.func_174805_g(this.func_174833_aM());
+             }
+ 
+-            this.field_70170_p.func_72838_d(entitypigzombie);
++            this.field_70170_p.addEntity(entitypigzombie, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.LIGHTNING);
+             this.func_70106_y();
+         }
+     }

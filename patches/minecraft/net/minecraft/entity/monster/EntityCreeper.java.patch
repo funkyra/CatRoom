@@ -1,6 +1,11 @@
 --- before/net/minecraft/entity/monster/EntityCreeper.java
 +++ after/net/minecraft/entity/monster/EntityCreeper.java
-@@ -39,9 +39,9 @@
+@@ -36,16 +36,18 @@
+ import net.minecraft.world.storage.loot.LootTableList;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
++import org.bukkit.event.entity.ExplosionPrimeEvent;
  
  public class EntityCreeper extends EntityMob
  {
@@ -12,8 +17,14 @@
 +    private static final DataParameter<Boolean> field_184715_c = EntityDataManager.<Boolean>func_187226_a(EntityCreeper.class, DataSerializers.field_187198_h);
      private int field_70834_e;
      private int field_70833_d;
-     private int field_82225_f = 30;
-@@ -54,34 +54,30 @@
+-    private int field_82225_f = 30;
+-    private int field_82226_g = 3;
++    public int field_82225_f = 30;
++    public int field_82226_g = 3;
+     private int field_175494_bm;
+ 
+     public EntityCreeper(World p_i1733_1_)
+@@ -54,34 +56,30 @@
          this.func_70105_a(0.6F, 1.7F);
      }
  
@@ -54,7 +65,7 @@
      public void func_180430_e(float p_180430_1_, float p_180430_2_)
      {
          super.func_180430_e(p_180430_1_, p_180430_2_);
-@@ -93,13 +89,12 @@
+@@ -93,13 +91,12 @@
          }
      }
  
@@ -71,7 +82,7 @@
      }
  
      public static void func_189762_b(DataFixer p_189762_0_)
-@@ -107,12 +102,11 @@
+@@ -107,12 +104,11 @@
          EntityLiving.func_189752_a(p_189762_0_, EntityCreeper.class);
      }
  
@@ -85,7 +96,7 @@
          {
              p_70014_1_.func_74757_a("powered", true);
          }
-@@ -122,11 +116,10 @@
+@@ -122,11 +118,10 @@
          p_70014_1_.func_74757_a("ignited", this.func_146078_ca());
      }
  
@@ -98,7 +109,7 @@
  
          if (p_70037_1_.func_150297_b("Fuse", 99))
          {
-@@ -144,7 +137,6 @@
+@@ -144,7 +139,6 @@
          }
      }
  
@@ -106,7 +117,7 @@
      public void func_70071_h_()
      {
          if (this.func_70089_S())
-@@ -180,19 +172,16 @@
+@@ -180,22 +174,19 @@
          super.func_70071_h_();
      }
  
@@ -125,8 +136,12 @@
 -    @Override
      public void func_70645_a(DamageSource p_70645_1_)
      {
-         super.func_70645_a(p_70645_1_);
-@@ -206,10 +195,7 @@
+-        super.func_70645_a(p_70645_1_);
++//        super.onDeath(cause); // CraftBukkit - Moved to end
+ 
+         if (this.field_70170_p.func_82736_K().func_82766_b("doMobLoot"))
+         {
+@@ -206,18 +197,15 @@
                  int k = i + this.field_70146_Z.nextInt(j - i + 1);
                  this.func_145779_a(Item.func_150899_d(k), 1);
              }
@@ -138,15 +153,16 @@
              {
                  ((EntityCreeper)p_70645_1_.func_76346_g()).func_175493_co();
                  this.func_70099_a(new ItemStack(Items.field_151144_bL, 1, 4), 0.0F);
-@@ -217,7 +203,6 @@
+             }
          }
++        super.func_70645_a(p_70645_1_); // CraftBukkit - Moved from above
      }
  
 -    @Override
      public boolean func_70652_k(Entity p_70652_1_)
      {
          return true;
-@@ -225,7 +210,7 @@
+@@ -225,7 +213,7 @@
  
      public boolean func_70830_n()
      {
@@ -155,7 +171,7 @@
      }
  
      @SideOnly(Side.CLIENT)
-@@ -235,7 +220,6 @@
+@@ -235,7 +223,6 @@
      }
  
      @Nullable
@@ -163,7 +179,7 @@
      protected ResourceLocation func_184647_J()
      {
          return LootTableList.field_186434_p;
-@@ -243,39 +227,27 @@
+@@ -243,39 +230,37 @@
  
      public int func_70832_p()
      {
@@ -180,12 +196,24 @@
 -    @Override
      public void func_70077_a(EntityLightningBolt p_70077_1_)
      {
++        if (p_70077_1_ == null) p_70077_1_ = new EntityLightningBolt(this.field_70170_p, this.field_70165_t, this.field_70163_u, this.field_70161_v, true); // CatServer - if null, create EntityLightningBolt for Bukkit
          super.func_70077_a(p_70077_1_);
 -        this.field_70180_af.func_187227_b(field_184714_b, true);
-+        this.field_70180_af.func_187227_b(field_184714_b, Boolean.valueOf(true));
-     }
- 
+-    }
+-
 -    @Override
++
++        if (CraftEventFactory.callCreeperPowerEvent(this, p_70077_1_, org.bukkit.event.entity.CreeperPowerEvent.PowerCause.LIGHTNING).isCancelled()) {
++            return;
++        }
++
++        this.setPowered(true);
++    }
++
++    public void setPowered(boolean powered) {
++        this.field_70180_af.func_187227_b(EntityCreeper.field_184714_b, powered);
++    }
++
      protected boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_)
      {
          ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
@@ -207,16 +235,43 @@
              p_184645_1_.func_184609_a(p_184645_2_);
  
              if (!this.field_70170_p.field_72995_K)
-@@ -293,7 +265,7 @@
+@@ -293,12 +278,22 @@
      {
          if (!this.field_70170_p.field_72995_K)
          {
 -            boolean flag = this.field_70170_p.func_82736_K().func_82766_b("mobGriefing");
 +            boolean flag = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.field_70170_p, this);
              float f = this.func_70830_n() ? 2.0F : 1.0F;
-             this.field_70729_aU = true;
-             this.field_70170_p.func_72876_a(this, this.field_70165_t, this.field_70163_u, this.field_70161_v, (float)this.field_82226_g * f, flag);
-@@ -326,12 +298,12 @@
+-            this.field_70729_aU = true;
+-            this.field_70170_p.func_72876_a(this, this.field_70165_t, this.field_70163_u, this.field_70161_v, (float)this.field_82226_g * f, flag);
+-            this.func_70106_y();
+-            this.func_190741_do();
++//            this.dead = true;
++//            this.world.createExplosion(this, this.posX, this.posY, this.posZ, (float)this.explosionRadius * f, flag);
++//            this.setDead();
++//            this.spawnLingeringCloud();
++            ExplosionPrimeEvent event = new ExplosionPrimeEvent(this.getBukkitEntity(), this.field_82226_g * f, false);
++            this.field_70170_p.getServer().getPluginManager().callEvent(event);
++            if (!event.isCancelled()) {
++                this.field_70729_aU = true;
++                this.field_70170_p.func_72885_a(this, this.field_70165_t, this.field_70163_u, this.field_70161_v, event.getRadius(), event.getFire(), flag);
++                this.func_70106_y();
++                this.func_190741_do();
++            } else {
++                field_70833_d = 0;
++            }
+         }
+     }
+ 
+@@ -309,6 +304,7 @@
+         if (!collection.isEmpty())
+         {
+             EntityAreaEffectCloud entityareaeffectcloud = new EntityAreaEffectCloud(this.field_70170_p, this.field_70165_t, this.field_70163_u, this.field_70161_v);
++            entityareaeffectcloud.func_184481_a(this);
+             entityareaeffectcloud.func_184483_a(2.5F);
+             entityareaeffectcloud.func_184495_b(-0.5F);
+             entityareaeffectcloud.func_184485_d(10);
+@@ -326,12 +322,12 @@
  
      public boolean func_146078_ca()
      {

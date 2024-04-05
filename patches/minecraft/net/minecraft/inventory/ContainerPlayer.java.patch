@@ -1,6 +1,11 @@
 --- before/net/minecraft/inventory/ContainerPlayer.java
 +++ after/net/minecraft/inventory/ContainerPlayer.java
-@@ -12,10 +12,7 @@
+@@ -9,22 +9,30 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryCrafting;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
  
  public class ContainerPlayer extends Container
  {
@@ -8,11 +13,31 @@
 -        {
 -            EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET
 -        };
+-    public InventoryCrafting field_75181_e = new InventoryCrafting(this, 2, 2);
+-    public InventoryCraftResult field_75179_f = new InventoryCraftResult();
 +    private static final EntityEquipmentSlot[] field_185003_h = new EntityEquipmentSlot[] {EntityEquipmentSlot.HEAD, EntityEquipmentSlot.CHEST, EntityEquipmentSlot.LEGS, EntityEquipmentSlot.FEET};
-     public InventoryCrafting field_75181_e = new InventoryCrafting(this, 2, 2);
-     public InventoryCraftResult field_75179_f = new InventoryCraftResult();
++    public InventoryCrafting field_75181_e; // CraftBukkit - move initialization into constructor
++    public InventoryCraftResult field_75179_f; // CraftBukkit - move initialization into constructor
      public boolean field_75180_g;
-@@ -38,36 +35,28 @@
+     private final EntityPlayer field_82862_h;
+ 
++    private CraftInventoryView bukkitEntity = null;
++    private InventoryPlayer playerInventory;
++
+     public ContainerPlayer(InventoryPlayer p_i1819_1_, boolean p_i1819_2_, EntityPlayer p_i1819_3_)
+     {
+         this.field_75180_g = p_i1819_2_;
+         this.field_82862_h = p_i1819_3_;
++        // CraftBukkit start
++        this.field_75179_f = new InventoryCraftResult(); // CraftBukkit - moved to before InventoryCrafting construction
++        this.field_75181_e = new InventoryCrafting(this, 2, 2, p_i1819_1_.field_70458_d); // CraftBukkit - pass player
++        this.field_75181_e.resultInventory = this.field_75179_f; // CraftBukkit - let InventoryCrafting know about its result slot
++        this.playerInventory = p_i1819_1_; // CraftBukkit - save player
++        // CraftBukkit end
+         this.func_75146_a(new SlotCrafting(p_i1819_1_.field_70458_d, this.field_75181_e, this.field_75179_f, 0, 154, 28));
+ 
+         for (int i = 0; i < 2; ++i)
+@@ -38,36 +46,28 @@
          for (int k = 0; k < 4; ++k)
          {
              final EntityEquipmentSlot entityequipmentslot = field_185003_h[k];
@@ -53,7 +78,7 @@
          }
  
          for (int l = 0; l < 3; ++l)
-@@ -87,7 +76,6 @@
+@@ -87,7 +87,6 @@
          {
              @Nullable
              @SideOnly(Side.CLIENT)
@@ -61,7 +86,7 @@
              public String func_178171_c()
              {
                  return "minecraft:items/empty_armor_slot_shield";
-@@ -95,13 +83,11 @@
+@@ -95,13 +94,11 @@
          });
      }
  
@@ -75,7 +100,7 @@
      public void func_75134_a(EntityPlayer p_75134_1_)
      {
          super.func_75134_a(p_75134_1_);
-@@ -113,13 +99,11 @@
+@@ -113,13 +110,11 @@
          }
      }
  
@@ -89,7 +114,7 @@
      public ItemStack func_82846_b(EntityPlayer p_82846_1_, int p_82846_2_)
      {
          ItemStack itemstack = ItemStack.field_190927_a;
-@@ -154,8 +138,7 @@
+@@ -154,8 +149,7 @@
                      return ItemStack.field_190927_a;
                  }
              }
@@ -99,7 +124,7 @@
              {
                  int i = 8 - entityequipmentslot.func_188454_b();
  
-@@ -164,7 +147,7 @@
+@@ -164,7 +158,7 @@
                      return ItemStack.field_190927_a;
                  }
              }
@@ -108,7 +133,7 @@
              {
                  if (!this.func_75135_a(itemstack1, 45, 46, false))
                  {
-@@ -215,7 +198,6 @@
+@@ -215,9 +209,19 @@
          return itemstack;
      }
  
@@ -116,3 +141,16 @@
      public boolean func_94530_a(ItemStack p_94530_1_, Slot p_94530_2_)
      {
          return p_94530_2_.field_75224_c != this.field_75179_f && super.func_94530_a(p_94530_1_, p_94530_2_);
++    }
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryCrafting inventory = new CraftInventoryCrafting(this.field_75181_e, this.field_75179_f);
++        bukkitEntity = new CraftInventoryView(this.playerInventory.field_70458_d.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
+     }
+ }

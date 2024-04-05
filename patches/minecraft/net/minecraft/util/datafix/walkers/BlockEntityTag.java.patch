@@ -22,12 +22,13 @@
      public NBTTagCompound func_188266_a(IDataFixer p_188266_1_, NBTTagCompound p_188266_2_, int p_188266_3_)
      {
          if (!p_188266_2_.func_150297_b("tag", 10))
-@@ -45,7 +42,7 @@
+@@ -45,7 +42,8 @@
  
                  if (s1 == null)
                  {
 -                    field_188268_a.warn("Unable to resolve BlockEntity for ItemInstance: {}", s);
-+                    field_188268_a.warn("Unable to resolve BlockEntity for ItemInstance: {}", (Object)s);
++                    // CraftBukkit - Remove unnecessary warning (occurs when deserializing a Shulker Box item)
++                    // LOGGER.warn("Unable to resolve BlockEntity for ItemInstance: {}", (Object)s);
                      flag = false;
                  }
                  else

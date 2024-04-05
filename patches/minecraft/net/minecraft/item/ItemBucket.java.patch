@@ -1,6 +1,17 @@
 --- before/net/minecraft/item/ItemBucket.java
 +++ after/net/minecraft/item/ItemBucket.java
-@@ -35,20 +35,21 @@
+@@ -23,6 +23,10 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.RayTraceResult;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
++import org.bukkit.event.player.PlayerBucketEmptyEvent;
++import org.bukkit.event.player.PlayerBucketFillEvent;
+ 
+ public class ItemBucket extends Item
+ {
+@@ -35,20 +39,21 @@
          this.func_77637_a(CreativeTabs.field_78026_f);
      }
  
@@ -25,7 +36,7 @@
          }
          else
          {
-@@ -56,36 +57,36 @@
+@@ -56,36 +61,46 @@
  
              if (!p_77659_1_.func_175660_a(p_77659_2_, blockpos))
              {
@@ -47,20 +58,30 @@
 -                    if (material == Material.field_151586_h && iblockstate.func_177229_b(BlockLiquid.field_176367_b) == 0)
 +                    if (material == Material.field_151586_h && ((Integer)iblockstate.func_177229_b(BlockLiquid.field_176367_b)).intValue() == 0)
                      {
++                        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(p_77659_2_, blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), null, itemstack, Items.field_151131_as);
++
++                        if (event.isCancelled()) {
++                            return new ActionResult<>(EnumActionResult.FAIL, itemstack);
++                        }
                          p_77659_1_.func_180501_a(blockpos, Blocks.field_150350_a.func_176223_P(), 11);
                          p_77659_2_.func_71029_a(StatList.func_188057_b(this));
                          p_77659_2_.func_184185_a(SoundEvents.field_187630_M, 1.0F, 1.0F);
 -                        return new ActionResult<>(EnumActionResult.SUCCESS, this.func_150910_a(itemstack, p_77659_2_, Items.field_151131_as));
-+                        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, this.func_150910_a(itemstack, p_77659_2_, Items.field_151131_as));
++                        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, this.fillBucket(itemstack, p_77659_2_, Items.field_151131_as, event.getItemStack()));
                      }
 -                    else if (material == Material.field_151587_i && iblockstate.func_177229_b(BlockLiquid.field_176367_b) == 0)
 +                    else if (material == Material.field_151587_i && ((Integer)iblockstate.func_177229_b(BlockLiquid.field_176367_b)).intValue() == 0)
                      {
++                        PlayerBucketFillEvent event = CraftEventFactory.callPlayerBucketFillEvent(p_77659_2_, blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), null, itemstack, Items.field_151129_at);
++
++                        if (event.isCancelled()) {
++                            return new ActionResult<>(EnumActionResult.FAIL, itemstack);
++                        }
                          p_77659_2_.func_184185_a(SoundEvents.field_187633_N, 1.0F, 1.0F);
                          p_77659_1_.func_180501_a(blockpos, Blocks.field_150350_a.func_176223_P(), 11);
                          p_77659_2_.func_71029_a(StatList.func_188057_b(this));
 -                        return new ActionResult<>(EnumActionResult.SUCCESS, this.func_150910_a(itemstack, p_77659_2_, Items.field_151129_at));
-+                        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, this.func_150910_a(itemstack, p_77659_2_, Items.field_151129_at));
++                        return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, this.fillBucket(itemstack, p_77659_2_, Items.field_151129_at, event.getItemStack()));
                      }
                      else
                      {
@@ -69,16 +90,19 @@
                      }
                  }
              }
-@@ -96,7 +97,7 @@
+@@ -96,9 +111,9 @@
  
                  if (!p_77659_2_.func_175151_a(blockpos1, raytraceresult.field_178784_b, itemstack))
                  {
 -                    return new ActionResult<>(EnumActionResult.FAIL, itemstack);
 +                    return new ActionResult<ItemStack>(EnumActionResult.FAIL, itemstack);
                  }
-                 else if (this.func_180616_a(p_77659_2_, p_77659_1_, blockpos1))
+-                else if (this.func_180616_a(p_77659_2_, p_77659_1_, blockpos1))
++                else if (this.tryPlaceContainedLiquid(p_77659_2_, p_77659_1_, blockpos1, raytraceresult.field_178784_b, blockpos, itemstack))
                  {
-@@ -106,13 +107,11 @@
+                     if (p_77659_2_ instanceof EntityPlayerMP)
+                     {
+@@ -106,13 +121,11 @@
                      }
  
                      p_77659_2_.func_71029_a(StatList.func_188057_b(this));
@@ -94,10 +118,78 @@
                  }
              }
          }
-@@ -168,20 +167,11 @@
-                     int l = p_180616_3_.func_177958_n();
-                     int i = p_180616_3_.func_177956_o();
-                     int j = p_180616_3_.func_177952_p();
+@@ -144,60 +157,103 @@
+         }
+     }
+ 
++    // CraftBukkit - added ob.ItemStack result - TODO: Is this... the right way to handle this?
++    private ItemStack fillBucket(ItemStack emptyBuckets, EntityPlayer player, Item fullBucket, org.bukkit.inventory.ItemStack result)
++    {
++        if (player.field_71075_bZ.field_75098_d)
++        {
++            return emptyBuckets;
++        }
++        else
++        {
++            emptyBuckets.func_190918_g(1);
++
++            if (emptyBuckets.func_190926_b())
++            {
++                // return new ItemStack(fullBucket);
++                return CraftItemStack.asNMSCopy(result);
++            }
++            else
++            {
++                if (!player.field_71071_by.func_70441_a(CraftItemStack.asNMSCopy(result)))
++                {
++                    player.func_71019_a(CraftItemStack.asNMSCopy(result), false);
++                }
++
++                return emptyBuckets;
++            }
++        }
++    }
++
+     public boolean func_180616_a(@Nullable EntityPlayer p_180616_1_, World p_180616_2_, BlockPos p_180616_3_)
+     {
++        return tryPlaceContainedLiquid(p_180616_1_, p_180616_2_, p_180616_3_, EnumFacing.UP, p_180616_3_.func_177977_b(), ItemStack.field_190927_a); // CatServer - fake clicked position to call event
++    }
++
++    public boolean tryPlaceContainedLiquid(@Nullable EntityPlayer player, World worldIn, BlockPos posIn, EnumFacing enumdirection, BlockPos clicked, ItemStack itemstack) {
+         if (this.field_77876_a == Blocks.field_150350_a)
+         {
+             return false;
+         }
+         else
+         {
+-            IBlockState iblockstate = p_180616_2_.func_180495_p(p_180616_3_);
++            IBlockState iblockstate = worldIn.func_180495_p(posIn);
+             Material material = iblockstate.func_185904_a();
+             boolean flag = !material.func_76220_a();
+-            boolean flag1 = iblockstate.func_177230_c().func_176200_f(p_180616_2_, p_180616_3_);
++            boolean flag1 = iblockstate.func_177230_c().func_176200_f(worldIn, posIn);
+ 
+-            if (!p_180616_2_.func_175623_d(p_180616_3_) && !flag && !flag1)
++            if (!worldIn.func_175623_d(posIn) && !flag && !flag1)
+             {
+                 return false;
+             }
+             else
+             {
+-                if (p_180616_2_.field_73011_w.func_177500_n() && this.field_77876_a == Blocks.field_150358_i)
++                if (player != null) {
++                    PlayerBucketEmptyEvent event = CraftEventFactory.callPlayerBucketEmptyEvent(player, clicked.func_177958_n(), clicked.func_177956_o(), clicked.func_177952_p(), enumdirection, itemstack);
++                    if (event.isCancelled()) {
++                        // TODO: inventory not updated
++                        return false;
++                    }
++                }
++
++                if (worldIn.field_73011_w.func_177500_n() && this.field_77876_a == Blocks.field_150358_i)
+                 {
+-                    int l = p_180616_3_.func_177958_n();
+-                    int i = p_180616_3_.func_177956_o();
+-                    int j = p_180616_3_.func_177952_p();
 -                    p_180616_2_.func_184133_a(
 -                        p_180616_1_,
 -                        p_180616_3_,
@@ -106,18 +198,34 @@
 -                        0.5F,
 -                        2.6F + (p_180616_2_.field_73012_v.nextFloat() - p_180616_2_.field_73012_v.nextFloat()) * 0.8F
 -                    );
-+                    p_180616_2_.func_184133_a(p_180616_1_, p_180616_3_, SoundEvents.field_187646_bt, SoundCategory.BLOCKS, 0.5F, 2.6F + (p_180616_2_.field_73012_v.nextFloat() - p_180616_2_.field_73012_v.nextFloat()) * 0.8F);
++                    int l = posIn.func_177958_n();
++                    int i = posIn.func_177956_o();
++                    int j = posIn.func_177952_p();
++                    worldIn.func_184133_a(player, posIn, SoundEvents.field_187646_bt, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.field_73012_v.nextFloat() - worldIn.field_73012_v.nextFloat()) * 0.8F);
  
                      for (int k = 0; k < 8; ++k)
                      {
 -                        p_180616_2_.func_175688_a(
 -                            EnumParticleTypes.SMOKE_LARGE, (double)l + Math.random(), (double)i + Math.random(), (double)j + Math.random(), 0.0, 0.0, 0.0
 -                        );
-+                        p_180616_2_.func_175688_a(EnumParticleTypes.SMOKE_LARGE, (double)l + Math.random(), (double)i + Math.random(), (double)j + Math.random(), 0.0D, 0.0D, 0.0D);
++                        worldIn.func_175688_a(EnumParticleTypes.SMOKE_LARGE, (double)l + Math.random(), (double)i + Math.random(), (double)j + Math.random(), 0.0D, 0.0D, 0.0D);
                      }
                  }
                  else
-@@ -198,6 +188,18 @@
+                 {
+-                    if (!p_180616_2_.field_72995_K && (flag || flag1) && !material.func_76224_d())
++                    if (!worldIn.field_72995_K && (flag || flag1) && !material.func_76224_d())
+                     {
+-                        p_180616_2_.func_175655_b(p_180616_3_, true);
++                        worldIn.func_175655_b(posIn, true);
+                     }
+ 
+                     SoundEvent soundevent = this.field_77876_a == Blocks.field_150356_k ? SoundEvents.field_187627_L : SoundEvents.field_187624_K;
+-                    p_180616_2_.func_184133_a(p_180616_1_, p_180616_3_, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
+-                    p_180616_2_.func_180501_a(p_180616_3_, this.field_77876_a.func_176223_P(), 11);
++                    worldIn.func_184133_a(player, posIn, soundevent, SoundCategory.BLOCKS, 1.0F, 1.0F);
++                    worldIn.func_180501_a(posIn, this.field_77876_a.func_176223_P(), 11);
+                 }
  
                  return true;
              }

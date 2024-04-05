@@ -55,7 +55,7 @@
      public void func_72709_b(Entity p_72709_1_)
      {
          this.field_72782_b.func_73039_n().func_72790_b(p_72709_1_);
-@@ -78,75 +53,38 @@
+@@ -78,77 +53,43 @@
          }
      }
  
@@ -133,12 +133,21 @@
 -    @Override
      public void func_180441_b(int p_180441_1_, BlockPos p_180441_2_, int p_180441_3_)
      {
++        EntityPlayer entityhuman = null;
++        Entity entity = field_72782_b.func_73045_a(p_180441_1_);
++        if (entity instanceof EntityPlayer) entityhuman = (EntityPlayer) entity;
          for (EntityPlayerMP entityplayermp : this.field_72783_a.func_184103_al().func_181057_v())
-@@ -157,7 +95,7 @@
+         {
+             if (entityplayermp != null && entityplayermp.field_70170_p == this.field_72782_b && entityplayermp.func_145782_y() != p_180441_1_)
+@@ -157,7 +98,11 @@
                  double d1 = (double)p_180441_2_.func_177956_o() - entityplayermp.field_70163_u;
                  double d2 = (double)p_180441_2_.func_177952_p() - entityplayermp.field_70161_v;
  
 -                if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0)
++                if (entityhuman != null && entityhuman instanceof EntityPlayerMP && !entityplayermp.getBukkitEntity().canSee(((EntityPlayerMP) entityhuman).getBukkitEntity())) {
++                    continue;
++                }
++
 +                if (d0 * d0 + d1 * d1 + d2 * d2 < 1024.0D)
                  {
                      entityplayermp.field_71135_a.func_147359_a(new SPacketBlockBreakAnim(p_180441_1_, p_180441_2_, p_180441_3_));

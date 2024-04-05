@@ -13,7 +13,14 @@
  import net.minecraft.init.Blocks;
  import net.minecraft.init.Items;
  import net.minecraft.item.Item;
-@@ -23,36 +25,24 @@
+@@ -17,42 +19,31 @@
+ import net.minecraft.util.math.MathHelper;
+ import net.minecraft.world.IBlockAccess;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
+ 
+ public class BlockStem extends BlockBush implements IGrowable
+ {
      public static final PropertyInteger field_176484_a = PropertyInteger.func_177719_a("age", 0, 7);
      public static final PropertyDirection field_176483_b = BlockTorch.field_176596_a;
      private final Block field_149877_a;
@@ -55,7 +62,7 @@
          p_176221_1_ = p_176221_1_.func_177226_a(field_176483_b, EnumFacing.UP);
  
          for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
-@@ -67,29 +57,28 @@
+@@ -67,29 +58,29 @@
          return p_176221_1_;
      }
  
@@ -76,7 +83,7 @@
              float f = BlockCrops.func_180672_a(this, p_180650_1_, p_180650_2_);
  
 -            if (p_180650_4_.nextInt((int)(25.0F / f) + 1) == 0)
-+            if(net.minecraftforge.common.ForgeHooks.onCropsGrowPre(p_180650_1_, p_180650_2_, p_180650_3_, p_180650_4_.nextInt((int)(25.0F / f) + 1) == 0))
++            if(net.minecraftforge.common.ForgeHooks.onCropsGrowPre(p_180650_1_, p_180650_2_, p_180650_3_, p_180650_4_.nextInt((int) ((100.0F / (this == Blocks.field_150393_bb ? p_180650_1_.spigotConfig.pumpkinModifier : p_180650_1_.spigotConfig.melonModifier)) * (25.0F / f)) + 1) == 0)) // Spigot
              {
 -                int i = p_180650_3_.func_177229_b(field_176484_a);
 +                int i = ((Integer)p_180650_3_.func_177229_b(field_176484_a)).intValue();
@@ -86,11 +93,12 @@
 -                    p_180650_3_ = p_180650_3_.func_177226_a(field_176484_a, i + 1);
 -                    p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_, 2);
 +                    IBlockState newState = p_180650_3_.func_177226_a(field_176484_a, Integer.valueOf(i + 1));
-+                    p_180650_1_.func_180501_a(p_180650_2_, newState, 2);
++                    CraftEventFactory.handleBlockGrowEvent(p_180650_1_, p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p(), this, func_176201_c(newState));
++//                    worldIn.setBlockState(pos, newState, 2);
                  }
                  else
                  {
-@@ -102,42 +91,45 @@
+@@ -102,42 +93,47 @@
                      }
  
                      p_180650_2_ = p_180650_2_.func_177972_a(EnumFacing.Plane.HORIZONTAL.func_179518_a(p_180650_4_));
@@ -102,7 +110,9 @@
 -                            && (block == Blocks.field_150458_ak || block == Blocks.field_150346_d || block == Blocks.field_150349_c))
 +                    if (p_180650_1_.func_175623_d(p_180650_2_) && (block.canSustainPlant(soil, p_180650_1_, p_180650_2_.func_177977_b(), EnumFacing.UP, this) || block == Blocks.field_150346_d || block == Blocks.field_150349_c))
                      {
-                         p_180650_1_.func_175656_a(p_180650_2_, this.field_149877_a.func_176223_P());
+-                        p_180650_1_.func_175656_a(p_180650_2_, this.field_149877_a.func_176223_P());
++                        CraftEventFactory.handleBlockGrowEvent(p_180650_1_, p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p(), this.field_149877_a, 0);
++//                        worldIn.setBlockState(pos, this.crop.getDefaultState());
                      }
                  }
 +                net.minecraftforge.common.ForgeHooks.onCropsGrowPost(p_180650_1_, p_180650_2_, p_180650_3_, p_180650_1_.func_180495_p(p_180650_2_));
@@ -115,7 +125,8 @@
 -        int i = p_176482_3_.func_177229_b(field_176484_a) + MathHelper.func_76136_a(p_176482_1_.field_73012_v, 2, 5);
 -        p_176482_1_.func_180501_a(p_176482_2_, p_176482_3_.func_177226_a(field_176484_a, Math.min(7, i)), 2);
 +        int i = ((Integer)p_176482_3_.func_177229_b(field_176484_a)).intValue() + MathHelper.func_76136_a(p_176482_1_.field_73012_v, 2, 5);
-+        p_176482_1_.func_180501_a(p_176482_2_, p_176482_3_.func_177226_a(field_176484_a, Integer.valueOf(Math.min(7, i))), 2);
++        CraftEventFactory.handleBlockGrowEvent(p_176482_1_, p_176482_2_.func_177958_n(), p_176482_2_.func_177956_o(), p_176482_2_.func_177952_p(), this, Math.min(7, i));
++//        worldIn.setBlockState(pos, state.withProperty(AGE, Integer.valueOf(Math.min(7, i))), 2);
      }
  
 -    @Override
@@ -146,7 +157,7 @@
                      }
                  }
              }
-@@ -157,52 +149,44 @@
+@@ -157,52 +153,44 @@
          }
      }
  

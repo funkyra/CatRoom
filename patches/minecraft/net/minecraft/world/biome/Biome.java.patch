@@ -1,15 +1,17 @@
 --- before/net/minecraft/world/biome/Biome.java
 +++ after/net/minecraft/world/biome/Biome.java
-@@ -50,7 +50,7 @@
+@@ -49,8 +49,9 @@
+ import net.minecraftforge.fml.relauncher.SideOnly;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
  
 -public abstract class Biome
 +public abstract class Biome extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<Biome>
  {
      private static final Logger field_150586_aC = LogManager.getLogger();
      protected static final IBlockState field_185365_a = Blocks.field_150348_b.func_176223_P();
-@@ -61,14 +61,14 @@
+@@ -61,14 +62,14 @@
      protected static final IBlockState field_185370_f = Blocks.field_150322_A.func_176223_P();
      protected static final IBlockState field_185371_g = Blocks.field_150432_aD.func_176223_P();
      protected static final IBlockState field_185372_h = Blocks.field_150355_j.func_176223_P();
@@ -26,7 +28,7 @@
      private final String field_76791_y;
      private final float field_76748_D;
      private final float field_76749_E;
-@@ -82,10 +82,12 @@
+@@ -82,10 +83,12 @@
      public IBlockState field_76752_A = Blocks.field_150349_c.func_176223_P();
      public IBlockState field_76753_B = Blocks.field_150346_d.func_176223_P();
      public BiomeDecorator field_76760_I;
@@ -43,7 +45,7 @@
  
      public static int func_185362_a(Biome p_185362_0_)
      {
-@@ -130,11 +132,12 @@
+@@ -130,11 +133,12 @@
          this.field_76761_J.add(new Biome.SpawnListEntry(EntityWitch.class, 5, 1, 1));
          this.field_76755_L.add(new Biome.SpawnListEntry(EntitySquid.class, 10, 4, 4));
          this.field_82914_M.add(new Biome.SpawnListEntry(EntityBat.class, 10, 8, 8));
@@ -57,7 +59,7 @@
      }
  
      public boolean func_185363_b()
-@@ -160,7 +163,7 @@
+@@ -160,7 +164,7 @@
      @SideOnly(Side.CLIENT)
      public int func_76731_a(float p_76731_1_)
      {
@@ -66,7 +68,7 @@
          p_76731_1_ = MathHelper.func_76131_a(p_76731_1_, -1.0F, 1.0F);
          return MathHelper.func_181758_c(0.62222224F - p_76731_1_ * 0.05F, 0.5F + p_76731_1_ * 0.1F, 1.0F);
      }
-@@ -178,7 +181,9 @@
+@@ -178,7 +182,9 @@
              case AMBIENT:
                  return this.field_82914_M;
              default:
@@ -77,7 +79,7 @@
          }
      }
  
-@@ -206,9 +211,7 @@
+@@ -206,9 +212,7 @@
      {
          if (p_180626_1_.func_177956_o() > 64)
          {
@@ -88,7 +90,7 @@
              return this.func_185353_n() - (f + (float)p_180626_1_.func_177956_o() - 64.0F) * 0.05F / 30.0F;
          }
          else
-@@ -222,34 +225,26 @@
+@@ -222,34 +226,26 @@
          this.field_76760_I.func_180292_a(p_180624_1_, p_180624_2_, this, p_180624_3_);
      }
  
@@ -132,7 +134,7 @@
          int l = p_180628_4_ & 15;
          int i1 = p_180628_5_ & 15;
          BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-@@ -328,6 +323,14 @@
+@@ -328,6 +324,14 @@
          }
      }
  
@@ -147,7 +149,7 @@
      public Class <? extends Biome > func_150562_l()
      {
          return this.getClass();
-@@ -335,20 +338,20 @@
+@@ -335,20 +339,20 @@
  
      public Biome.TempCategory func_150561_m()
      {
@@ -171,7 +173,7 @@
      }
  
      public static Biome func_180276_a(int p_180276_0_, Biome p_180276_1_)
-@@ -391,7 +394,7 @@
+@@ -391,7 +395,7 @@
      @SideOnly(Side.CLIENT)
      public final int func_185361_o()
      {
@@ -180,7 +182,7 @@
      }
  
      public final boolean func_150559_j()
-@@ -399,477 +402,148 @@
+@@ -399,477 +403,149 @@
          return this.field_76766_R;
      }
  
@@ -257,7 +259,8 @@
 +            return;
 +        }
 +
-+        world.func_180501_a(pos, flower.state, 3);
++//        world.setBlockState(pos, flower.state, 3);
++        CraftEventFactory.handleBlockGrowEvent(world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), flower.state.func_177230_c(), flower.state.func_177230_c().func_176201_c(flower.state));
 +    }
 +
 +    /* ========================================= FORGE END ======================================*/
@@ -798,7 +801,7 @@
      }
  
      public static void func_185354_a(int p_185354_0_, String p_185354_1_, Biome p_185354_2_)
-@@ -970,10 +644,16 @@
+@@ -970,10 +646,16 @@
                  this.field_76299_d = p_i1970_4_;
              }
  

@@ -1,6 +1,28 @@
 --- before/net/minecraft/inventory/ContainerBrewingStand.java
 +++ after/net/minecraft/inventory/ContainerBrewingStand.java
-@@ -43,14 +43,12 @@
+@@ -12,6 +12,8 @@
+ import net.minecraft.potion.PotionUtils;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryBrewer;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
+ 
+ public class ContainerBrewingStand extends Container
+ {
+@@ -20,8 +22,12 @@
+     private int field_184998_g;
+     private int field_184999_h;
+ 
++    private CraftInventoryView bukkitEntity = null;
++    private InventoryPlayer player;
++
+     public ContainerBrewingStand(InventoryPlayer p_i45802_1_, IInventory p_i45802_2_)
+     {
++        this.player = p_i45802_1_;
+         this.field_75188_e = p_i45802_2_;
+         this.func_75146_a(new ContainerBrewingStand.Potion(p_i45802_2_, 0, 56, 51));
+         this.func_75146_a(new ContainerBrewingStand.Potion(p_i45802_2_, 1, 79, 58));
+@@ -43,14 +49,12 @@
          }
      }
  
@@ -15,7 +37,7 @@
      public void func_75142_b()
      {
          super.func_75142_b();
-@@ -75,19 +73,16 @@
+@@ -75,19 +79,17 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -28,6 +50,7 @@
 -    @Override
      public boolean func_75145_c(EntityPlayer p_75145_1_)
      {
++        if (!this.checkReachable) return true;
          return this.field_75188_e.func_70300_a(p_75145_1_);
      }
  
@@ -35,7 +58,7 @@
      public ItemStack func_82846_b(EntityPlayer p_82846_1_, int p_82846_2_)
      {
          ItemStack itemstack = ItemStack.field_190927_a;
-@@ -177,7 +172,6 @@
+@@ -177,7 +179,6 @@
                  super(p_i47070_1_, p_i47070_2_, p_i47070_3_, p_i47070_4_);
              }
  
@@ -43,7 +66,7 @@
              public boolean func_75214_a(ItemStack p_75214_1_)
              {
                  return func_185004_b_(p_75214_1_);
-@@ -188,7 +182,6 @@
+@@ -188,7 +189,6 @@
                  return p_185004_0_.func_77973_b() == Items.field_151065_br;
              }
  
@@ -51,7 +74,7 @@
              public int func_75219_a()
              {
                  return 64;
-@@ -202,13 +195,11 @@
+@@ -202,13 +202,11 @@
                  super(p_i47069_1_, p_i47069_2_, p_i47069_3_, p_i47069_4_);
              }
  
@@ -66,7 +89,7 @@
              public int func_75219_a()
              {
                  return 64;
-@@ -222,25 +213,23 @@
+@@ -222,25 +220,23 @@
                  super(p_i47598_1_, p_i47598_2_, p_i47598_3_, p_i47598_4_);
              }
  
@@ -93,7 +116,7 @@
                      CriteriaTriggers.field_192130_j.func_192173_a((EntityPlayerMP)p_190901_1_, potiontype);
                  }
  
-@@ -250,8 +239,7 @@
+@@ -250,8 +246,18 @@
  
              public static boolean func_75243_a_(ItemStack p_75243_0_)
              {
@@ -102,4 +125,15 @@
 +                return net.minecraftforge.common.brewing.BrewingRecipeRegistry.isValidInput(p_75243_0_);
              }
          }
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        CraftInventoryBrewer inventory = new CraftInventoryBrewer(this.field_75188_e);
++        bukkitEntity = new CraftInventoryView(this.player.field_70458_d.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
++    }
  }

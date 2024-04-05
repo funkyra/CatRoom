@@ -81,11 +81,13 @@
                  return serverstatusresponse;
              }
  
-@@ -205,10 +208,50 @@
+@@ -205,10 +208,52 @@
                      jsonobject.addProperty("favicon", p_serialize_1_.func_151316_d());
                  }
  
-+                net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.enhanceStatusQuery(jsonobject);
++                if (!catserver.server.CatServer.getConfig().disableFMLStatusModInfo) {
++                    net.minecraftforge.fml.common.network.internal.FMLNetworkHandler.enhanceStatusQuery(jsonobject);
++                }
                  return jsonobject;
              }
          }
@@ -132,7 +134,7 @@
      public static class Version
          {
              private final String field_151306_a;
-@@ -242,7 +285,7 @@
+@@ -242,7 +287,7 @@
                      {
                          JsonObject jsonobject = new JsonObject();
                          jsonobject.addProperty("name", p_serialize_1_.func_151303_a());

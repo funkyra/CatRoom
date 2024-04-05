@@ -91,7 +91,7 @@
              if (c0 == 167 && i + 1 < p_78255_1_.length())
              {
 -                int i1 = "0123456789abcdefklmnor".indexOf(String.valueOf(p_78255_1_.charAt(i + 1)).toLowerCase(Locale.ROOT).charAt(0));
-+                int i1 = "0123456789abcdefklmnor§".indexOf(String.valueOf(p_78255_1_.charAt(i + 1)).toLowerCase(Locale.ROOT).charAt(0));
++                int i1 = "0123456789abcdefklmnor搂".indexOf(String.valueOf(p_78255_1_.charAt(i + 1)).toLowerCase(Locale.ROOT).charAt(0));
  
 -                if (i1 < 16)
 +                if (i1 < 0)
@@ -237,7 +237,7 @@
 +                    lineWidth = 0;
 +                    map.put(i, Pair.of(lineWidth, format.toString()));
 +                    continue;
-+                case '§':
++                case '搂':
 +                    if (i + 1 < chars.length) { // Prevent out of bound
 +                        f = chars[i + 1];
 +                        if (f != 'l' && f != 'L') { // Check start of bold style
@@ -246,24 +246,24 @@
 +                                if (f == 'r' || f == 'R') {
 +                                    format.delete(0, format.length()); // Clear the format
 +                                } else {
-+                                    format.append('§').append(f); // Add to current format code
++                                    format.append('搂').append(f); // Add to current format code
 +                                }
-+                                line.append('§').append(f);
++                                line.append('搂').append(f);
 +                                map.put(i, Pair.of(lineWidth, format.toString()));
 +                                map.put(++i, Pair.of(lineWidth, format.toString()));
 +                                continue;
 +                            }
 +                            if (f >= 'k' && f <= 'o' || f >= 'K' && f <= 'O') {
-+                                format.append('§').append(f); // Add to current format code
-+                                line.append('§').append(f);
++                                format.append('搂').append(f); // Add to current format code
++                                line.append('搂').append(f);
 +                                map.put(i, Pair.of(lineWidth, format.toString()));
 +                                map.put(++i, Pair.of(lineWidth, format.toString()));
 +                                continue;
 +                            }
 +                        } else {
 +                            bold = true;
-+                            format.append('§').append(f); // Add to current format code
-+                            line.append('§').append(f);
++                            format.append('搂').append(f); // Add to current format code
++                            line.append('搂').append(f);
 +                            map.put(i, Pair.of(lineWidth, format.toString()));
 +                            map.put(++i, Pair.of(lineWidth, format.toString()));
 +                            continue;

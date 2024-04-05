@@ -9,18 +9,27 @@
  
          if (enumconnectionstate == null)
          {
-@@ -34,9 +34,7 @@
+@@ -34,10 +34,15 @@
  
              if (field_150798_a.isDebugEnabled())
              {
 -                field_150798_a.debug(
 -                    field_150797_b, "OUT: [{}:{}] {}", p_encode_1_.channel().attr(NetworkManager.field_150739_c).get(), integer, p_encode_2_.getClass().getName()
 -                );
+-            }
 +                field_150798_a.debug(field_150797_b, "OUT: [{}:{}] {}", p_encode_1_.channel().attr(NetworkManager.field_150739_c).get(), integer, p_encode_2_.getClass().getName());
-             }
++            }
++
++            // CatServer start - Forge set the state is PLAY, but the LOGIN packet hasn't encoded.
++            if (integer == null && (integer = EnumConnectionState.LOGIN.func_179246_a(this.field_152500_c, p_encode_2_)) != null)
++            {
++                field_150798_a.debug("Current state is {}, but send packet {}", enumconnectionstate, p_encode_2_.getClass().getSimpleName());
++            }
++            // CatServer end
  
              if (integer == null)
-@@ -46,7 +44,7 @@
+             {
+@@ -46,7 +51,7 @@
              else
              {
                  PacketBuffer packetbuffer = new PacketBuffer(p_encode_3_);
@@ -29,7 +38,7 @@
  
                  try
                  {
-@@ -54,7 +52,7 @@
+@@ -54,7 +59,7 @@
                  }
                  catch (Throwable throwable)
                  {

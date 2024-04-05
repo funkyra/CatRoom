@@ -1,6 +1,6 @@
 --- before/net/minecraft/item/crafting/RecipeFireworks.java
 +++ after/net/minecraft/item/crafting/RecipeFireworks.java
-@@ -10,14 +10,11 @@
+@@ -10,14 +10,17 @@
  import net.minecraft.nbt.NBTTagList;
  import net.minecraft.util.NonNullList;
  import net.minecraft.world.World;
@@ -8,15 +8,21 @@
 -import net.minecraftforge.fml.relauncher.SideOnly;
  
 -public class RecipeFireworks implements IRecipe
-+public class RecipeFireworks extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
++public class RecipeFireworks extends ShapelessRecipes implements IRecipe
  {
      private ItemStack field_92102_a = ItemStack.field_190927_a;
  
 -    @Override
++    // CraftBukkit start - Delegate to new parent class with bogus info
++    public RecipeFireworks() {
++        super("", new ItemStack(Items.field_151152_bP, 0, 0), NonNullList.func_193580_a(Ingredient.field_193370_a, Ingredient.func_193367_a(Items.field_151016_H)));
++    }
++    // CraftBukkit end
++
      public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
      {
          this.field_92102_a = ItemStack.field_190927_a;
-@@ -42,7 +39,7 @@
+@@ -42,7 +45,7 @@
                  {
                      ++l;
                  }
@@ -25,7 +31,7 @@
                  {
                      ++k;
                  }
-@@ -82,140 +79,143 @@
+@@ -82,140 +85,143 @@
              }
          }
  
@@ -300,7 +306,7 @@
              }
              else
              {
-@@ -228,44 +228,35 @@
+@@ -228,44 +234,35 @@
          }
      }
  

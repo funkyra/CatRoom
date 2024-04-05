@@ -8,7 +8,15 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.init.Blocks;
-@@ -24,22 +25,12 @@
+@@ -17,29 +18,19 @@
+ 
+ public class ItemBlockSpecial extends Item
+ {
+-    private final Block field_150935_a;
++    public final Block field_150935_a;
+ 
+     public ItemBlockSpecial(Block p_i45329_1_)
+     {
          this.field_150935_a = p_i45329_1_;
      }
  

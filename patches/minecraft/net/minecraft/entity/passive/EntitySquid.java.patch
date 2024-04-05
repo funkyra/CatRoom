@@ -1,0 +1,11 @@
+--- before/net/minecraft/entity/passive/EntitySquid.java
++++ after/net/minecraft/entity/passive/EntitySquid.java
+@@ -204,7 +204,7 @@
+     @Override
+     public boolean func_70601_bi()
+     {
+-        return this.field_70163_u > 45.0 && this.field_70163_u < (double)this.field_70170_p.func_181545_F() && super.func_70601_bi();
++        return this.field_70163_u > this.field_70170_p.spigotConfig.squidSpawnRangeMin && this.field_70163_u < (double)this.field_70170_p.func_181545_F() && super.func_70601_bi();
+     }
+ 
+     @SideOnly(Side.CLIENT)

@@ -1,6 +1,14 @@
 --- before/net/minecraft/item/ItemMinecart.java
 +++ after/net/minecraft/item/ItemMinecart.java
-@@ -21,30 +21,27 @@
+@@ -15,36 +15,35 @@
+ import net.minecraft.util.EnumHand;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
++import org.bukkit.event.block.BlockDispenseEvent;
+ 
+ public class ItemMinecart extends Item
+ {
      private static final IBehaviorDispenseItem field_96602_b = new BehaviorDefaultDispenseItem()
      {
          private final BehaviorDefaultDispenseItem field_96465_b = new BehaviorDefaultDispenseItem();
@@ -37,7 +45,7 @@
                  }
              }
              else
-@@ -55,17 +52,15 @@
+@@ -55,32 +54,55 @@
                  }
  
                  IBlockState iblockstate1 = world.func_180495_p(blockpos.func_177977_b());
@@ -54,19 +62,58 @@
                  else
                  {
 -                    d3 = -0.9;
+-                }
+-            }
+-
+-            EntityMinecart entityminecart = EntityMinecart.func_184263_a(world, d0, d1 + d3, d2, ((ItemMinecart)p_82487_2_.func_77973_b()).field_77841_a);
 +                    d3 = -0.9D;
-                 }
++                }
++            }
++
++            // EntityMinecart entityminecart = EntityMinecart.create(world, d0, d1 + d3, d2, ((ItemMinecart)stack.getItem()).minecartType);
++            ItemStack itemstack1 = p_82487_2_.func_77979_a(1);
++            org.bukkit.block.Block block2 = world.getWorld().getBlockAt(p_82487_1_.func_180699_d().func_177958_n(), p_82487_1_.func_180699_d().func_177956_o(), p_82487_1_.func_180699_d().func_177952_p());
++            CraftItemStack craftItem = CraftItemStack.asCraftMirror(itemstack1);
++
++            BlockDispenseEvent event = new BlockDispenseEvent(block2, craftItem.clone(), new org.bukkit.util.Vector(d0, d1 + d3, d2));
++            world.getServer().getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                p_82487_2_.func_190917_f(1);
++                return p_82487_2_;
++            }
++
++            if (!event.getItem().equals(craftItem)) {
++                p_82487_2_.func_190917_f(1);
++                // Chain to handler for new item
++                ItemStack eventStack = CraftItemStack.asNMSCopy(event.getItem());
++                IBehaviorDispenseItem idispensebehavior = BlockDispenser.field_149943_a.func_82594_a(eventStack.func_77973_b());
++                if (idispensebehavior != IBehaviorDispenseItem.field_82483_a && idispensebehavior != this) {
++                    idispensebehavior.func_82482_a(p_82487_1_, eventStack);
++                    return p_82487_2_;
++                }
++            }
++
++            itemstack1 = CraftItemStack.asNMSCopy(event.getItem());
++            EntityMinecart entityminecart = EntityMinecart.func_184263_a(world, event.getVelocity().getX(), event.getVelocity().getY(), event.getVelocity().getZ(), ((ItemMinecart) itemstack1.func_77973_b()).field_77841_a);
+ 
+             if (p_82487_2_.func_82837_s())
+             {
+                 entityminecart.func_96094_a(p_82487_2_.func_82833_r());
              }
  
-@@ -80,7 +75,6 @@
-             p_82487_2_.func_190918_g(1);
+-            world.func_72838_d(entityminecart);
+-            p_82487_2_.func_190918_g(1);
++            // world.spawnEntity(entityminecart);
++            if (!world.func_72838_d(entityminecart)) p_82487_2_.func_190917_f(1);
++            // stack.shrink(1); // CraftBukkit - handled during event processing
              return p_82487_2_;
          }
 -        @Override
          protected void func_82485_a(IBlockSource p_82485_1_)
          {
              p_82485_1_.func_82618_k().func_175718_b(1000, p_82485_1_.func_180699_d(), 0);
-@@ -96,17 +90,7 @@
+@@ -96,17 +118,7 @@
          BlockDispenser.field_149943_a.func_82595_a(this, field_96602_b);
      }
  
@@ -85,7 +132,7 @@
      {
          IBlockState iblockstate = p_180614_2_.func_180495_p(p_180614_3_);
  
-@@ -120,23 +104,15 @@
+@@ -120,30 +132,24 @@
  
              if (!p_180614_2_.field_72995_K)
              {
@@ -113,3 +160,13 @@
  
                  if (itemstack.func_82837_s())
                  {
+                     entityminecart.func_96094_a(itemstack.func_82833_r());
+                 }
+ 
+-                p_180614_2_.func_72838_d(entityminecart);
++                // worldIn.spawnEntity(entityminecart);
++                if (!p_180614_2_.func_72838_d(entityminecart))
++                    return EnumActionResult.PASS;
+             }
+ 
+             itemstack.func_190918_g(1);

@@ -1,6 +1,10 @@
 --- before/net/minecraft/block/BlockRailPowered.java
 +++ after/net/minecraft/block/BlockRailPowered.java
-@@ -14,28 +14,27 @@
+@@ -11,31 +11,31 @@
+ import net.minecraft.util.Rotation;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
  
  public class BlockRailPowered extends BlockRailBase
  {
@@ -41,7 +45,7 @@
      }
  
      @SuppressWarnings("incomplete-switch")
-@@ -51,7 +50,7 @@
+@@ -51,7 +51,7 @@
              int j = p_176566_2_.func_177956_o();
              int k = p_176566_2_.func_177952_p();
              boolean flag = true;
@@ -50,7 +54,7 @@
  
              switch (blockrailbase$enumraildirection)
              {
-@@ -155,34 +154,26 @@
+@@ -155,34 +155,26 @@
      {
          IBlockState iblockstate = p_176567_1_.func_180495_p(p_176567_2_);
  
@@ -94,7 +98,7 @@
                  }
                  else
                  {
-@@ -196,47 +187,39 @@
+@@ -196,47 +188,44 @@
          }
      }
  
@@ -111,6 +115,11 @@
          if (flag1 != flag)
          {
 -            p_189541_2_.func_180501_a(p_189541_3_, p_189541_1_.func_177226_a(field_176569_M, flag1), 3);
++            int power = p_189541_1_.func_177229_b(field_176569_M) ? 15 : 0;
++            int newPower = CraftEventFactory.callRedstoneChange(p_189541_2_, p_189541_3_.func_177958_n(), p_189541_3_.func_177956_o(), p_189541_3_.func_177952_p(), power, 15 - power).getNewCurrent();
++            if (newPower == power) {
++                return;
++            }
 +            p_189541_2_.func_180501_a(p_189541_3_, p_189541_1_.func_177226_a(field_176569_M, Boolean.valueOf(flag1)), 3);
              p_189541_2_.func_175685_c(p_189541_3_.func_177977_b(), this, false);
  
@@ -149,7 +158,7 @@
          {
              i |= 8;
          }
-@@ -245,7 +228,6 @@
+@@ -245,7 +234,6 @@
      }
  
      @SuppressWarnings("incomplete-switch")
@@ -157,7 +166,7 @@
      public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_)
      {
          switch (p_185499_2_)
-@@ -330,10 +312,9 @@
+@@ -330,10 +318,9 @@
      }
  
      @SuppressWarnings("incomplete-switch")
@@ -169,7 +178,7 @@
  
          switch (p_185471_2_)
          {
-@@ -383,9 +364,8 @@
+@@ -383,9 +370,8 @@
          return super.func_185471_a(p_185471_1_, p_185471_2_);
      }
  

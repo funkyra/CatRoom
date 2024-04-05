@@ -1,0 +1,51 @@
+--- before/net/minecraft/entity/projectile/EntityTippedArrow.java
++++ after/net/minecraft/entity/projectile/EntityTippedArrow.java
+@@ -16,6 +16,7 @@
+ import net.minecraft.potion.PotionType;
+ import net.minecraft.potion.PotionUtils;
+ import net.minecraft.util.EnumParticleTypes;
++import net.minecraft.util.ResourceLocation;
+ import net.minecraft.util.datafix.DataFixer;
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+@@ -25,7 +26,7 @@
+ {
+     private static final DataParameter<Integer> field_184559_f = EntityDataManager.func_187226_a(EntityTippedArrow.class, DataSerializers.field_187192_b);
+     private PotionType field_184560_g = PotionTypes.field_185229_a;
+-    private final Set<PotionEffect> field_184561_h = Sets.newHashSet();
++    public final Set<PotionEffect> field_184561_h = Sets.newHashSet();
+     private boolean field_191509_at;
+ 
+     public EntityTippedArrow(World p_i46756_1_)
+@@ -156,12 +157,30 @@
+         }
+     }
+ 
++    // CraftBukkit start accessor methods
++    public void refreshEffects() {
++        this.func_184212_Q().func_187227_b(EntityTippedArrow.field_184559_f, PotionUtils.func_185181_a(PotionUtils.func_185186_a(this.field_184560_g, this.field_184561_h)));
++    }
++
++    public String getType() {
++        return PotionType.field_185176_a.func_177774_c(this.field_184560_g).toString();
++    }
++
++    public void setType(String string) {
++        this.field_184560_g = PotionType.field_185176_a.func_82594_a(new ResourceLocation(string));
++        this.field_70180_af.func_187227_b(EntityTippedArrow.field_184559_f, PotionUtils.func_185181_a(PotionUtils.func_185186_a(this.field_184560_g, this.field_184561_h)));
++    }
++
++    public boolean isTipped() {
++        return !(this.field_184561_h.isEmpty() && this.field_184560_g == PotionTypes.field_185229_a);
++    }
++
+     public int func_184557_n()
+     {
+         return this.field_70180_af.func_187225_a(field_184559_f);
+     }
+ 
+-    private void func_191507_d(int p_191507_1_)
++    public void func_191507_d(int p_191507_1_)
+     {
+         this.field_191509_at = true;
+         this.field_70180_af.func_187227_b(field_184559_f, p_191507_1_);

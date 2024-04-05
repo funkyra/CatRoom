@@ -33,9 +33,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -58,6 +61,11 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
+import org.bukkit.event.inventory.InventoryType;
 
 import javax.annotation.Nullable;
 
@@ -81,6 +89,7 @@ public class FMLNetworkHandler
 
     public static void openGui(EntityPlayer entityPlayer, Object mod, int modGuiId, World world, int x, int y, int z)
     {
+        if (catserver.server.AsyncCatcher.checkAsync("open gui")) { catserver.server.AsyncCatcher.ensureExecuteOnPrimaryThread(() -> openGui(entityPlayer, mod, modGuiId, world, x, y, z)); return; } // CatServer - prevent crash caused by async open gui
         ModContainer mc = FMLCommonHandler.instance().findContainerFor(mod);
         if (entityPlayer instanceof EntityPlayerMP && !(entityPlayer instanceof FakePlayer))
         {
@@ -88,6 +97,20 @@ public class FMLNetworkHandler
             Container remoteGuiContainer = NetworkRegistry.INSTANCE.getRemoteGuiContainer(mc, entityPlayerMP, modGuiId, world, x, y, z);
             if (remoteGuiContainer != null)
             {
+                // CatServer start - create bukkitView for passed container then fire open event.
+                if (remoteGuiContainer.getBukkitView() == null) {
+                    TileEntity te = entityPlayer.world.getTileEntity(new BlockPos(x, y, z));
+                    if (te instanceof IInventory) {
+                        remoteGuiContainer.setBukkitView(new CraftInventoryView(entityPlayer.getBukkitEntity(), new CraftInventory((IInventory) te), remoteGuiContainer));
+                    } else {
+                        remoteGuiContainer.setBukkitView(new CraftInventoryView(entityPlayer.getBukkitEntity(), Bukkit.createInventory(entityPlayer.getBukkitEntity(), InventoryType.CHEST), remoteGuiContainer));
+                    }
+                }
+                remoteGuiContainer = CraftEventFactory.callInventoryOpenEvent((EntityPlayerMP) entityPlayer, remoteGuiContainer, false);
+                if (remoteGuiContainer == null) {
+                    return;
+                }
+                // CatSever end
                 entityPlayerMP.getNextWindowId();
                 entityPlayerMP.closeContainer();
                 int windowId = entityPlayerMP.currentWindowId;

@@ -1,0 +1,11 @@
+--- before/net/minecraft/network/play/client/CPacketResourcePackStatus.java
++++ after/net/minecraft/network/play/client/CPacketResourcePackStatus.java
+@@ -7,7 +7,7 @@
+ 
+ public class CPacketResourcePackStatus implements Packet<INetHandlerPlayServer>
+ {
+-    private CPacketResourcePackStatus.Action field_179719_b;
++    public Action field_179719_b;
+ 
+     public CPacketResourcePackStatus()
+     {

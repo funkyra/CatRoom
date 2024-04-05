@@ -9,15 +9,16 @@
  {
      public EntityMooshroom(World p_i1687_1_)
      {
-@@ -30,7 +30,6 @@
+@@ -30,7 +30,7 @@
          EntityLiving.func_189752_a(p_189791_0_, EntityMooshroom.class);
      }
  
 -    @Override
++    // TODO: Implement PlayerShearEntityEvent
      public boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_)
      {
          ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
-@@ -50,19 +49,10 @@
+@@ -50,19 +50,10 @@
  
              return true;
          }
@@ -39,7 +40,7 @@
  
              if (!this.field_70170_p.field_72995_K)
              {
-@@ -80,16 +70,7 @@
+@@ -80,16 +71,7 @@
  
                  for (int i = 0; i < 5; ++i)
                  {
@@ -57,7 +58,7 @@
                  }
  
                  itemstack.func_77972_a(1, p_184645_1_);
-@@ -109,8 +90,36 @@
+@@ -109,8 +91,36 @@
          return new EntityMooshroom(this.field_70170_p);
      }
  

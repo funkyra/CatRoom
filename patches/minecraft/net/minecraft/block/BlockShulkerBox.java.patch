@@ -1,0 +1,11 @@
+--- before/net/minecraft/block/BlockShulkerBox.java
++++ after/net/minecraft/block/BlockShulkerBox.java
+@@ -43,7 +43,7 @@
+ public class BlockShulkerBox extends BlockContainer
+ {
+     public static final PropertyEnum<EnumFacing> field_190957_a = PropertyDirection.func_177714_a("facing");
+-    private final EnumDyeColor field_190958_b;
++    public final EnumDyeColor field_190958_b;
+ 
+     public BlockShulkerBox(EnumDyeColor p_i47248_1_)
+     {

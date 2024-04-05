@@ -1,6 +1,14 @@
 --- before/net/minecraft/block/BlockStaticLiquid.java
 +++ after/net/minecraft/block/BlockStaticLiquid.java
-@@ -21,7 +21,6 @@
+@@ -7,6 +7,7 @@
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
+ 
+ public class BlockStaticLiquid extends BlockLiquid
+ {
+@@ -21,7 +22,6 @@
          }
      }
  
@@ -8,7 +16,7 @@
      public void func_189540_a(IBlockState p_189540_1_, World p_189540_2_, BlockPos p_189540_3_, Block p_189540_4_, BlockPos p_189540_5_)
      {
          if (!this.func_176365_e(p_189540_2_, p_189540_3_, p_189540_1_))
-@@ -37,7 +36,6 @@
+@@ -37,7 +37,6 @@
          p_176370_1_.func_175684_a(p_176370_2_, blockdynamicliquid, this.func_149738_a(p_176370_1_));
      }
  
@@ -16,7 +24,7 @@
      public void func_180650_b(World p_180650_1_, BlockPos p_180650_2_, IBlockState p_180650_3_, Random p_180650_4_)
      {
          if (this.field_149764_J == Material.field_151587_i)
-@@ -54,22 +52,22 @@
+@@ -54,22 +53,27 @@
                      {
                          blockpos = blockpos.func_177982_a(p_180650_4_.nextInt(3) - 1, 1, p_180650_4_.nextInt(3) - 1);
  
@@ -35,6 +43,11 @@
                              if (this.func_176369_e(p_180650_1_, blockpos))
                              {
 -                                p_180650_1_.func_175656_a(blockpos, Blocks.field_150480_ab.func_176223_P());
++                                if (p_180650_1_.func_180495_p(blockpos) != Blocks.field_150480_ab) {
++                                    if (CraftEventFactory.callBlockIgniteEvent(p_180650_1_, blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p()).isCancelled()) {
++                                        continue;
++                                    }
++                                }
 +                                p_180650_1_.func_175656_a(blockpos, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_180650_1_, blockpos, p_180650_2_, Blocks.field_150480_ab.func_176223_P()));
                                  return;
                              }
@@ -44,16 +57,24 @@
                          {
                              return;
                          }
-@@ -88,7 +86,7 @@
+@@ -88,7 +92,15 @@
  
                          if (p_180650_1_.func_175623_d(blockpos1.func_177984_a()) && this.func_176368_m(p_180650_1_, blockpos1))
                          {
 -                            p_180650_1_.func_175656_a(blockpos1.func_177984_a(), Blocks.field_150480_ab.func_176223_P());
++                            // CraftBukkit start - Prevent lava putting something on fire
++                            BlockPos up = blockpos1.func_177984_a();
++                            if (p_180650_1_.func_180495_p(up) != Blocks.field_150480_ab) {
++                                if (CraftEventFactory.callBlockIgniteEvent(p_180650_1_, up.func_177958_n(), up.func_177956_o(), up.func_177952_p(), p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p()).isCancelled()) {
++                                    continue;
++                                }
++                            }
++                            // CraftBukkit end
 +                            p_180650_1_.func_175656_a(blockpos1.func_177984_a(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_180650_1_, blockpos1.func_177984_a(), p_180650_2_, Blocks.field_150480_ab.func_176223_P()));
                          }
                      }
                  }
-@@ -111,8 +109,6 @@
+@@ -111,8 +123,6 @@
  
      private boolean func_176368_m(World p_176368_1_, BlockPos p_176368_2_)
      {

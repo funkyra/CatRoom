@@ -223,4 +223,9 @@ public class ItemStackHandler implements IItemHandler, IItemHandlerModifiable, I
     {
 
     }
+    // CatServer start
+    public NonNullList<ItemStack> getStacksList() {
+        return this.stacks;
+    }
+    // CatServer end
 }

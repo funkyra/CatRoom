@@ -116,7 +116,7 @@
      }
  
 -    static class MixPredicate<T>
-+    static class MixPredicate<T extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<T>>
++    public static class MixPredicate<T extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<T>>
          {
 -            final T field_185198_a;
 +            final net.minecraftforge.registries.IRegistryDelegate<T> field_185198_a;

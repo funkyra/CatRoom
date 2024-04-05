@@ -53,7 +53,7 @@
      public boolean func_75253_b()
      {
          EntityLivingBase entitylivingbase = this.field_75441_b.func_70638_az();
-@@ -84,58 +95,64 @@
+@@ -84,58 +95,65 @@
          }
          else
          {
@@ -88,6 +88,7 @@
      public void func_75246_d()
      {
          EntityLivingBase entitylivingbase = this.field_75441_b.func_70638_az();
++        if (entitylivingbase == null) return; // CatServer - fix NPE
          this.field_75441_b.func_70671_ap().func_75651_a(entitylivingbase, 30.0F, 30.0F);
 -        double d0 = this.field_75441_b
 -                    .func_70092_e(entitylivingbase.field_70165_t, entitylivingbase.func_174813_aQ().field_72338_b, entitylivingbase.field_70161_v);

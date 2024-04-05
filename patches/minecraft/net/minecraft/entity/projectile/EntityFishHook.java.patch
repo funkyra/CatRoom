@@ -1,6 +1,12 @@
 --- before/net/minecraft/entity/projectile/EntityFishHook.java
 +++ after/net/minecraft/entity/projectile/EntityFishHook.java
-@@ -35,7 +35,7 @@
+@@ -32,13 +32,16 @@
+ import net.minecraft.world.storage.loot.LootTableList;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.entity.Fish;
++import org.bukkit.entity.Player;
++import org.bukkit.event.player.PlayerFishEvent;
  
  public class EntityFishHook extends Entity
  {
@@ -8,8 +14,12 @@
 +    private static final DataParameter<Integer> field_184528_c = EntityDataManager.<Integer>func_187226_a(EntityFishHook.class, DataSerializers.field_187192_b);
      private boolean field_146051_au;
      private int field_146049_av;
-     private EntityPlayer field_146042_b;
-@@ -89,44 +89,38 @@
+-    private EntityPlayer field_146042_b;
++    public EntityPlayer field_146042_b;
+     private int field_146047_aw;
+     private int field_146045_ax;
+     private int field_146040_ay;
+@@ -89,44 +92,38 @@
      {
          float f = this.field_146042_b.field_70127_C + (this.field_146042_b.field_70125_A - this.field_146042_b.field_70127_C);
          float f1 = this.field_146042_b.field_70126_B + (this.field_146042_b.field_70177_z - this.field_146042_b.field_70126_B);
@@ -69,7 +79,7 @@
              this.field_146043_c = i > 0 ? this.field_70170_p.func_73045_a(i - 1) : null;
          }
  
-@@ -134,22 +128,17 @@
+@@ -134,22 +131,17 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -95,7 +105,7 @@
      public void func_70071_h_()
      {
          super.func_70071_h_();
-@@ -184,18 +173,18 @@
+@@ -184,18 +176,18 @@
              {
                  if (this.field_146043_c != null)
                  {
@@ -120,7 +130,7 @@
                      this.field_190627_av = EntityFishHook.State.BOBBING;
                      return;
                  }
-@@ -212,9 +201,9 @@
+@@ -212,9 +204,9 @@
                  else
                  {
                      this.field_146047_aw = 0;
@@ -133,7 +143,7 @@
                  }
              }
              else
-@@ -232,7 +221,7 @@
+@@ -232,7 +224,7 @@
                          {
                              this.field_70165_t = this.field_146043_c.field_70165_t;
                              double d2 = (double)this.field_146043_c.field_70131_O;
@@ -142,7 +152,7 @@
                              this.field_70161_v = this.field_146043_c.field_70161_v;
                              this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
                          }
-@@ -243,16 +232,16 @@
+@@ -243,16 +235,16 @@
  
                  if (this.field_190627_av == EntityFishHook.State.BOBBING)
                  {
@@ -164,7 +174,7 @@
  
                      if (!this.field_70170_p.field_72995_K && f > 0.0F)
                      {
-@@ -263,15 +252,15 @@
+@@ -263,15 +255,15 @@
  
              if (iblockstate.func_185904_a() != Material.field_151586_h)
              {
@@ -185,7 +195,7 @@
              this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
          }
      }
-@@ -280,10 +269,10 @@
+@@ -280,10 +272,10 @@
      {
          ItemStack itemstack = this.field_146042_b.func_184614_ca();
          ItemStack itemstack1 = this.field_146042_b.func_184592_cb();
@@ -199,7 +209,7 @@
          {
              return false;
          }
-@@ -297,12 +286,11 @@
+@@ -297,12 +289,11 @@
      private void func_190623_q()
      {
          float f = MathHelper.func_76133_a(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
@@ -215,7 +225,7 @@
          }
  
          while (this.field_70125_A - this.field_70127_C >= 180.0F)
-@@ -338,22 +326,21 @@
+@@ -338,22 +329,21 @@
          }
  
          Entity entity = null;
@@ -242,7 +252,15 @@
                      {
                          entity = entity1;
                          d0 = d1;
-@@ -383,7 +370,7 @@
+@@ -369,6 +359,7 @@
+ 
+         if (raytraceresult != null && raytraceresult.field_72313_a != RayTraceResult.Type.MISS)
+         {
++            org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callProjectileHitEvent(this, raytraceresult);
+             if (raytraceresult.field_72313_a == RayTraceResult.Type.ENTITY)
+             {
+                 this.field_146043_c = raytraceresult.field_72308_g;
+@@ -383,7 +374,7 @@
  
      private void func_190622_s()
      {
@@ -251,7 +269,12 @@
      }
  
      private void func_190621_a(BlockPos p_190621_1_)
-@@ -413,7 +400,7 @@
+@@ -410,10 +401,12 @@
+             {
+                 this.field_146040_ay = 0;
+                 this.field_146038_az = 0;
++                PlayerFishEvent playerFishEvent = new PlayerFishEvent((Player) this.field_146042_b.getBukkitEntity(), null, (Fish) this.getBukkitEntity(), PlayerFishEvent.State.FAILED_ATTEMPT);
++                this.field_70170_p.getServer().getPluginManager().callEvent(playerFishEvent);
              }
              else
              {
@@ -260,7 +283,7 @@
              }
          }
          else if (this.field_146038_az > 0)
-@@ -422,55 +409,35 @@
+@@ -422,55 +415,40 @@
  
              if (this.field_146038_az > 0)
              {
@@ -295,6 +318,11 @@
              }
              else
              {
++                PlayerFishEvent playerFishEvent = new PlayerFishEvent((Player) this.field_146042_b.getBukkitEntity(), null, (Fish) this.getBukkitEntity(), PlayerFishEvent.State.BITE);
++                this.field_70170_p.getServer().getPluginManager().callEvent(playerFishEvent);
++                if (playerFishEvent.isCancelled()) {
++                    return;
++                }
                  this.field_70181_x = (double)(-0.4F * MathHelper.func_151240_a(this.field_70146_Z, 0.6F, 1.0F));
                  this.func_184185_a(SoundEvents.field_187609_F, 0.25F, 1.0F + (this.field_70146_Z.nextFloat() - this.field_70146_Z.nextFloat()) * 0.4F);
 -                double d3 = this.func_174813_aQ().field_72338_b + 0.5;
@@ -326,7 +354,7 @@
                  this.field_146045_ax = MathHelper.func_76136_a(this.field_70146_Z, 20, 40);
              }
          }
-@@ -481,29 +448,29 @@
+@@ -481,29 +459,29 @@
  
              if (this.field_146040_ay < 20)
              {
@@ -363,7 +391,7 @@
                  }
              }
  
-@@ -525,12 +492,10 @@
+@@ -525,12 +503,10 @@
          return p_189739_1_.func_70067_L() || p_189739_1_ instanceof EntityItem;
      }
  
@@ -376,15 +404,22 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
      }
-@@ -541,6 +506,7 @@
+@@ -541,8 +517,14 @@
          {
              int i = 0;
  
 +            net.minecraftforge.event.entity.player.ItemFishedEvent event = null;
              if (this.field_146043_c != null)
              {
++                PlayerFishEvent playerFishEvent = new PlayerFishEvent((Player) this.field_146042_b.getBukkitEntity(), this.field_146043_c.getBukkitEntity(), (Fish) this.getBukkitEntity(), PlayerFishEvent.State.CAUGHT_ENTITY);
++                this.field_70170_p.getServer().getPluginManager().callEvent(playerFishEvent);
++                if (playerFishEvent.isCancelled()) {
++                    return 0;
++                }
                  this.func_184527_k();
-@@ -550,34 +516,29 @@
+                 this.field_70170_p.func_72960_a(this, (byte)31);
+                 i = this.field_146043_c instanceof EntityItem ? 3 : 5;
+@@ -550,34 +532,41 @@
              else if (this.field_146045_ax > 0)
              {
                  LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.field_70170_p);
@@ -406,6 +441,13 @@
 +                for (ItemStack itemstack : result)
                  {
                      EntityItem entityitem = new EntityItem(this.field_70170_p, this.field_70165_t, this.field_70163_u, this.field_70161_v, itemstack);
++                    PlayerFishEvent playerFishEvent = new PlayerFishEvent((Player) this.field_146042_b.getBukkitEntity(), entityitem.getBukkitEntity(), (Fish) this.getBukkitEntity(), PlayerFishEvent.State.CAUGHT_FISH);
++                    playerFishEvent.setExpToDrop(this.field_70146_Z.nextInt(6) + 1);
++                    this.field_70170_p.getServer().getPluginManager().callEvent(playerFishEvent);
++
++                    if (playerFishEvent.isCancelled()) {
++                        return 0;
++                    }
                      double d0 = this.field_146042_b.field_70165_t - this.field_70165_t;
                      double d1 = this.field_146042_b.field_70163_u - this.field_70163_u;
                      double d2 = this.field_146042_b.field_70161_v - this.field_70161_v;
@@ -430,12 +472,34 @@
 -                            this.field_70146_Z.nextInt(6) + 1
 -                        )
 -                    );
-+                    this.field_146042_b.field_70170_p.func_72838_d(new EntityXPOrb(this.field_146042_b.field_70170_p, this.field_146042_b.field_70165_t, this.field_146042_b.field_70163_u + 0.5D, this.field_146042_b.field_70161_v + 0.5D, this.field_70146_Z.nextInt(6) + 1));
++                    // this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
++                    // CraftBukkit start - this.random.nextInt(6) + 1 -> playerFishEvent.getExpToDrop()
++                    if (playerFishEvent.getExpToDrop() > 0) {
++                        this.field_146042_b.field_70170_p.func_72838_d(new EntityXPOrb(this.field_146042_b.field_70170_p, this.field_146042_b.field_70165_t, this.field_146042_b.field_70163_u + 0.5D, this.field_146042_b.field_70161_v + 0.5D, playerFishEvent.getExpToDrop()));
++                    }
++                    // CraftBukkit end
                      Item item = itemstack.func_77973_b();
  
                      if (item == Items.field_151115_aP || item == Items.field_179566_aV)
-@@ -595,7 +556,7 @@
+@@ -591,11 +580,24 @@
+ 
+             if (this.field_146051_au)
+             {
++                PlayerFishEvent playerFishEvent = new PlayerFishEvent((Player) this.field_146042_b.getBukkitEntity(), null, (Fish) this.getBukkitEntity(), PlayerFishEvent.State.IN_GROUND);
++                this.field_70170_p.getServer().getPluginManager().callEvent(playerFishEvent);
++
++                if (playerFishEvent.isCancelled()) {
++                    return 0;
++                }
+                 i = 2;
              }
++            if (i == 0) {
++                PlayerFishEvent playerFishEvent = new PlayerFishEvent((Player) this.field_146042_b.getBukkitEntity(), null, (Fish) this.getBukkitEntity(), PlayerFishEvent.State.FAILED_ATTEMPT);
++                this.field_70170_p.getServer().getPluginManager().callEvent(playerFishEvent);
++                if (playerFishEvent.isCancelled()) {
++                    return 0;
++                }
++            }
  
              this.func_70106_y();
 -            return i;
@@ -443,7 +507,7 @@
          }
          else
          {
-@@ -604,13 +565,9 @@
+@@ -604,13 +606,9 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -458,7 +522,7 @@
          {
              this.func_184527_k();
          }
-@@ -625,20 +582,18 @@
+@@ -625,20 +623,18 @@
              double d0 = this.field_146042_b.field_70165_t - this.field_70165_t;
              double d1 = this.field_146042_b.field_70163_u - this.field_70163_u;
              double d2 = this.field_146042_b.field_70161_v - this.field_70161_v;

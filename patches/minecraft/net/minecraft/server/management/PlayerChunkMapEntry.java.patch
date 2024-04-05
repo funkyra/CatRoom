@@ -1,15 +1,17 @@
 --- before/net/minecraft/server/management/PlayerChunkMapEntry.java
 +++ after/net/minecraft/server/management/PlayerChunkMapEntry.java
-@@ -23,7 +23,7 @@
+@@ -23,21 +23,30 @@
  {
      private static final Logger field_187281_a = LogManager.getLogger();
      private final PlayerChunkMap field_187282_b;
 -    private final List<EntityPlayerMP> field_187283_c = Lists.newArrayList();
-+    private final List<EntityPlayerMP> field_187283_c = Lists.<EntityPlayerMP>newArrayList();
++    public final List<EntityPlayerMP> field_187283_c = Lists.<EntityPlayerMP>newArrayList();
      private final ChunkPos field_187284_d;
      private short[] field_187285_e = new short[64];
      @Nullable
-@@ -32,12 +32,21 @@
+-    private Chunk field_187286_f;
++    public Chunk field_187286_f;
+     private int field_187287_g;
      private int field_187288_h;
      private long field_187289_i;
      private boolean field_187290_j;
@@ -159,7 +161,7 @@
      public void func_187280_d()
      {
          if (this.field_187290_j && this.field_187286_f != null)
-@@ -218,28 +243,32 @@
+@@ -218,28 +243,57 @@
                      int k = (this.field_187285_e[0] >> 8 & 15) + this.field_187284_d.field_77275_b * 16;
                      BlockPos blockpos = new BlockPos(i, j, k);
                      this.func_187267_a(new SPacketBlockChange(this.field_187282_b.func_72688_a(), blockpos));
@@ -174,8 +176,34 @@
 -                else if (this.field_187287_g == 64)
 +                else if (this.field_187287_g >= net.minecraftforge.common.ForgeModContainer.clumpingThreshold)
                  {
-                     this.func_187267_a(new SPacketChunkData(this.field_187286_f, this.field_187288_h));
+-                    this.func_187267_a(new SPacketChunkData(this.field_187286_f, this.field_187288_h));
 +                    //TODO: FDix Mojang's fuckup to modded by combining all TE data into the chunk data packet... seriously... packet size explosion!
++                    try {
++                        this.func_187267_a(new SPacketChunkData(this.field_187286_f, this.field_187288_h));
++                    }catch (Throwable throwable) { // If out of buffer, try resend packet;
++                        try {
++                            this.func_187267_a(new SPacketMultiBlockChange(this.field_187287_g, this.field_187285_e, this.field_187286_f));
++                            //} Keep this in the else until we figure out a fix for mojang's derpitude on the data packet so we don't double send crap.
++                            //{// Forge: Send only the tile entities that are updated, Adding this brace lets us keep the indent and the patch small
++                            for (int l = 0; l < this.field_187287_g; ++l)
++                            {
++                                int i1 = (this.field_187285_e[l] >> 12 & 15) + this.field_187284_d.field_77276_a * 16;
++                                int j1 = this.field_187285_e[l] & 255;
++                                int k1 = (this.field_187285_e[l] >> 8 & 15) + this.field_187284_d.field_77275_b * 16;
++                                BlockPos blockpos1 = new BlockPos(i1, j1, k1);
++                                net.minecraft.block.state.IBlockState state = this.field_187282_b.func_72688_a().func_180495_p(blockpos1);
++
++                                if (state.func_177230_c().hasTileEntity(state))
++                                {
++                                    this.func_187273_a(this.field_187282_b.func_72688_a().func_175625_s(blockpos1));
++                                }
++                            }
++                        }catch (Throwable throwable1) {
++                            throwable1.printStackTrace();
++                            return;
++                            //Don't Reset the change blocks. next tick send it
++                        }
++                    }
                  }
                  else
                  {
@@ -196,7 +224,7 @@
                          {
                              this.func_187273_a(this.field_187282_b.func_72688_a().func_175625_s(blockpos1));
                          }
-@@ -318,5 +347,10 @@
+@@ -318,5 +372,10 @@
          }
  
          return d0;

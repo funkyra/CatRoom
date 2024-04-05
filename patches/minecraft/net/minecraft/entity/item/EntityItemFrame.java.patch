@@ -33,7 +33,17 @@
      public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_)
      {
          if (this.func_180431_b(p_70097_1_))
-@@ -79,35 +76,30 @@
+@@ -66,6 +63,9 @@
+         {
+             if (!this.field_70170_p.field_72995_K)
+             {
++                if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, p_70097_1_, p_70097_2_, false) || this.field_70128_L) {
++                    return true;
++                }
+                 this.func_146065_b(p_70097_1_.func_76346_g(), false);
+                 this.func_184185_a(SoundEvents.field_187629_cO, 1.0F, 1.0F);
+                 this.func_82334_a(ItemStack.field_190927_a);
+@@ -79,35 +79,30 @@
          }
      }
  
@@ -71,7 +81,7 @@
      public void func_184523_o()
      {
          this.func_184185_a(SoundEvents.field_187626_cN, 1.0F, 1.0F);
-@@ -148,19 +140,20 @@
+@@ -148,19 +143,20 @@
      {
          if (!p_110131_1_.func_190926_b())
          {
@@ -95,7 +105,7 @@
      }
  
      public void func_82334_a(ItemStack p_82334_1_)
-@@ -191,7 +184,6 @@
+@@ -191,7 +187,6 @@
          }
      }
  
@@ -103,7 +113,7 @@
      public void func_184206_a(DataParameter<?> p_184206_1_)
      {
          if (p_184206_1_.equals(field_184525_c))
-@@ -207,7 +199,7 @@
+@@ -207,7 +202,7 @@
  
      public int func_82333_j()
      {
@@ -112,7 +122,7 @@
      }
  
      public void func_82336_g(int p_82336_1_)
-@@ -217,7 +209,7 @@
+@@ -217,7 +212,7 @@
  
      private void func_174865_a(int p_174865_1_, boolean p_174865_2_)
      {
@@ -121,7 +131,7 @@
  
          if (p_174865_2_ && this.field_174861_a != null)
          {
-@@ -227,10 +219,9 @@
+@@ -227,10 +222,9 @@
  
      public static void func_189738_a(DataFixer p_189738_0_)
      {
@@ -133,7 +143,7 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          if (!this.func_82335_i().func_190926_b())
-@@ -243,7 +234,6 @@
+@@ -243,7 +237,6 @@
          super.func_70014_b(p_70014_1_);
      }
  
@@ -141,7 +151,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          NBTTagCompound nbttagcompound = p_70037_1_.func_74775_l("Item");
-@@ -262,7 +252,6 @@
+@@ -262,7 +255,6 @@
          super.func_70037_a(p_70037_1_);
      }
  

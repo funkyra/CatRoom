@@ -1,0 +1,244 @@
+--- before/net/minecraft/server/management/PlayerChunkMap.java
++++ after/net/minecraft/server/management/PlayerChunkMap.java
+@@ -10,9 +10,12 @@
+ import java.util.Collections;
+ import java.util.Comparator;
+ import java.util.Iterator;
++import java.util.LinkedList;
+ import java.util.List;
+ import java.util.Set;
+ import javax.annotation.Nullable;
++
++import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.ChunkPos;
+@@ -38,12 +41,12 @@
+         }
+     };
+     private final WorldServer field_72701_a;
+-    private final List<EntityPlayerMP> field_72699_b = Lists.newArrayList();
+-    private final Long2ObjectMap<PlayerChunkMapEntry> field_72700_c = new Long2ObjectOpenHashMap<>(4096);
+-    private final Set<PlayerChunkMapEntry> field_72697_d = Sets.newHashSet();
+-    private final List<PlayerChunkMapEntry> field_187310_g = Lists.newLinkedList();
+-    private final List<PlayerChunkMapEntry> field_187311_h = Lists.newLinkedList();
+-    private final List<PlayerChunkMapEntry> field_111193_e = Lists.newArrayList();
++    private final List<EntityPlayerMP> field_72699_b = Lists.<EntityPlayerMP>newArrayList();
++    private final Long2ObjectMap<PlayerChunkMapEntry> field_72700_c = new Long2ObjectOpenHashMap<PlayerChunkMapEntry>(4096);
++    private final Set<PlayerChunkMapEntry> field_72697_d = Sets.<PlayerChunkMapEntry>newHashSet();
++    private final List<PlayerChunkMapEntry> field_187310_g = Lists.<PlayerChunkMapEntry>newLinkedList();
++    private final List<PlayerChunkMapEntry> field_187311_h = Lists.<PlayerChunkMapEntry>newLinkedList();
++    private final List<PlayerChunkMapEntry> field_111193_e = Lists.<PlayerChunkMapEntry>newArrayList();
+     private int field_72698_e;
+     private long field_111192_g;
+     private boolean field_187312_l = true;
+@@ -52,7 +55,7 @@
+     public PlayerChunkMap(WorldServer p_i1176_1_)
+     {
+         this.field_72701_a = p_i1176_1_;
+-        this.func_152622_a(p_i1176_1_.func_73046_m().func_184103_al().func_72395_o());
++        this.func_152622_a(p_i1176_1_.spigotConfig.viewDistance); // Spigot
+     }
+ 
+     public WorldServer func_72688_a()
+@@ -150,6 +153,12 @@
+         {
+             long l = System.nanoTime() + 50000000L;
+             int k = 49;
++
++            // Spigot start
++            org.spigotmc.SlackActivityAccountant activityAccountant = net.minecraft.server.MinecraftServer.getServerInst().slackActivityAccountant;
++            activityAccountant.startActivity(Math.min(catserver.server.CatServer.getConfig().worldGenMaxTickTime, 18.75) / (18.75 * 2)); // CatServer - 50 * 0.375 = 18.75
++            // Spigot end
++
+             Iterator<PlayerChunkMapEntry> iterator = this.field_187311_h.iterator();
+ 
+             while (iterator.hasNext())
+@@ -169,13 +178,20 @@
+                             this.field_187310_g.remove(playerchunkmapentry1);
+                         }
+ 
+-                        if (--k < 0 || System.nanoTime() > l)
++                        --k;
++
++                        if (k < 0 || activityAccountant.activityTimeIsExhausted()) // CatServer
+                         {
+                             break;
+                         }
+                     }
++                } else {
++                    // CraftBukkit - SPIGOT-2891: remove once chunk has been provided
++                    iterator.remove();
+                 }
+             }
++
++            activityAccountant.endActivity(); // Spigot
+         }
+ 
+         if (!this.field_187310_g.isEmpty())
+@@ -247,8 +263,17 @@
+         return playerchunkmapentry;
+     }
+ 
++    public final boolean isChunkInUse(int x, int z) {
++        PlayerChunkMapEntry pi = func_187301_b(x, z);
++        if (pi != null) {
++            return (pi.field_187283_c.size() > 0);
++        }
++        return false;
++    }
++
+     public void func_180244_a(BlockPos p_180244_1_)
+     {
++        if (catserver.server.AsyncCatcher.checkAndPostPrimaryThread("update block", () -> func_180244_a(p_180244_1_))) return; // CatServer
+         int i = p_180244_1_.func_177958_n() >> 4;
+         int j = p_180244_1_.func_177952_p() >> 4;
+         PlayerChunkMapEntry playerchunkmapentry = this.func_187301_b(i, j);
+@@ -266,12 +291,20 @@
+         p_72683_1_.field_71131_d = p_72683_1_.field_70165_t;
+         p_72683_1_.field_71132_e = p_72683_1_.field_70161_v;
+ 
++        List<ChunkPos> chunkList = new LinkedList<>();
++
+         for (int k = i - this.field_72698_e; k <= i + this.field_72698_e; ++k)
+         {
+             for (int l = j - this.field_72698_e; l <= j + this.field_72698_e; ++l)
+             {
+-                this.func_187302_c(k, l).func_187276_a(p_72683_1_);
++                // this.getOrCreateEntry(k, l).addPlayer(player);
++                chunkList.add(new ChunkPos(k, l));
+             }
++        }
++
++        Collections.sort(chunkList, new ChunkCoordComparator(p_72683_1_));
++        for (ChunkPos pair : chunkList) {
++            this.func_187302_c(pair.field_77276_a, pair.field_77275_b).func_187276_a(p_72683_1_);
+         }
+ 
+         this.field_72699_b.add(p_72683_1_);
+@@ -331,6 +364,8 @@
+             int j1 = i - k;
+             int k1 = j - l;
+ 
++            List<ChunkPos> chunksToLoad = new LinkedList<>();
++
+             if (j1 != 0 || k1 != 0)
+             {
+                 for (int l1 = i - i1; l1 <= i + i1; ++l1)
+@@ -339,7 +374,8 @@
+                     {
+                         if (!this.func_72684_a(l1, i2, k, l, i1))
+                         {
+-                            this.func_187302_c(l1, i2).func_187276_a(p_72685_1_);
++                            // this.getOrCreateEntry(l1, i2).addPlayer(player);
++                            chunksToLoad.add(new ChunkPos(l1, i2));
+                         }
+ 
+                         if (!this.func_72684_a(l1 - j1, i2 - k1, i, j, i1))
+@@ -357,6 +393,12 @@
+                 p_72685_1_.field_71131_d = p_72685_1_.field_70165_t;
+                 p_72685_1_.field_71132_e = p_72685_1_.field_70161_v;
+                 this.func_187306_e();
++                // CraftBukkit start - send nearest chunks first
++                Collections.sort(chunksToLoad, new ChunkCoordComparator(p_72685_1_));
++                for (ChunkPos pair : chunksToLoad) {
++                    this.func_187302_c(pair.field_77276_a, pair.field_77275_b).func_187276_a(p_72685_1_);
++                }
++                // CraftBukkit end
+             }
+         }
+     }
+@@ -433,11 +475,13 @@
+ 
+     public void func_187304_a(PlayerChunkMapEntry p_187304_1_)
+     {
++        org.spigotmc.AsyncCatcher.catchOp("Async Player Chunk Add"); // Paper
+         this.field_72697_d.add(p_187304_1_);
+     }
+ 
+     public void func_187305_b(PlayerChunkMapEntry p_187305_1_)
+     {
++        org.spigotmc.AsyncCatcher.catchOp("Async Player Chunk Remove"); // Paper
+         ChunkPos chunkpos = p_187305_1_.func_187264_a();
+         long i = func_187307_d(chunkpos.field_77276_a, chunkpos.field_77275_b);
+         p_187305_1_.func_187279_c();
+@@ -448,9 +492,78 @@
+         this.field_187311_h.remove(p_187305_1_);
+         Chunk chunk = p_187305_1_.func_187266_f();
+ 
+-        if (chunk != null)
++        if (false && chunk != null) // CatServer - use craftbukkit timing unload chunk
+         {
+             this.func_72688_a().func_72863_F().func_189549_a(chunk);
+         }
+     }
++
++    // CraftBukkit start - Sorter to load nearby chunks first
++    private static class ChunkCoordComparator implements java.util.Comparator<ChunkPos> {
++        private int x;
++        private int z;
++
++        public ChunkCoordComparator (EntityPlayer entityplayer) {
++            x = (int) entityplayer.field_70165_t >> 4;
++            z = (int) entityplayer.field_70161_v >> 4;
++        }
++
++        // CatServer start
++        public ChunkCoordComparator(int x, int z) {
++            this.x = x;
++            this.z = z;
++        }
++        // CatServer end
++
++        public int compare(ChunkPos a, ChunkPos b) {
++            if (a.equals(b)) {
++                return 0;
++            }
++
++            // Subtract current position to set center point
++            int ax = a.field_77276_a - this.x;
++            int az = a.field_77275_b - this.z;
++            int bx = b.field_77276_a - this.x;
++            int bz = b.field_77275_b - this.z;
++
++            int result = ((ax - bx) * (ax + bx)) + ((az - bz) * (az + bz));
++            if (result != 0) {
++                return result;
++            }
++
++            if (ax < 0) {
++                if (bx < 0) {
++                    return bz - az;
++                } else {
++                    return -1;
++                }
++            } else {
++                if (bx < 0) {
++                    return 1;
++                } else {
++                    return az - bz;
++                }
++            }
++        }
++    }
++    // CraftBukkit end
++
++    // CatServer start
++    public void prepareForAsync(int chunkX, int chunkZ) {
++        List<ChunkPos> chunkList = new LinkedList<>();
++
++        for (int k = chunkX - this.field_72698_e; k <= chunkX + this.field_72698_e; ++k) {
++            for (int l = chunkZ - this.field_72698_e; l <= chunkZ + this.field_72698_e; ++l) {
++                chunkList.add(new ChunkPos(k, l));
++            }
++        }
++
++        Collections.sort(chunkList, new ChunkCoordComparator(chunkX, chunkZ));
++        for (ChunkPos pair : chunkList) {
++            this.func_187302_c(pair.field_77276_a, pair.field_77275_b);
++        }
++
++        this.func_187306_e();
++    }
++    // CatServer end
+ }

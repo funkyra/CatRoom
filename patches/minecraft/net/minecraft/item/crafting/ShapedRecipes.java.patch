@@ -1,18 +1,30 @@
 --- before/net/minecraft/item/crafting/ShapedRecipes.java
 +++ after/net/minecraft/item/crafting/ShapedRecipes.java
-@@ -19,10 +19,8 @@
+@@ -19,10 +19,11 @@
  import net.minecraft.util.NonNullList;
  import net.minecraft.util.ResourceLocation;
  import net.minecraft.world.World;
 -import net.minecraftforge.fml.relauncher.Side;
 -import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftShapedRecipe;
++import org.bukkit.inventory.Recipe;
  
 -public class ShapedRecipes implements IRecipe
 +public class ShapedRecipes extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements net.minecraftforge.common.crafting.IShapedRecipe
  {
      public final int field_77576_b;
      public final int field_77577_c;
-@@ -39,56 +37,45 @@
+@@ -30,6 +31,8 @@
+     private final ItemStack field_77575_e;
+     private final String field_194137_e;
+ 
++    public ResourceLocation key;
++
+     public ShapedRecipes(String p_i47501_1_, int p_i47501_2_, int p_i47501_3_, NonNullList<Ingredient> p_i47501_4_, ItemStack p_i47501_5_)
+     {
+         this.field_194137_e = p_i47501_1_;
+@@ -39,56 +42,45 @@
          this.field_77575_e = p_i47501_5_;
      }
  
@@ -73,7 +85,7 @@
              {
                  if (this.func_77573_a(p_77569_1_, i, j, true))
                  {
-@@ -107,9 +94,9 @@
+@@ -107,9 +99,9 @@
  
      private boolean func_77573_a(InventoryCrafting p_77573_1_, int p_77573_2_, int p_77573_3_, boolean p_77573_4_)
      {
@@ -85,7 +97,7 @@
              {
                  int k = i - p_77573_2_;
                  int l = j - p_77573_3_;
-@@ -137,7 +124,6 @@
+@@ -137,7 +129,6 @@
          return true;
      }
  
@@ -93,7 +105,7 @@
      public ItemStack func_77572_b(InventoryCrafting p_77572_1_)
      {
          return this.func_77571_b().func_77946_l();
-@@ -167,7 +153,7 @@
+@@ -167,7 +158,7 @@
  
      private static NonNullList<Ingredient> func_192402_a(String[] p_192402_0_, Map<String, Ingredient> p_192402_1_, int p_192402_2_, int p_192402_3_)
      {
@@ -102,7 +114,7 @@
          Set<String> set = Sets.newHashSet(p_192402_1_.keySet());
          set.remove(" ");
  
-@@ -247,11 +233,11 @@
+@@ -247,11 +238,11 @@
  
      private static int func_194135_a(String p_194135_0_)
      {
@@ -117,7 +129,7 @@
          }
  
          return i;
-@@ -259,11 +245,11 @@
+@@ -259,11 +250,11 @@
  
      private static int func_194136_b(String p_194136_0_)
      {
@@ -132,7 +144,7 @@
          }
  
          return i;
-@@ -306,11 +292,11 @@
+@@ -306,11 +297,11 @@
  
      private static Map<String, Ingredient> func_192408_a(JsonObject p_192408_0_)
      {
@@ -146,7 +158,7 @@
              {
                  throw new JsonSyntaxException("Invalid key entry: '" + (String)entry.getKey() + "' is an invalid symbol (must be 1 character only).");
              }
-@@ -329,38 +315,41 @@
+@@ -329,38 +320,41 @@
  
      public static Ingredient func_193361_a(@Nullable JsonElement p_193361_0_)
      {
@@ -217,10 +229,79 @@
      }
  
      public static ItemStack func_192405_a(JsonObject p_192405_0_, boolean p_192405_1_)
-@@ -382,5 +371,17 @@
+@@ -382,5 +376,86 @@
              int j = p_192405_1_ ? JsonUtils.func_151208_a(p_192405_0_, "count", 1) : 1;
              return new ItemStack(item, j, i);
          }
++    }
++
++    @Override
++    public Recipe toBukkitRecipe() {
++        // CatServer start - handle special custom recipe
++        if (this.field_77577_c < 1 || this.field_77577_c > 3 || this.field_77576_b < 1 || this.field_77576_b > 3) {
++            return new catserver.server.inventory.CustomModRecipe(this, this.getRegistryName());
++        }
++        // CatServer end
++        CraftItemStack result = CraftItemStack.asCraftMirror(this.field_77575_e);
++        CraftShapedRecipe recipe = new CraftShapedRecipe(result, this);
++        switch (this.field_77577_c) {
++            case 1:
++                switch (this.field_77576_b) {
++                    case 1:
++                        recipe.shape("a");
++                        break;
++                    case 2:
++                        recipe.shape("ab");
++                        break;
++                    case 3:
++                        recipe.shape("abc");
++                        break;
++                }
++                break;
++            case 2:
++                switch (this.field_77576_b) {
++                    case 1:
++                        recipe.shape("a","b");
++                        break;
++                    case 2:
++                        recipe.shape("ab","cd");
++                        break;
++                    case 3:
++                        recipe.shape("abc","def");
++                        break;
++                }
++                break;
++            case 3:
++                switch (this.field_77576_b) {
++                    case 1:
++                        recipe.shape("a","b","c");
++                        break;
++                    case 2:
++                        recipe.shape("ab","cd","ef");
++                        break;
++                    case 3:
++                        recipe.shape("abc","def","ghi");
++                        break;
++                }
++                break;
++        }
++        char c = 'a';
++        for (Ingredient list : this.field_77574_d) {
++            if (list != null) { // CatServer - get recipe from OreDictionary
++                ItemStack[] matchingStacks = list.func_193365_a();
++                if (matchingStacks.length > 0) {
++                    net.minecraft.item.ItemStack stack = matchingStacks[0];
++                    recipe.setIngredient(c, org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers.getMaterial(stack.func_77973_b()), (matchingStacks.length) > 1 ? 32767 : stack.func_77960_j());
++                }
++            }
++            c++;
++        }
++        return recipe;
++    }
++
++    @Override
++    public void setKey(ResourceLocation key) {
++        this.key = key;
 +    }
 +
 +    //================================================ FORGE START ================================================

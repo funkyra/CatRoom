@@ -21,6 +21,8 @@ package net.minecraftforge.fml.relauncher;
 
 import java.lang.reflect.Method;
 
+import catserver.server.launch.Java11Support;
+import catserver.server.launch.Java14Support;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -31,6 +33,8 @@ public class ServerLaunchWrapper {
      */
     public static void main(String[] args)
     {
+        Java11Support.setup();
+        Java14Support.setup();
         new ServerLaunchWrapper().run(args);
     }
 

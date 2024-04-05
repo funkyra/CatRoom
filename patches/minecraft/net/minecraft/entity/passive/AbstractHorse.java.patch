@@ -1,6 +1,14 @@
 --- before/net/minecraft/entity/passive/AbstractHorse.java
 +++ after/net/minecraft/entity/passive/AbstractHorse.java
-@@ -66,11 +66,9 @@
+@@ -56,6 +56,7 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.entity.EntityRegainHealthEvent;
+ 
+ public abstract class AbstractHorse extends EntityAnimal implements IInventoryChangedListener, IJumpingMount
+ {
+@@ -66,18 +67,16 @@
              return p_apply_1_ instanceof AbstractHorse && ((AbstractHorse)p_apply_1_).func_110205_ce();
          }
      };
@@ -9,13 +17,30 @@
 -        .func_111112_a(true);
 -    private static final DataParameter<Byte> field_184787_bE = EntityDataManager.func_187226_a(AbstractHorse.class, DataSerializers.field_187191_a);
 -    private static final DataParameter<Optional<UUID>> field_184790_bH = EntityDataManager.func_187226_a(AbstractHorse.class, DataSerializers.field_187203_m);
-+    protected static final IAttribute field_110271_bv = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).func_111117_a("Jump Strength").func_111112_a(true);
++    public static final IAttribute field_110271_bv = (new RangedAttribute((IAttribute)null, "horse.jumpStrength", 0.7D, 0.0D, 2.0D)).func_111117_a("Jump Strength").func_111112_a(true);
 +    private static final DataParameter<Byte> field_184787_bE = EntityDataManager.<Byte>func_187226_a(AbstractHorse.class, DataSerializers.field_187191_a);
 +    private static final DataParameter<Optional<UUID>> field_184790_bH = EntityDataManager.<Optional<UUID>>func_187226_a(AbstractHorse.class, DataSerializers.field_187203_m);
      private int field_190689_bJ;
      private int field_110290_bE;
      private int field_110295_bF;
-@@ -98,43 +96,41 @@
+     public int field_110278_bp;
+     public int field_110279_bq;
+     protected boolean field_110275_br;
+-    protected ContainerHorseChest field_110296_bG;
++    public ContainerHorseChest field_110296_bG;
+     protected int field_110274_bs;
+     protected float field_110277_bt;
+     private boolean field_110294_bI;
+@@ -90,6 +89,8 @@
+     protected boolean field_190688_bE = true;
+     protected int field_110285_bP;
+ 
++    public int maxDomestication = 100; // CraftBukkit - store max domestication value
++
+     public AbstractHorse(World p_i47299_1_)
+     {
+         super(p_i47299_1_);
+@@ -98,43 +99,41 @@
          this.func_110226_cD();
      }
  
@@ -69,7 +94,7 @@
          }
      }
  
-@@ -146,7 +142,7 @@
+@@ -146,7 +145,7 @@
      @Nullable
      public UUID func_184780_dh()
      {
@@ -78,7 +103,7 @@
      }
  
      public void func_184779_b(@Nullable UUID p_184779_1_)
-@@ -159,7 +155,6 @@
+@@ -159,7 +158,6 @@
          return 0.5F;
      }
  
@@ -86,7 +111,7 @@
      public void func_98054_a(boolean p_98054_1_)
      {
          this.func_98055_j(p_98054_1_ ? this.func_110254_bY() : 1.0F);
-@@ -180,13 +175,11 @@
+@@ -180,13 +178,11 @@
          this.field_110275_br = p_110255_1_;
      }
  
@@ -100,7 +125,7 @@
      protected void func_142017_o(float p_142017_1_)
      {
          if (p_142017_1_ > 6.0F && this.func_110204_cc())
-@@ -237,14 +230,12 @@
+@@ -237,14 +233,12 @@
          return i;
      }
  
@@ -115,7 +140,7 @@
      public boolean func_70104_M()
      {
          return !this.func_184207_aI();
-@@ -256,23 +247,15 @@
+@@ -256,23 +250,15 @@
  
          if (!this.func_174814_R())
          {
@@ -143,7 +168,7 @@
          if (p_180430_1_ > 1.0F)
          {
              this.func_184185_a(SoundEvents.field_187723_ct, 0.4F, 1.0F);
-@@ -292,24 +275,13 @@
+@@ -292,24 +278,13 @@
                  }
              }
  
@@ -170,7 +195,20 @@
              }
          }
      }
-@@ -343,6 +315,7 @@
+@@ -319,10 +294,10 @@
+         return 2;
+     }
+ 
+-    protected void func_110226_cD()
++    public void func_110226_cD()
+     {
+         ContainerHorseChest containerhorsechest = this.field_110296_bG;
+-        this.field_110296_bG = new ContainerHorseChest("HorseChest", this.func_190686_di());
++        this.field_110296_bG = new ContainerHorseChest("HorseChest", this.func_190686_di(), this);
+         this.field_110296_bG.func_110133_a(this.func_70005_c_());
+ 
+         if (containerhorsechest != null)
+@@ -343,6 +318,7 @@
  
          this.field_110296_bG.func_110134_a(this);
          this.func_110232_cE();
@@ -178,7 +216,7 @@
      }
  
      protected void func_110232_cE()
-@@ -353,7 +326,6 @@
+@@ -353,7 +329,6 @@
          }
      }
  
@@ -186,7 +224,7 @@
      public void func_76316_a(IInventory p_76316_1_)
      {
          boolean flag = this.func_110257_ck();
-@@ -371,8 +343,7 @@
+@@ -371,8 +346,7 @@
          double d0 = Double.MAX_VALUE;
          Entity entity = null;
  
@@ -196,7 +234,7 @@
          {
              double d1 = entity1.func_70092_e(p_110250_1_.field_70165_t, p_110250_1_.field_70163_u, p_110250_1_.field_70161_v);
  
-@@ -392,7 +363,6 @@
+@@ -392,7 +366,6 @@
      }
  
      @Nullable
@@ -204,7 +242,7 @@
      protected SoundEvent func_184615_bR()
      {
          this.func_110249_cI();
-@@ -400,7 +370,6 @@
+@@ -400,7 +373,6 @@
      }
  
      @Nullable
@@ -212,7 +250,7 @@
      protected SoundEvent func_184601_bQ(DamageSource p_184601_1_)
      {
          this.func_110249_cI();
-@@ -414,7 +383,6 @@
+@@ -414,7 +386,6 @@
      }
  
      @Nullable
@@ -220,7 +258,7 @@
      protected SoundEvent func_184639_G()
      {
          this.func_110249_cI();
-@@ -445,7 +413,6 @@
+@@ -445,7 +416,6 @@
          return null;
      }
  
@@ -228,7 +266,7 @@
      protected void func_180429_a(BlockPos p_180429_1_, Block p_180429_2_)
      {
          if (!p_180429_2_.func_176223_P().func_185904_a().func_76224_d())
-@@ -486,16 +453,14 @@
+@@ -486,16 +456,14 @@
          this.func_184185_a(SoundEvents.field_187714_cq, p_190680_1_.func_185843_a() * 0.15F, p_190680_1_.func_185847_b());
      }
  
@@ -247,8 +285,12 @@
      public int func_70641_bl()
      {
          return 6;
-@@ -506,13 +471,11 @@
-         return 100;
+@@ -503,16 +471,14 @@
+ 
+     public int func_190676_dC()
+     {
+-        return 100;
++        return this.maxDomestication; // CraftBukkit - return stored max domestication instead of 100
      }
  
 -    @Override
@@ -261,7 +303,14 @@
      public int func_70627_aG()
      {
          return 400;
-@@ -591,16 +554,7 @@
+@@ -585,22 +551,13 @@
+ 
+         if (this.func_110143_aJ() < this.func_110138_aP() && f > 0.0F)
+         {
+-            this.func_70691_i(f);
++            this.heal(f, EntityRegainHealthEvent.RegainReason.EATING);
+             flag = true;
+         }
  
          if (this.func_70631_g_() && i > 0)
          {
@@ -279,7 +328,7 @@
  
              if (!this.field_70170_p.field_72995_K)
              {
-@@ -641,13 +595,11 @@
+@@ -641,13 +598,11 @@
          }
      }
  
@@ -293,23 +342,36 @@
      public boolean func_70877_b(ItemStack p_70877_1_)
      {
          return false;
-@@ -658,7 +610,6 @@
+@@ -658,10 +613,9 @@
          this.field_110278_bp = 1;
      }
  
 -    @Override
      public void func_70645_a(DamageSource p_70645_1_)
      {
-         super.func_70645_a(p_70645_1_);
-@@ -677,7 +628,6 @@
+-        super.func_70645_a(p_70645_1_);
++        // super.onDeath(cause); // Moved down
+ 
+         if (!this.field_70170_p.field_72995_K && this.field_110296_bG != null)
+         {
+@@ -675,9 +629,9 @@
+                 }
+             }
          }
++        super.func_70645_a(p_70645_1_);
      }
  
 -    @Override
      public void func_70636_d()
      {
          if (this.field_70146_Z.nextInt(200) == 0)
-@@ -696,19 +646,7 @@
+@@ -691,24 +645,12 @@
+         {
+             if (this.field_70146_Z.nextInt(900) == 0 && this.field_70725_aQ == 0)
+             {
+-                this.func_70691_i(1.0F);
++                this.heal(1.0F, EntityRegainHealthEvent.RegainReason.REGEN);
+             }
  
              if (this.func_190684_dE())
              {
@@ -330,7 +392,7 @@
                  {
                      this.func_110227_p(true);
                  }
-@@ -728,9 +666,9 @@
+@@ -728,9 +670,9 @@
      {
          if (this.func_110205_ce() && this.func_70631_g_() && !this.func_110204_cc())
          {
@@ -342,7 +404,7 @@
              {
                  this.field_70699_by.func_75494_a(abstracthorse);
              }
-@@ -742,7 +680,6 @@
+@@ -742,7 +684,6 @@
          return true;
      }
  
@@ -350,7 +412,7 @@
      public void func_70071_h_()
      {
          super.func_70071_h_();
-@@ -899,7 +836,6 @@
+@@ -899,7 +840,6 @@
          return true;
      }
  
@@ -358,7 +420,7 @@
      public void func_191986_a(float p_191986_1_, float p_191986_2_, float p_191986_3_)
      {
          if (this.func_184207_aI() && this.func_82171_bF() && this.func_110257_ck())
-@@ -940,8 +876,8 @@
+@@ -940,8 +880,8 @@
  
                  if (p_191986_3_ > 0.0F)
                  {
@@ -369,7 +431,7 @@
                      this.field_70159_w += (double)(-0.4F * f * this.field_110277_bt);
                      this.field_70179_y += (double)(0.4F * f1 * this.field_110277_bt);
                      this.func_184185_a(SoundEvents.field_187720_cs, 0.4F, 1.0F);
-@@ -959,9 +895,9 @@
+@@ -959,9 +899,9 @@
              }
              else if (entitylivingbase instanceof EntityPlayer)
              {
@@ -382,7 +444,7 @@
              }
  
              if (this.field_70122_E)
-@@ -993,10 +929,9 @@
+@@ -993,10 +933,9 @@
      public static void func_190683_c(DataFixer p_190683_0_, Class<?> p_190683_1_)
      {
          EntityLiving.func_189752_a(p_190683_0_, p_190683_1_);
@@ -394,7 +456,15 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          super.func_70014_b(p_70014_1_);
-@@ -1016,7 +951,6 @@
+@@ -1009,14 +948,13 @@
+         {
+             p_70014_1_.func_74778_a("OwnerUUID", this.func_184780_dh().toString());
+         }
+-
++        p_70014_1_.func_74768_a("Bukkit.MaxDomestication", this.maxDomestication);
+         if (!this.field_110296_bG.func_70301_a(0).func_190926_b())
+         {
+             p_70014_1_.func_74782_a("SaddleItem", this.field_110296_bG.func_70301_a(0).func_77955_b(new NBTTagCompound()));
          }
      }
  
@@ -402,7 +472,15 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          super.func_70037_a(p_70037_1_);
-@@ -1045,7 +979,7 @@
+@@ -1040,12 +978,15 @@
+         {
+             this.func_184779_b(UUID.fromString(s));
+         }
++        if (p_70037_1_.func_74764_b("Bukkit.MaxDomestication")) {
++            this.maxDomestication = p_70037_1_.func_74762_e("Bukkit.MaxDomestication");
++        }
+ 
+         IAttributeInstance iattributeinstance = this.func_110140_aT().func_111152_a("Speed");
  
          if (iattributeinstance != null)
          {
@@ -411,7 +489,7 @@
          }
  
          if (p_70037_1_.func_150297_b("SaddleItem", 10))
-@@ -1061,7 +995,6 @@
+@@ -1061,7 +1002,6 @@
          this.func_110232_cE();
      }
  
@@ -419,7 +497,7 @@
      public boolean func_70878_b(EntityAnimal p_70878_1_)
      {
          return false;
-@@ -1069,16 +1002,10 @@
+@@ -1069,16 +1009,10 @@
  
      protected boolean func_110200_cJ()
      {
@@ -437,7 +515,7 @@
      public EntityAgeable func_90011_a(EntityAgeable p_90011_1_)
      {
          return null;
-@@ -1086,19 +1013,14 @@
+@@ -1086,19 +1020,14 @@
  
      protected void func_190681_a(EntityAgeable p_190681_1_, AbstractHorse p_190681_2_)
      {
@@ -462,7 +540,7 @@
      public boolean func_82171_bF()
      {
          return this.func_184179_bs() instanceof EntityLivingBase;
-@@ -1123,7 +1045,6 @@
+@@ -1123,7 +1052,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -470,7 +548,7 @@
      public void func_110206_u(int p_110206_1_)
      {
          if (this.func_110257_ck())
-@@ -1149,20 +1070,17 @@
+@@ -1149,20 +1077,27 @@
          }
      }
  
@@ -483,6 +561,16 @@
 -    @Override
      public void func_184775_b(int p_184775_1_)
      {
++        float power;
++        if (p_184775_1_ >= 90) {
++            power = 1.0F;
++        } else {
++            power = 0.4F + 0.4F * (float) p_184775_1_ / 90.0F;
++        }
++        org.bukkit.event.entity.HorseJumpEvent event = org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callHorseJumpEvent(this, power);
++        if (event.isCancelled()) {
++            return;
++        }
          this.field_110294_bI = true;
          this.func_110220_cK();
      }
@@ -491,7 +579,7 @@
      public void func_184777_r_()
      {
      }
-@@ -1174,24 +1092,14 @@
+@@ -1174,24 +1109,14 @@
  
          for (int i = 0; i < 7; ++i)
          {
@@ -520,7 +608,7 @@
      public void func_70103_a(byte p_70103_1_)
      {
          if (p_70103_1_ == 7)
-@@ -1208,7 +1116,6 @@
+@@ -1208,7 +1133,6 @@
          }
      }
  
@@ -528,7 +616,7 @@
      public void func_184232_k(Entity p_184232_1_)
      {
          super.func_184232_k(p_184232_1_);
-@@ -1221,15 +1128,11 @@
+@@ -1221,15 +1145,11 @@
  
          if (this.field_110282_bM > 0.0F)
          {
@@ -547,7 +635,7 @@
  
              if (p_184232_1_ instanceof EntityLivingBase)
              {
-@@ -1245,21 +1148,19 @@
+@@ -1245,21 +1165,19 @@
  
      protected double func_110245_cM()
      {
@@ -571,7 +659,7 @@
      public float func_70047_e()
      {
          return this.field_70131_O;
-@@ -1275,7 +1176,6 @@
+@@ -1275,7 +1193,6 @@
          return false;
      }
  
@@ -579,7 +667,7 @@
      public boolean func_174820_d(int p_174820_1_, ItemStack p_174820_2_)
      {
          int i = p_174820_1_ - 400;
-@@ -1314,14 +1214,12 @@
+@@ -1314,14 +1231,12 @@
      }
  
      @Nullable
@@ -595,7 +683,7 @@
      public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_)
      {
          p_180482_2_ = super.func_180482_a(p_180482_1_, p_180482_2_);
-@@ -1332,5 +1230,23 @@
+@@ -1332,5 +1247,23 @@
          }
  
          return p_180482_2_;

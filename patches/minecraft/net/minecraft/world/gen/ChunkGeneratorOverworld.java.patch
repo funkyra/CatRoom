@@ -149,7 +149,20 @@
          int i = 0;
          int j = 0;
  
-@@ -315,66 +309,66 @@
+@@ -302,6 +296,12 @@
+                             f6 = 1.0F + f6 * 4.0F;
+                         }
+ 
++                        // CraftBukkit start - fix MC-54738
++                        if (f5 < -1.8F) {
++                            f5 = -1.8F;
++                        }
++                        // CraftBukkit end
++
+                         float f7 = this.field_185999_r[j1 + 2 + (k1 + 2) * 5] / (f5 + 2.0F);
+ 
+                         if (biome1.func_185355_j() > biome.func_185355_j())
+@@ -315,66 +315,66 @@
                      }
                  }
  
@@ -239,7 +252,7 @@
                      }
  
                      this.field_185998_q[i] = d5;
-@@ -384,7 +378,6 @@
+@@ -384,7 +384,6 @@
          }
      }
  
@@ -247,7 +260,7 @@
      public void func_185931_b(int p_185931_1_, int p_185931_2_)
      {
          BlockFalling.field_149832_M = true;
-@@ -399,6 +392,8 @@
+@@ -399,6 +398,8 @@
          boolean flag = false;
          ChunkPos chunkpos = new ChunkPos(p_185931_1_, p_185931_2_);
  
@@ -256,7 +269,7 @@
          if (this.field_185996_o)
          {
              if (this.field_186000_s.field_177829_w)
-@@ -432,19 +427,17 @@
+@@ -432,19 +433,17 @@
              }
          }
  
@@ -280,7 +293,7 @@
          {
              int i2 = this.field_185990_i.nextInt(16) + 8;
              int l2 = this.field_185990_i.nextInt(this.field_185990_i.nextInt(248) + 8);
-@@ -452,25 +445,29 @@
+@@ -452,25 +451,29 @@
  
              if (l2 < this.field_185995_n.func_181545_F() || this.field_185990_i.nextInt(this.field_186000_s.field_177777_D / 8) == 0)
              {
@@ -312,7 +325,7 @@
          for (int k2 = 0; k2 < 16; ++k2)
          {
              for (int j3 = 0; j3 < 16; ++j3)
-@@ -489,11 +486,13 @@
+@@ -489,11 +492,13 @@
                  }
              }
          }
@@ -327,7 +340,7 @@
      public boolean func_185933_a(Chunk p_185933_1_, int p_185933_2_, int p_185933_3_)
      {
          boolean flag = false;
-@@ -506,7 +505,6 @@
+@@ -506,7 +511,6 @@
          return flag;
      }
  
@@ -335,7 +348,7 @@
      public List<Biome.SpawnListEntry> func_177458_a(EnumCreatureType p_177458_1_, BlockPos p_177458_2_)
      {
          Biome biome = this.field_185995_n.func_180494_b(p_177458_2_);
-@@ -518,9 +516,7 @@
+@@ -518,9 +522,7 @@
                  return this.field_186007_z.func_82667_a();
              }
  
@@ -346,7 +359,7 @@
              {
                  return this.field_185980_B.func_175799_b();
              }
-@@ -529,7 +525,6 @@
+@@ -529,7 +531,6 @@
          return biome.func_76747_a(p_177458_1_);
      }
  
@@ -354,7 +367,7 @@
      public boolean func_193414_a(World p_193414_1_, String p_193414_2_, BlockPos p_193414_3_)
      {
          if (!this.field_185996_o)
-@@ -563,7 +558,6 @@
+@@ -563,7 +564,6 @@
      }
  
      @Nullable
@@ -362,7 +375,7 @@
      public BlockPos func_180513_a(World p_180513_1_, String p_180513_2_, BlockPos p_180513_3_, boolean p_180513_4_)
      {
          if (!this.field_185996_o)
-@@ -596,39 +590,38 @@
+@@ -596,39 +596,38 @@
          }
      }
  

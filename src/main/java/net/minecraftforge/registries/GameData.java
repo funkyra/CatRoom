@@ -69,13 +69,7 @@ import com.google.common.collect.BiMap;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -84,6 +78,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.Level;
+import org.bukkit.inventory.Recipe;
 
 /**
  * INTERNAL ONLY
@@ -472,6 +467,7 @@ public class GameData
         {
             private static ItemStack result = new ItemStack(Items.DIAMOND, 64);
             private ResourceLocation name;
+            private Recipe bukkitRecip; // CatServer - bukkit compatibility
 
             @Override
             public IRecipe setRegistryName(ResourceLocation name) {
@@ -485,6 +481,18 @@ public class GameData
             @Override public boolean canFit(int width, int height) { return false; }
             @Override public ItemStack getRecipeOutput() { return result; }
             @Override public boolean isDynamic() { return true; }
+
+            @Override
+            public Recipe toBukkitRecipe() {
+                if (bukkitRecip == null)
+                    bukkitRecip = new catserver.server.inventory.CustomModRecipe(this, this.getRegistryName());
+                return this.bukkitRecip;
+            }
+
+            @Override
+            public void setKey(ResourceLocation key) {
+
+            }
         }
     }
 

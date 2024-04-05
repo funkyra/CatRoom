@@ -156,16 +156,19 @@
      public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_)
      {
          p_180482_2_ = super.func_180482_a(p_180482_1_, p_180482_2_);
-@@ -188,7 +178,7 @@
+@@ -188,8 +178,9 @@
          {
              EntitySkeleton entityskeleton = new EntitySkeleton(this.field_70170_p);
              entityskeleton.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, 0.0F);
 -            entityskeleton.func_180482_a(p_180482_1_, null);
+-            this.field_70170_p.func_72838_d(entityskeleton);
 +            entityskeleton.func_180482_a(p_180482_1_, (IEntityLivingData)null);
-             this.field_70170_p.func_72838_d(entityskeleton);
++            // this.world.spawnEntity(entityskeleton);
++            this.field_70170_p.addEntity(entityskeleton, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.JOCKEY);
              entityskeleton.func_184220_m(this);
          }
-@@ -216,7 +206,6 @@
+ 
+@@ -216,7 +207,6 @@
          return p_180482_2_;
      }
  
@@ -173,7 +176,7 @@
      public float func_70047_e()
      {
          return 0.65F;
-@@ -226,17 +215,16 @@
+@@ -226,17 +216,16 @@
          {
              public AISpiderAttack(EntitySpider p_i46676_1_)
              {
@@ -193,7 +196,7 @@
                      return false;
                  }
                  else
-@@ -245,7 +233,6 @@
+@@ -245,7 +234,6 @@
                  }
              }
  
@@ -201,7 +204,7 @@
              protected double func_179512_a(EntityLivingBase p_179512_1_)
              {
                  return (double)(4.0F + p_179512_1_.field_70130_N);
-@@ -259,7 +246,6 @@
+@@ -259,7 +247,6 @@
                  super(p_i45818_1_, p_i45818_2_, true);
              }
  

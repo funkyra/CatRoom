@@ -1,10 +1,56 @@
 --- before/net/minecraft/world/WorldServerMulti.java
 +++ after/net/minecraft/world/WorldServerMulti.java
-@@ -11,57 +11,51 @@
+@@ -7,61 +7,102 @@
+ import net.minecraft.world.border.WorldBorder;
+ import net.minecraft.world.storage.DerivedWorldInfo;
+ import net.minecraft.world.storage.ISaveHandler;
++import net.minecraft.world.storage.WorldInfo;
+ 
  public class WorldServerMulti extends WorldServer
  {
      private final WorldServer field_175743_a;
 +    private IBorderListener borderListener;
++
++    // CraftBukkit start - Add WorldInfo, Environment and ChunkGenerator arguments
++    public WorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, int dimensionId, WorldServer delegate, Profiler profilerIn, WorldInfo worldData, org.bukkit.World.Environment env, org.bukkit.generator.ChunkGenerator gen)
++    {
++        super(server, saveHandlerIn, worldData, dimensionId, profilerIn, env, gen);
++        this.field_175743_a = delegate;
++        /* CraftBukkit start
++        this.borderListener = new IBorderListener()
++        {
++            public void onSizeChanged(WorldBorder border, double newSize)
++            {
++                WorldServerMulti.this.getWorldBorder().setTransition(newSize);
++            }
++            public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time)
++            {
++                WorldServerMulti.this.getWorldBorder().setTransition(oldSize, newSize, time);
++            }
++            public void onCenterChanged(WorldBorder border, double x, double z)
++            {
++                WorldServerMulti.this.getWorldBorder().setCenter(x, z);
++            }
++            public void onWarningTimeChanged(WorldBorder border, int newTime)
++            {
++                WorldServerMulti.this.getWorldBorder().setWarningTime(newTime);
++            }
++            public void onWarningDistanceChanged(WorldBorder border, int newDistance)
++            {
++                WorldServerMulti.this.getWorldBorder().setWarningDistance(newDistance);
++            }
++            public void onDamageAmountChanged(WorldBorder border, double newAmount)
++            {
++                WorldServerMulti.this.getWorldBorder().setDamageAmount(newAmount);
++            }
++            public void onDamageBufferChanged(WorldBorder border, double newSize)
++            {
++                WorldServerMulti.this.getWorldBorder().setDamageBuffer(newSize);
++            }
++        };
++        this.delegate.getWorldBorder().addListener(this.borderListener);
++        // CraftBukkit end */
++    }
  
      public WorldServerMulti(MinecraftServer p_i45923_1_, ISaveHandler p_i45923_2_, int p_i45923_3_, WorldServer p_i45923_4_, Profiler p_i45923_5_)
      {
@@ -54,16 +100,22 @@
      }
  
 -    @Override
-     protected void func_73042_a() throws MinecraftException
+-    protected void func_73042_a() throws MinecraftException
++    /* we handle all saving including perWorldStorage in WorldServer.saveLevel. This needs to be disabled since we follow
++    // bukkit's world saving methods by using a seperate save handler for each world. Each world folder needs to generate a corresponding 
++    // level.dat for plugins that require it such as MultiWorld.
++    /*
++    protected void saveLevel() throws MinecraftException
      {
-+        this.perWorldStorage.func_75744_a();
++        this.perWorldStorage.saveAllData();
      }
++    */
  
 -    @Override
      public World func_175643_b()
      {
          this.field_72988_C = this.field_175743_a.func_175693_T();
-@@ -69,12 +63,12 @@
+@@ -69,12 +110,12 @@
          this.field_184151_B = this.field_175743_a.func_184146_ak();
          this.field_191951_C = this.field_175743_a.func_191952_z();
          String s = VillageCollection.func_176062_a(this.field_73011_w);
@@ -78,12 +130,14 @@
          }
          else
          {
-@@ -82,7 +76,16 @@
+@@ -82,7 +123,17 @@
              this.field_72982_D.func_82566_a(this);
          }
  
+-        return this;
 +        this.initCapabilities();
-         return this;
++        // return this;
++        return super.func_175643_b(); // CraftBukkit
 +    }
 +
 +

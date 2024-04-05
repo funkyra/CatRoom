@@ -32,6 +32,7 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -499,12 +500,12 @@ public class ForgeModContainer extends DummyModContainer implements WorldAccessC
         }
         ForgeChunkManager.captureConfig(evt.getModConfigurationDirectory());
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new catserver.server.CatServerEventHandler()); // CatServer
 
-        // TODO: Create own version checker instead
-//        if (!ForgeModContainer.disableVersionCheck)
-//        {
-//            ForgeVersion.startVersionCheck();
-//        }
+        if (false && !ForgeModContainer.disableVersionCheck) // CatServer - diable Forge version check
+        {
+            ForgeVersion.startVersionCheck();
+        }
     }
 
     @SubscribeEvent

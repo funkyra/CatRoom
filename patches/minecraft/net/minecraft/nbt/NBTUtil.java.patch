@@ -1,0 +1,33 @@
+--- before/net/minecraft/nbt/NBTUtil.java
++++ after/net/minecraft/nbt/NBTUtil.java
+@@ -2,6 +2,7 @@
+ 
+ import com.google.common.annotations.VisibleForTesting;
+ import com.google.common.base.Optional;
++import com.google.common.collect.UnmodifiableIterator;
+ import com.mojang.authlib.GameProfile;
+ import com.mojang.authlib.properties.Property;
+ import java.util.UUID;
+@@ -288,10 +289,12 @@
+         if (!p_190009_1_.func_177228_b().isEmpty())
+         {
+             NBTTagCompound nbttagcompound = new NBTTagCompound();
++            UnmodifiableIterator unmodifiableiterator = p_190009_1_.func_177228_b().entrySet().iterator();
+ 
+-            for (Entry < IProperty<?>, Comparable<? >> entry : p_190009_1_.func_177228_b().entrySet())
++            while (unmodifiableiterator.hasNext())
+             {
+-                IProperty<?> iproperty = entry.getKey();
++                Entry < IProperty<?>, Comparable<? >> entry = (Entry)unmodifiableiterator.next();
++                IProperty<?> iproperty = (IProperty)entry.getKey();
+                 nbttagcompound.func_74778_a(iproperty.func_177701_a(), func_190010_a(iproperty, entry.getValue()));
+             }
+ 
+@@ -300,6 +303,7 @@
+ 
+         return p_190009_0_;
+     }
++
+     @SuppressWarnings("unchecked")
+     private static <T extends Comparable<T>> String func_190010_a(IProperty<T> p_190010_0_, Comparable<?> p_190010_1_)
+     {

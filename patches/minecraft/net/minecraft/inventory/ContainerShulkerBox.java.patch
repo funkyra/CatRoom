@@ -1,0 +1,35 @@
+--- before/net/minecraft/inventory/ContainerShulkerBox.java
++++ after/net/minecraft/inventory/ContainerShulkerBox.java
+@@ -3,11 +3,16 @@
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.InventoryPlayer;
+ import net.minecraft.item.ItemStack;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventory;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
+ 
+ public class ContainerShulkerBox extends Container
+ {
+     private final IInventory field_190899_a;
+ 
++    private CraftInventoryView bukkitEntity;
++    private InventoryPlayer player;
++
+     public ContainerShulkerBox(InventoryPlayer p_i47266_1_, IInventory p_i47266_2_, EntityPlayer p_i47266_3_)
+     {
+         this.field_190899_a = p_i47266_2_;
+@@ -84,5 +89,15 @@
+     {
+         super.func_75134_a(p_75134_1_);
+         this.field_190899_a.func_174886_c(p_75134_1_);
++    }
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        bukkitEntity = new CraftInventoryView(this.player.field_70458_d.getBukkitEntity(), new CraftInventory(this.field_190899_a), this);
++        return bukkitEntity;
+     }
+ }

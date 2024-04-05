@@ -1,0 +1,21 @@
+--- before/net/minecraft/client/resources/FileResourcePack.java
++++ after/net/minecraft/client/resources/FileResourcePack.java
+@@ -111,12 +111,12 @@
+         return set;
+     }
+ 
+-    @Override
+-    protected void finalize() throws Throwable
+-    {
+-        this.close();
+-        super.finalize();
+-    }
++//    @Override
++//    protected void finalize() throws Throwable
++//    {
++//        this.close();
++//        super.finalize();
++//    }
+ 
+     @Override
+     public void close() throws IOException

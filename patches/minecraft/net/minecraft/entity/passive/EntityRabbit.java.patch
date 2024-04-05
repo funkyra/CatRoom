@@ -9,15 +9,26 @@
      private int field_175540_bm;
      private int field_175535_bn;
      private boolean field_175537_bp;
-@@ -68,30 +68,28 @@
+@@ -66,32 +66,35 @@
+     {
+         super(p_i45869_1_);
          this.func_70105_a(0.4F, 0.5F);
-         this.field_70767_i = new EntityRabbit.RabbitJumpHelper(this);
-         this.field_70765_h = new EntityRabbit.RabbitMoveHelper(this);
+-        this.field_70767_i = new EntityRabbit.RabbitJumpHelper(this);
+-        this.field_70765_h = new EntityRabbit.RabbitMoveHelper(this);
 -        this.func_175515_b(0.0);
-+        this.func_175515_b(0.0D);
-     }
- 
+-    }
+-
 -    @Override
++        this.field_70767_i = new RabbitJumpHelper(this);
++        this.field_70765_h = new RabbitMoveHelper(this);
++        this.initializePathFinderGoals(); // CraftBukkit - moved code
++    }
++
++    // CraftBukkit start - code from constructor
++    public void initializePathFinderGoals(){
++        this.func_175515_b(0.0D);
++    }
++
      protected void func_184651_r()
      {
          this.field_70714_bg.func_75776_a(1, new EntityAISwimming(this));
@@ -51,7 +62,7 @@
          {
              Path path = this.field_70699_by.func_75505_d();
  
-@@ -99,13 +97,13 @@
+@@ -99,13 +102,13 @@
              {
                  Vec3d vec3d = path.func_75878_a(this);
  
@@ -67,7 +78,7 @@
          }
          else
          {
-@@ -113,17 +111,16 @@
+@@ -113,17 +116,16 @@
          }
      }
  
@@ -87,7 +98,7 @@
              {
                  this.func_191958_b(0.0F, 0.0F, 1.0F, 0.1F);
              }
-@@ -147,16 +144,13 @@
+@@ -147,16 +149,13 @@
          this.field_70765_h.func_75642_a(this.field_70765_h.func_179917_d(), this.field_70765_h.func_179919_e(), this.field_70765_h.func_179918_f(), p_175515_1_);
      }
  
@@ -105,7 +116,7 @@
          }
      }
  
-@@ -167,14 +161,12 @@
+@@ -167,14 +166,12 @@
          this.field_175540_bm = 0;
      }
  
@@ -121,7 +132,7 @@
      public void func_70619_bc()
      {
          if (this.field_175538_bq > 0)
-@@ -204,13 +196,10 @@
+@@ -204,13 +201,10 @@
              {
                  EntityLivingBase entitylivingbase = this.func_70638_az();
  
@@ -137,7 +148,7 @@
                      this.func_184770_cZ();
                      this.field_175537_bp = true;
                  }
-@@ -243,15 +232,13 @@
+@@ -243,15 +237,13 @@
          this.field_175537_bp = this.field_70122_E;
      }
  
@@ -154,7 +165,7 @@
      }
  
      private void func_175518_cr()
-@@ -266,7 +253,7 @@
+@@ -266,7 +258,7 @@
  
      private void func_175530_ct()
      {
@@ -163,7 +174,7 @@
          {
              this.field_175538_bq = 10;
          }
-@@ -282,7 +269,6 @@
+@@ -282,7 +274,6 @@
          this.func_175520_cs();
      }
  
@@ -171,7 +182,7 @@
      public void func_70636_d()
      {
          super.func_70636_d();
-@@ -299,12 +285,11 @@
+@@ -299,12 +290,11 @@
          }
      }
  
@@ -186,7 +197,7 @@
      }
  
      public static void func_189801_b(DataFixer p_189801_0_)
-@@ -312,7 +297,6 @@
+@@ -312,7 +302,6 @@
          EntityLiving.func_189752_a(p_189801_0_, EntityRabbit.class);
      }
  
@@ -194,7 +205,7 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          super.func_70014_b(p_70014_1_);
-@@ -320,7 +304,6 @@
+@@ -320,7 +309,6 @@
          p_70014_1_.func_74768_a("MoreCarrotTicks", this.field_175541_bs);
      }
  
@@ -202,7 +213,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          super.func_70037_a(p_70037_1_);
-@@ -333,25 +316,21 @@
+@@ -333,25 +321,21 @@
          return SoundEvents.field_187824_en;
      }
  
@@ -228,7 +239,7 @@
      public boolean func_70652_k(Entity p_70652_1_)
      {
          if (this.func_175531_cl() == 99)
-@@ -365,20 +344,17 @@
+@@ -365,20 +349,17 @@
          }
      }
  
@@ -249,7 +260,7 @@
      protected ResourceLocation func_184647_J()
      {
          return LootTableList.field_186393_A;
-@@ -410,7 +386,6 @@
+@@ -410,7 +391,6 @@
          return entityrabbit;
      }
  
@@ -257,7 +268,7 @@
      public boolean func_70877_b(ItemStack p_70877_1_)
      {
          return this.func_175525_a(p_70877_1_.func_77973_b());
-@@ -418,18 +393,18 @@
+@@ -418,18 +398,18 @@
  
      public int func_175531_cl()
      {
@@ -281,7 +292,7 @@
  
              if (!this.func_145818_k_())
              {
-@@ -437,11 +412,10 @@
+@@ -437,11 +417,10 @@
              }
          }
  
@@ -294,7 +305,7 @@
      public IEntityLivingData func_180482_a(DifficultyInstance p_180482_1_, @Nullable IEntityLivingData p_180482_2_)
      {
          p_180482_2_ = super.func_180482_a(p_180482_1_, p_180482_2_);
-@@ -496,22 +470,11 @@
+@@ -496,22 +475,11 @@
      {
          BlockCarrot blockcarrot = (BlockCarrot)Blocks.field_150459_bM;
          IBlockState iblockstate = blockcarrot.func_185528_e(blockcarrot.func_185526_g());
@@ -318,7 +329,7 @@
      public void func_70103_a(byte p_70103_1_)
      {
          if (p_70103_1_ == 1)
-@@ -536,7 +499,6 @@
+@@ -536,7 +504,6 @@
                  this.field_179511_d = p_i46403_1_;
              }
  
@@ -326,7 +337,7 @@
              public boolean func_75250_a()
              {
                  return this.field_179511_d.func_175531_cl() != 99 && super.func_75250_a();
-@@ -547,10 +509,9 @@
+@@ -547,10 +514,9 @@
          {
              public AIEvilAttack(EntityRabbit p_i45867_1_)
              {
@@ -338,7 +349,7 @@
              protected double func_179512_a(EntityLivingBase p_179512_1_)
              {
                  return (double)(4.0F + p_179512_1_.field_70130_N);
-@@ -567,7 +528,6 @@
+@@ -567,7 +533,6 @@
                  this.field_179486_b = p_i45861_1_;
              }
  
@@ -346,7 +357,7 @@
              public void func_75246_d()
              {
                  super.func_75246_d();
-@@ -583,16 +543,15 @@
+@@ -583,16 +548,15 @@
  
              public AIRaidFarm(EntityRabbit p_i45860_1_)
              {
@@ -365,7 +376,7 @@
                      {
                          return false;
                      }
-@@ -605,25 +564,15 @@
+@@ -605,25 +569,15 @@
                  return super.func_75250_a();
              }
  
@@ -392,7 +403,7 @@
  
                  if (this.func_179487_f())
                  {
-@@ -634,16 +583,16 @@
+@@ -634,16 +588,26 @@
  
                      if (this.field_179499_e && block instanceof BlockCarrot)
                      {
@@ -402,17 +413,27 @@
 -                        if (integer == 0)
 +                        if (integer.intValue() == 0)
                          {
++                            if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityChangeBlockEvent(this.field_179500_c, blockpos, Blocks.field_150350_a, 0).isCancelled()) {
++                                return;
++                            }
                              world.func_180501_a(blockpos, Blocks.field_150350_a.func_176223_P(), 2);
                              world.func_175655_b(blockpos, true);
                          }
                          else
                          {
 -                            world.func_180501_a(blockpos, iblockstate.func_177226_a(BlockCarrot.field_176488_a, integer - 1), 2);
++                            if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityChangeBlockEvent(
++                                    this.field_179500_c,
++                                    blockpos,
++                                    block, block.func_176201_c(iblockstate.func_177226_a(BlockCarrot.field_176488_a, Integer.valueOf(integer.intValue() - 1)))
++                            ).isCancelled()) {
++                                return;
++                            }
 +                            world.func_180501_a(blockpos, iblockstate.func_177226_a(BlockCarrot.field_176488_a, Integer.valueOf(integer.intValue() - 1)), 2);
                              world.func_175718_b(2001, blockpos, Block.func_176210_f(iblockstate));
                          }
  
-@@ -655,7 +604,6 @@
+@@ -655,7 +619,6 @@
                  }
              }
  
@@ -420,7 +441,7 @@
              protected boolean func_179488_a(World p_179488_1_, BlockPos p_179488_2_)
              {
                  Block block = p_179488_1_.func_180495_p(p_179488_2_).func_177230_c();
-@@ -703,7 +651,6 @@
+@@ -703,7 +666,6 @@
              this.field_180068_d = p_180066_1_;
          }
  
@@ -428,7 +449,7 @@
          public void func_75661_b()
          {
              if (this.field_75662_b)
-@@ -725,14 +672,11 @@
+@@ -725,14 +687,11 @@
                  this.field_179929_g = p_i45862_1_;
              }
  
@@ -445,7 +466,7 @@
                  }
                  else if (this.func_75640_a())
                  {
-@@ -742,17 +686,16 @@
+@@ -742,17 +701,16 @@
                  super.func_75641_c();
              }
  

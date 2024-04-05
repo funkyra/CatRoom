@@ -1,0 +1,11 @@
+--- before/net/minecraft/entity/ai/EntityAIFindEntityNearest.java
++++ after/net/minecraft/entity/ai/EntityAIFindEntityNearest.java
+@@ -109,7 +109,7 @@
+     @Override
+     public void func_75249_e()
+     {
+-        this.field_179442_b.func_70624_b(this.field_179441_e);
++        this.field_179442_b.setGoalTarget(this.field_179441_e, org.bukkit.event.entity.EntityTargetEvent.TargetReason.CLOSEST_ENTITY, true);
+         super.func_75249_e();
+     }
+ 

@@ -57,7 +57,7 @@
          }
          else if (this.field_75449_e == 0 && this.field_75451_c.func_70941_o())
          {
-@@ -112,18 +106,22 @@
+@@ -112,21 +106,28 @@
          }
          else
          {
@@ -71,6 +71,9 @@
      {
 -        EntityVillager entityvillager = this.field_75450_b.func_90011_a(this.field_75451_c);
 +        net.minecraft.entity.EntityAgeable entityvillager = this.field_75450_b.func_90011_a(this.field_75451_c);
++        if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityBreedEvent(entityvillager, this.field_75450_b, this.field_75451_c, null, null, 0).isCancelled()) {
++            return;
++        }
          this.field_75451_c.func_70873_a(6000);
          this.field_75450_b.func_70873_a(6000);
          this.field_75451_c.func_175549_o(false);
@@ -81,4 +84,8 @@
 +        entityvillager = event.getChild();
          entityvillager.func_70873_a(-24000);
          entityvillager.func_70012_b(this.field_75450_b.field_70165_t, this.field_75450_b.field_70163_u, this.field_75450_b.field_70161_v, 0.0F, 0.0F);
-         this.field_75448_d.func_72838_d(entityvillager);
+-        this.field_75448_d.func_72838_d(entityvillager);
++        this.field_75448_d.addEntity(entityvillager, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.BREEDING);
+         this.field_75448_d.func_72960_a(entityvillager, (byte)12);
+     }
+ }

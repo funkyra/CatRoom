@@ -1,6 +1,19 @@
 --- before/net/minecraft/entity/item/EntityArmorStand.java
 +++ after/net/minecraft/entity/item/EntityArmorStand.java
-@@ -47,36 +47,44 @@
+@@ -38,6 +38,12 @@
+ import net.minecraft.world.WorldServer;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.CraftEquipmentSlot;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
++import org.bukkit.entity.ArmorStand;
++import org.bukkit.entity.Player;
++import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
++import org.bukkit.inventory.EquipmentSlot;
+ 
+ public class EntityArmorStand extends EntityLivingBase
+ {
+@@ -47,36 +53,46 @@
      private static final Rotations field_175431_d = new Rotations(-15.0F, 0.0F, 10.0F);
      private static final Rotations field_175432_e = new Rotations(-1.0F, 0.0F, -1.0F);
      private static final Rotations field_175429_f = new Rotations(1.0F, 0.0F, 1.0F);
@@ -40,12 +53,14 @@
 -    private Rotations field_175439_bk = field_175431_d;
 -    private Rotations field_175440_bl = field_175432_e;
 -    private Rotations field_175441_bm = field_175429_f;
-+    private Rotations field_175443_bh;
-+    private Rotations field_175444_bi;
-+    private Rotations field_175438_bj;
-+    private Rotations field_175439_bk;
-+    private Rotations field_175440_bl;
-+    private Rotations field_175441_bm;
++    public Rotations field_175443_bh;
++    public Rotations field_175444_bi;
++    public Rotations field_175438_bj;
++    public Rotations field_175439_bk;
++    public Rotations field_175440_bl;
++    public Rotations field_175441_bm;
++
++    private java.util.ArrayList<org.bukkit.inventory.ItemStack> drops = new java.util.ArrayList<>(); // CatServer
  
      public EntityArmorStand(World p_i45854_1_)
      {
@@ -61,15 +76,21 @@
          this.field_70145_X = this.func_189652_ae();
          this.func_70105_a(0.5F, 1.975F);
      }
-@@ -87,7 +95,6 @@
+@@ -87,7 +103,13 @@
          this.func_70107_b(p_i45855_2_, p_i45855_4_, p_i45855_6_);
      }
  
--    @Override
++    // CraftBukkit start - SPIGOT-3607, SPIGOT-3637
+     @Override
++    public float getBukkitYaw() {
++        return this.field_70177_z;
++    }
++    // CraftBukkit end
++
      protected final void func_70105_a(float p_70105_1_, float p_70105_2_)
      {
          double d0 = this.field_70165_t;
-@@ -98,17 +105,15 @@
+@@ -98,17 +120,15 @@
          this.func_70107_b(d0, d1, d2);
      }
  
@@ -88,7 +109,7 @@
          this.field_70180_af.func_187214_a(field_184802_b, field_175435_a);
          this.field_70180_af.func_187214_a(field_184803_c, field_175433_b);
          this.field_70180_af.func_187214_a(field_184804_d, field_175434_c);
-@@ -117,19 +122,16 @@
+@@ -117,19 +137,16 @@
          this.field_70180_af.func_187214_a(field_184807_g, field_175429_f);
      }
  
@@ -108,7 +129,7 @@
      public ItemStack func_184582_a(EntityEquipmentSlot p_184582_1_)
      {
          switch (p_184582_1_.func_188453_a())
-@@ -143,7 +145,6 @@
+@@ -143,7 +160,6 @@
          }
      }
  
@@ -116,7 +137,7 @@
      public void func_184201_a(EntityEquipmentSlot p_184201_1_, ItemStack p_184201_2_)
      {
          switch (p_184201_1_.func_188453_a())
-@@ -158,7 +159,6 @@
+@@ -158,7 +174,6 @@
          }
      }
  
@@ -124,7 +145,7 @@
      public boolean func_174820_d(int p_174820_1_, ItemStack p_174820_2_)
      {
          EntityEquipmentSlot entityequipmentslot;
-@@ -206,10 +206,9 @@
+@@ -206,10 +221,9 @@
  
      public static void func_189805_a(DataFixer p_189805_0_)
      {
@@ -136,7 +157,7 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          super.func_70014_b(p_70014_1_);
-@@ -257,7 +256,6 @@
+@@ -257,7 +271,6 @@
          p_70014_1_.func_74782_a("Pose", this.func_175419_y());
      }
  
@@ -144,7 +165,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          super.func_70037_a(p_70037_1_);
-@@ -347,18 +345,15 @@
+@@ -347,18 +360,15 @@
          return nbttagcompound;
      }
  
@@ -163,7 +184,7 @@
      protected void func_85033_bc()
      {
          List<Entity> list = this.field_70170_p.func_175674_a(this, this.func_174813_aQ(), field_184798_bv);
-@@ -367,79 +362,81 @@
+@@ -367,79 +377,81 @@
          {
              Entity entity = list.get(i);
  
@@ -288,7 +309,26 @@
          {
              entityequipmentslot = EntityEquipmentSlot.HEAD;
          }
-@@ -466,121 +463,127 @@
+@@ -460,127 +472,149 @@
+         {
+             if (!itemstack.func_190926_b() || (this.field_175442_bg & 1 << p_184795_2_.func_188452_c() + 16) == 0)
+             {
++                org.bukkit.inventory.ItemStack armorStandItem = CraftItemStack.asCraftMirror(itemstack);
++                org.bukkit.inventory.ItemStack playerHeldItem = CraftItemStack.asCraftMirror(p_184795_3_);
++
++                Player bukkitPlayer = (Player) p_184795_1_.getBukkitEntity();
++                ArmorStand self = (ArmorStand) this.getBukkitEntity();
++
++                EquipmentSlot slot = CraftEquipmentSlot.getSlot(p_184795_2_);
++                PlayerArmorStandManipulateEvent armorStandManipulateEvent = new PlayerArmorStandManipulateEvent(bukkitPlayer, self, playerHeldItem, armorStandItem, slot);
++                this.field_70170_p.getServer().getPluginManager().callEvent(armorStandManipulateEvent);
++
++                if (armorStandManipulateEvent.isCancelled()) {
++                    return;
++                }
+                 if (p_184795_1_.field_71075_bZ.field_75098_d && itemstack.func_190926_b() && !p_184795_3_.func_190926_b())
+                 {
+                     ItemStack itemstack2 = p_184795_3_.func_77946_l();
                      itemstack2.func_190920_e(1);
                      this.func_184201_a(p_184795_2_, itemstack2);
                  }
@@ -366,34 +406,26 @@
 -
 -            if (!flag1 && !flag)
 -            {
++        if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleNonLivingEntityDamageEvent(this, p_70097_1_, p_70097_2_)) {
++            return false;
++        }
 +        if (!this.field_70170_p.field_72995_K && !this.field_70128_L)
 +        {
 +            if (DamageSource.field_76380_i.equals(p_70097_1_))
 +            {
-+                this.func_70106_y();
++                this.func_174812_G();
                  return false;
              }
 -            else
 +            else if (!this.func_180431_b(p_70097_1_) && !this.field_175436_h && !this.func_181026_s())
              {
 -                if (p_70097_1_.func_76364_f() instanceof EntityArrow)
--                {
--                    p_70097_1_.func_76364_f().func_70106_y();
--                }
--
--                if (p_70097_1_.func_76346_g() instanceof EntityPlayer && !((EntityPlayer)p_70097_1_.func_76346_g()).field_71075_bZ.field_75099_e)
--                {
--                    return false;
--                }
--                else if (p_70097_1_.func_180136_u())
--                {
--                    this.func_190773_I();
--                    this.func_175412_z();
 +                if (p_70097_1_.func_94541_c())
-+                {
+                 {
+-                    p_70097_1_.func_76364_f().func_70106_y();
 +                    this.func_175409_C();
-                     this.func_70106_y();
-                     return false;
++                    this.func_174812_G();
++                    return false;
                  }
 +                else if (DamageSource.field_76372_a.equals(p_70097_1_))
 +                {
@@ -405,14 +437,20 @@
 +                    {
 +                        this.func_70015_d(5);
 +                    }
-+
-+                    return false;
-+                }
+ 
+-                if (p_70097_1_.func_76346_g() instanceof EntityPlayer && !((EntityPlayer)p_70097_1_.func_76346_g()).field_71075_bZ.field_75099_e)
+-                {
+                     return false;
+                 }
+-                else if (p_70097_1_.func_180136_u())
 +                else if (DamageSource.field_76370_b.equals(p_70097_1_) && this.func_110143_aJ() > 0.5F)
-+                {
+                 {
+-                    this.func_190773_I();
+-                    this.func_175412_z();
+-                    this.func_70106_y();
 +                    this.func_175406_a(4.0F);
-+                    return false;
-+                }
+                     return false;
+                 }
                  else
                  {
 -                    long i = this.field_70170_p.func_82737_E();
@@ -444,7 +482,7 @@
 +                        {
 +                            this.func_190773_I();
 +                            this.func_175412_z();
-+                            this.func_70106_y();
++                            this.func_174812_G();
 +                            return false;
 +                        }
 +                        else
@@ -460,7 +498,7 @@
 +                            {
 +                                this.func_175421_A();
 +                                this.func_175412_z();
-+                                this.func_70106_y();
++                                this.func_174812_G();
 +                            }
 +
 +                            return false;
@@ -495,7 +533,7 @@
                  this.field_175437_i = this.field_70170_p.func_82737_E();
              }
          }
-@@ -591,17 +594,16 @@
+@@ -591,17 +625,16 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -517,7 +555,7 @@
          return p_70112_1_ < d0 * d0;
      }
  
-@@ -609,26 +611,14 @@
+@@ -609,31 +642,19 @@
      {
          if (this.field_70170_p instanceof WorldServer)
          {
@@ -546,25 +584,43 @@
  
          if (f <= 0.5F)
          {
-@@ -657,7 +647,7 @@
+             this.func_175409_C();
+-            this.func_70106_y();
++            this.func_174812_G();
+         }
+         else
+         {
+@@ -643,7 +664,8 @@
+ 
+     private void func_175421_A()
+     {
+-        Block.func_180635_a(this.field_70170_p, new BlockPos(this), new ItemStack(Items.field_179565_cj));
++//        Block.spawnAsEntity(this.world, new BlockPos(this), new ItemStack(Items.ARMOR_STAND));
++        drops.add(org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack.asBukkitCopy(new ItemStack(Items.field_179565_cj))); // CraftBukkit - add to drops
+         this.func_175409_C();
+     }
+ 
+@@ -657,7 +679,8 @@
  
              if (!itemstack.func_190926_b())
              {
 -                Block.func_180635_a(this.field_70170_p, new BlockPos(this).func_177984_a(), itemstack);
-+                Block.func_180635_a(this.field_70170_p, (new BlockPos(this)).func_177984_a(), itemstack);
++//                Block.spawnAsEntity(this.world, (new BlockPos(this)).up(), itemstack);
++                drops.add(org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack.asBukkitCopy(itemstack)); // CraftBukkit - add to drops
                  this.field_184799_bw.set(i, ItemStack.field_190927_a);
              }
          }
-@@ -668,7 +658,7 @@
+@@ -668,7 +691,8 @@
  
              if (!itemstack1.func_190926_b())
              {
 -                Block.func_180635_a(this.field_70170_p, new BlockPos(this).func_177984_a(), itemstack1);
-+                Block.func_180635_a(this.field_70170_p, (new BlockPos(this)).func_177984_a(), itemstack1);
++//                Block.spawnAsEntity(this.world, (new BlockPos(this)).up(), itemstack1);
++                drops.add(org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack.asBukkitCopy(itemstack1)); // CraftBukkit - add to drops
                  this.field_184800_bx.set(j, ItemStack.field_190927_a);
              }
          }
-@@ -676,11 +666,9 @@
+@@ -676,11 +700,9 @@
  
      private void func_190773_I()
      {
@@ -577,7 +633,7 @@
      protected float func_110146_f(float p_110146_1_, float p_110146_2_)
      {
          this.field_70760_ar = this.field_70126_B;
-@@ -688,19 +676,16 @@
+@@ -688,19 +710,16 @@
          return 0.0F;
      }
  
@@ -598,7 +654,7 @@
      public void func_191986_a(float p_191986_1_, float p_191986_2_, float p_191986_3_)
      {
          if (!this.func_189652_ae())
-@@ -709,60 +694,57 @@
+@@ -709,60 +728,57 @@
          }
      }
  
@@ -665,7 +721,7 @@
  
          if (!this.field_175441_bm.equals(rotations5))
          {
-@@ -791,38 +773,32 @@
+@@ -791,83 +807,84 @@
          }
      }
  
@@ -691,7 +747,14 @@
 -    @Override
      public void func_174812_G()
      {
++        org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityDeathEvent(this, drops); // CraftBukkit - call event
          this.func_70106_y();
++        // CatServer start
++        for (EntityItem item : capturedDrops)
++        {
++            field_70170_p.func_72838_d(item);
++        }
++        // CatServer end
      }
  
 -    @Override
@@ -704,9 +767,10 @@
      public EnumPushReaction func_184192_z()
      {
          return this.func_181026_s() ? EnumPushReaction.IGNORE : super.func_184192_z();
-@@ -830,44 +806,44 @@
+     }
  
-     private void func_175420_a(boolean p_175420_1_)
+-    private void func_175420_a(boolean p_175420_1_)
++    public void func_175420_a(boolean p_175420_1_)
      {
 -        this.field_70180_af.func_187227_b(field_184801_a, this.func_184797_a(this.field_70180_af.func_187225_a(field_184801_a), 1, p_175420_1_));
 +        this.field_70180_af.func_187227_b(field_184801_a, Byte.valueOf(this.func_184797_a(((Byte)this.field_70180_af.func_187225_a(field_184801_a)).byteValue(), 1, p_175420_1_)));
@@ -719,7 +783,8 @@
 +        return (((Byte)this.field_70180_af.func_187225_a(field_184801_a)).byteValue() & 1) != 0;
      }
  
-     private void func_175413_k(boolean p_175413_1_)
+-    private void func_175413_k(boolean p_175413_1_)
++    public void func_175413_k(boolean p_175413_1_)
      {
 -        this.field_70180_af.func_187227_b(field_184801_a, this.func_184797_a(this.field_70180_af.func_187225_a(field_184801_a), 4, p_175413_1_));
 +        this.field_70180_af.func_187227_b(field_184801_a, Byte.valueOf(this.func_184797_a(((Byte)this.field_70180_af.func_187225_a(field_184801_a)).byteValue(), 4, p_175413_1_)));
@@ -731,7 +796,8 @@
 +        return (((Byte)this.field_70180_af.func_187225_a(field_184801_a)).byteValue() & 4) != 0;
      }
  
-     private void func_175426_l(boolean p_175426_1_)
+-    private void func_175426_l(boolean p_175426_1_)
++    public void func_175426_l(boolean p_175426_1_)
      {
 -        this.field_70180_af.func_187227_b(field_184801_a, this.func_184797_a(this.field_70180_af.func_187225_a(field_184801_a), 8, p_175426_1_));
 +        this.field_70180_af.func_187227_b(field_184801_a, Byte.valueOf(this.func_184797_a(((Byte)this.field_70180_af.func_187225_a(field_184801_a)).byteValue(), 8, p_175426_1_)));
@@ -743,7 +809,8 @@
 +        return (((Byte)this.field_70180_af.func_187225_a(field_184801_a)).byteValue() & 8) != 0;
      }
  
-     private void func_181027_m(boolean p_181027_1_)
+-    private void func_181027_m(boolean p_181027_1_)
++    public void func_181027_m(boolean p_181027_1_)
      {
 -        this.field_70180_af.func_187227_b(field_184801_a, this.func_184797_a(this.field_70180_af.func_187225_a(field_184801_a), 16, p_181027_1_));
 +        this.field_70180_af.func_187227_b(field_184801_a, Byte.valueOf(this.func_184797_a(((Byte)this.field_70180_af.func_187225_a(field_184801_a)).byteValue(), 16, p_181027_1_)));
@@ -757,7 +824,7 @@
      }
  
      private byte func_184797_a(byte p_184797_1_, int p_184797_2_, boolean p_184797_3_)
-@@ -954,50 +930,42 @@
+@@ -954,50 +971,42 @@
          return this.field_175441_bm;
      }
  
@@ -808,7 +875,7 @@
      public void func_184206_a(DataParameter<?> p_184206_1_)
      {
          if (field_184801_a.equals(p_184206_1_))
-@@ -1008,7 +976,6 @@
+@@ -1008,7 +1017,6 @@
          super.func_184206_a(p_184206_1_);
      }
  

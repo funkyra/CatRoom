@@ -8,7 +8,15 @@
  import net.minecraft.advancements.CriteriaTriggers;
  import net.minecraft.block.Block;
  import net.minecraft.block.BlockSkull;
-@@ -34,17 +35,7 @@
+@@ -10,6 +11,7 @@
+ import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.init.Blocks;
+ import net.minecraft.nbt.NBTTagCompound;
++import net.minecraft.nbt.NBTTagList;
+ import net.minecraft.nbt.NBTUtil;
+ import net.minecraft.tileentity.TileEntity;
+ import net.minecraft.tileentity.TileEntitySkull;
+@@ -34,17 +36,7 @@
          this.func_77627_a(true);
      }
  
@@ -27,7 +35,7 @@
      {
          if (p_180614_5_ == EnumFacing.DOWN)
          {
-@@ -52,13 +43,18 @@
+@@ -52,13 +44,18 @@
          }
          else
          {
@@ -47,7 +55,7 @@
                  {
                      return EnumActionResult.FAIL;
                  }
-@@ -68,71 +64,73 @@
+@@ -68,71 +65,73 @@
  
              ItemStack itemstack = p_180614_1_.func_184586_b(p_180614_4_);
  
@@ -179,7 +187,7 @@
      public void func_150895_a(CreativeTabs p_150895_1_, NonNullList<ItemStack> p_150895_2_)
      {
          if (this.func_194125_a(p_150895_1_))
-@@ -144,13 +142,11 @@
+@@ -144,13 +143,11 @@
          }
      }
  
@@ -193,7 +201,7 @@
      public String func_77667_c(ItemStack p_77667_1_)
      {
          int i = p_77667_1_.func_77960_j();
-@@ -163,7 +159,6 @@
+@@ -163,7 +160,6 @@
          return super.func_77658_a() + "." + field_82807_a[i];
      }
  
@@ -201,19 +209,43 @@
      public String func_77653_i(ItemStack p_77653_1_)
      {
          if (p_77653_1_.func_77960_j() == 3 && p_77653_1_.func_77942_o())
-@@ -187,14 +182,13 @@
+@@ -187,20 +183,34 @@
          return super.func_77653_i(p_77653_1_);
      }
  
 -    @Override
-     public boolean func_179215_a(NBTTagCompound p_179215_1_)
+-    public boolean func_179215_a(NBTTagCompound p_179215_1_)
++    public boolean func_179215_a(final NBTTagCompound p_179215_1_) // Spigot - make final
      {
          super.func_179215_a(p_179215_1_);
  
          if (p_179215_1_.func_150297_b("SkullOwner", 8) && !StringUtils.isBlank(p_179215_1_.func_74779_i("SkullOwner")))
          {
 -            GameProfile gameprofile = new GameProfile(null, p_179215_1_.func_74779_i("SkullOwner"));
+-            gameprofile = TileEntitySkull.func_174884_b(gameprofile);
+-            p_179215_1_.func_74782_a("SkullOwner", NBTUtil.func_180708_a(new NBTTagCompound(), gameprofile));
 +            GameProfile gameprofile = new GameProfile((UUID)null, p_179215_1_.func_74779_i("SkullOwner"));
-             gameprofile = TileEntitySkull.func_174884_b(gameprofile);
-             p_179215_1_.func_74782_a("SkullOwner", NBTUtil.func_180708_a(new NBTTagCompound(), gameprofile));
++            // Spigot start
++            TileEntitySkull.updateGameprofile(gameprofile, new com.google.common.base.Predicate<GameProfile>() {
++
++                @Override
++                public boolean apply(GameProfile gameprofile) {
++                    p_179215_1_.func_74782_a("SkullOwner", NBTUtil.func_180708_a(new NBTTagCompound(), gameprofile));
++                    return false;
++                }
++            }, false);
++            // Spigot end
              return true;
+         }
+         else
+         {
++            NBTTagList textures = p_179215_1_.func_74775_l("SkullOwner").func_74775_l("Properties").func_150295_c("textures", 10); // Safe due to method contracts
++            for (int i = 0; i < textures.func_74745_c(); i++) {
++                if (textures.func_179238_g(i) instanceof NBTTagCompound && !((NBTTagCompound) textures.func_179238_g(i)).func_150297_b("Signature", 8) && ((NBTTagCompound) textures.func_179238_g(i)).func_74779_i("Value").trim().isEmpty()) {
++                    p_179215_1_.func_82580_o("SkullOwner");
++                    break;
++                }
++            }
+             return false;
+         }
+     }

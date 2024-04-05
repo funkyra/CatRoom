@@ -1,6 +1,6 @@
 --- before/net/minecraft/entity/monster/EntityMagmaCube.java
 +++ after/net/minecraft/entity/monster/EntityMagmaCube.java
-@@ -28,28 +28,22 @@
+@@ -28,134 +28,112 @@
          EntityLiving.func_189752_a(p_189759_0_, EntityMagmaCube.class);
      }
  
@@ -28,10 +28,11 @@
      }
  
 -    @Override
-     protected void func_70799_a(int p_70799_1_, boolean p_70799_2_)
+-    protected void func_70799_a(int p_70799_1_, boolean p_70799_2_)
++    public void func_70799_a(int p_70799_1_, boolean p_70799_2_)
      {
          super.func_70799_a(p_70799_1_, p_70799_2_);
-@@ -57,105 +51,89 @@
+         this.func_110148_a(SharedMonsterAttributes.field_188791_g).func_111128_a((double)(p_70799_1_ * 3));
      }
  
      @SideOnly(Side.CLIENT)

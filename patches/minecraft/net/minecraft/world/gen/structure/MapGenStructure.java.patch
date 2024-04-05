@@ -92,13 +92,19 @@
              if (structurestart.func_75069_d() && structurestart.func_75071_a().func_175898_b(p_175796_2_))
              {
                  return true;
-@@ -155,12 +175,12 @@
+@@ -155,12 +175,17 @@
      {
          if (this.field_143029_e == null && p_143027_1_ != null)
          {
 -            this.field_143029_e = (MapGenStructureData)p_143027_1_.func_72943_a(MapGenStructureData.class, this.func_143025_a());
-+            this.field_143029_e = (MapGenStructureData)p_143027_1_.getPerWorldStorage().func_75742_a(MapGenStructureData.class, this.func_143025_a());
- 
+-
++            // Spigot Start
++            if (p_143027_1_.spigotConfig.saveStructureInfo) {
++                this.field_143029_e = (MapGenStructureData)p_143027_1_.getPerWorldStorage().func_75742_a(MapGenStructureData.class, this.func_143025_a());
++            } else {
++                this.field_143029_e = new MapGenStructureData(this.func_143025_a());
++            }
++            // Spigot End
              if (this.field_143029_e == null)
              {
                  this.field_143029_e = new MapGenStructureData(this.func_143025_a());
@@ -107,7 +113,7 @@
              }
              else
              {
-@@ -201,17 +221,7 @@
+@@ -201,17 +226,7 @@
  
      protected abstract StructureStart func_75049_b(int p_75049_1_, int p_75049_2_);
  
@@ -126,7 +132,7 @@
      {
          int i = p_191069_2_.func_177958_n() >> 4;
          int j = p_191069_2_.func_177952_p() >> 4;
-@@ -245,18 +255,18 @@
+@@ -245,18 +260,18 @@
                          int l1 = j1 / p_191069_3_;
                          int i2 = k1 / p_191069_3_;
                          Random random1 = p_191069_0_.func_72843_D(l1, i2, p_191069_5_);

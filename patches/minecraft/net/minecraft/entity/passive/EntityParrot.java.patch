@@ -187,7 +187,7 @@
              if (!this.field_70170_p.field_72995_K)
              {
 -                if (this.field_70146_Z.nextInt(10) == 0)
-+                if (this.field_70146_Z.nextInt(10) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, p_184645_1_))
++                if (this.field_70146_Z.nextInt(10) == 0 && !net.minecraftforge.event.ForgeEventFactory.onAnimalTame(this, p_184645_1_) && !org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityTameEvent(this, p_184645_1_).isCancelled())
                  {
                      this.func_193101_c(p_184645_1_);
                      this.func_70908_e(true);
@@ -350,7 +350,17 @@
      public boolean func_70097_a(DamageSource p_70097_1_, float p_70097_2_)
      {
          if (this.func_180431_b(p_70097_1_))
-@@ -491,29 +429,26 @@
+@@ -482,7 +420,8 @@
+         {
+             if (this.field_70911_d != null)
+             {
+-                this.field_70911_d.func_75270_a(false);
++                // CraftBukkit - moved into EntityLiving.damageEntity(DamageSource, float)
++                // this.aiSit.setSitting(false);
+             }
+ 
+             return super.func_70097_a(p_70097_1_, p_70097_2_);
+@@ -491,29 +430,26 @@
  
      public int func_191998_ds()
      {
@@ -383,7 +393,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          super.func_70037_a(p_70037_1_);
-@@ -521,7 +456,6 @@
+@@ -521,7 +457,6 @@
      }
  
      @Nullable
@@ -391,7 +401,7 @@
      protected ResourceLocation func_184647_J()
      {
          return LootTableList.field_192561_ax;
-@@ -534,33 +468,38 @@
+@@ -534,33 +469,38 @@
  
      static
      {

@@ -1,6 +1,35 @@
 --- before/net/minecraft/tileentity/TileEntityBrewingStand.java
 +++ after/net/minecraft/tileentity/TileEntityBrewingStand.java
-@@ -28,20 +28,18 @@
+@@ -1,6 +1,8 @@
+ package net.minecraft.tileentity;
+ 
+ import java.util.Arrays;
++import java.util.List;
++
+ import net.minecraft.block.BlockBrewingStand;
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.entity.player.EntityPlayer;
+@@ -15,6 +17,7 @@
+ import net.minecraft.item.ItemStack;
+ import net.minecraft.nbt.NBTTagCompound;
+ import net.minecraft.potion.PotionHelper;
++import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.ITickable;
+ import net.minecraft.util.NonNullList;
+@@ -23,25 +26,55 @@
+ import net.minecraft.util.datafix.walkers.ItemStackDataLists;
+ import net.minecraft.util.math.BlockPos;
+ 
++import org.bukkit.craftbukkit.v1_12_R1.entity.CraftHumanEntity;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
++import org.bukkit.entity.HumanEntity;
++import org.bukkit.event.inventory.BrewEvent;
++import org.bukkit.event.inventory.BrewingStandFuelEvent;
++import org.bukkit.inventory.InventoryHolder;
++
+ public class TileEntityBrewingStand extends TileEntityLockable implements ITickable, ISidedInventory
+ {
      private static final int[] field_145941_a = new int[] {3};
      private static final int[] field_184277_f = new int[] {0, 1, 2, 3};
      private static final int[] field_145947_i = new int[] {0, 1, 2, 4};
@@ -13,6 +42,31 @@
      private int field_184278_m;
  
 -    @Override
++    private int lastTick = catserver.server.CatServer.getCurrentTick(); // CatServer - implement realtime
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++    
++    public List<ItemStack> getContents() {
++        return this.field_145945_j;
++    }
++        
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++    
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++        
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++        
++    public void setMaxStackSize(int size) {
++        maxStack = size;
++    }
++    // CraftBukkit end
      public String func_70005_c_()
      {
          return this.func_145818_k_() ? this.field_145942_n : "container.brewing";
@@ -22,7 +76,7 @@
      public boolean func_145818_k_()
      {
          return this.field_145942_n != null && !this.field_145942_n.isEmpty();
-@@ -52,13 +50,11 @@
+@@ -52,13 +85,11 @@
          this.field_145942_n = p_145937_1_;
      }
  
@@ -36,7 +90,7 @@
      public boolean func_191420_l()
      {
          for (ItemStack itemstack : this.field_145945_j)
-@@ -72,7 +68,6 @@
+@@ -72,15 +103,25 @@
          return true;
      }
  
@@ -44,7 +98,45 @@
      public void func_73660_a()
      {
          ItemStack itemstack = this.field_145945_j.get(4);
-@@ -133,7 +128,7 @@
+ 
+         if (this.field_184278_m <= 0 && itemstack.func_77973_b() == Items.field_151065_br)
+         {
+-            this.field_184278_m = 20;
+-            itemstack.func_190918_g(1);
++            // this.fuel = 20;
++            // itemstack.shrink(1);
++            BrewingStandFuelEvent event = new BrewingStandFuelEvent(field_145850_b.getWorld().getBlockAt(field_174879_c.func_177958_n(), field_174879_c.func_177956_o(), field_174879_c.func_177952_p()), CraftItemStack.asCraftMirror(itemstack), 20);
++            this.field_145850_b.getServer().getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                return;
++            }
++
++            this.field_184278_m = event.getFuelPower();
++            if (this.field_184278_m > 0 && event.isConsuming()) {
++                itemstack.func_190918_g(1);
++            }
+             this.func_70296_d();
+         }
+ 
+@@ -88,10 +129,14 @@
+         boolean flag1 = this.field_145946_k > 0;
+         ItemStack itemstack1 = this.field_145945_j.get(3);
+ 
++        // CraftBukkit start - Use wall time instead of ticks for brewing
++        int elapsedTicks = catserver.server.CatServer.getCurrentTick() - this.lastTick; // CatServer - implement realtime
++        this.lastTick = catserver.server.CatServer.getCurrentTick(); // CatServer - implement realtime
++
+         if (flag1)
+         {
+-            --this.field_145946_k;
+-            boolean flag2 = this.field_145946_k == 0;
++            this.field_145946_k -= elapsedTicks;
++            boolean flag2 = this.field_145946_k <= 0; // == -> <=
+ 
+             if (flag2 && flag)
+             {
+@@ -133,7 +178,7 @@
  
                  for (int i = 0; i < BlockBrewingStand.field_176451_a.length; ++i)
                  {
@@ -53,7 +145,7 @@
                  }
  
                  this.field_145850_b.func_180501_a(this.field_174879_c, iblockstate, 2);
-@@ -147,7 +142,7 @@
+@@ -147,7 +192,7 @@
  
          for (int i = 0; i < 3; ++i)
          {
@@ -62,7 +154,7 @@
              {
                  aboolean[i] = true;
              }
-@@ -158,6 +153,7 @@
+@@ -158,6 +203,7 @@
  
      private boolean func_145934_k()
      {
@@ -70,7 +162,7 @@
          ItemStack itemstack = this.field_145945_j.get(3);
  
          if (itemstack.func_190926_b())
-@@ -186,19 +182,17 @@
+@@ -186,19 +232,26 @@
  
      private void func_145940_l()
      {
@@ -80,7 +172,15 @@
 -        for (int i = 0; i < 3; ++i)
 -        {
 -            this.field_145945_j.set(i, PotionHelper.func_185212_d(itemstack, this.field_145945_j.get(i)));
--        }
++        InventoryHolder owner = this.getOwner();
++        if (owner != null) {
++            BrewEvent event = new BrewEvent(field_145850_b.getWorld().getBlockAt(field_174879_c.func_177958_n(), field_174879_c.func_177956_o(), field_174879_c.func_177952_p()), (org.bukkit.inventory.BrewerInventory) owner.getInventory(), this.field_184278_m);
++            org.bukkit.Bukkit.getPluginManager().callEvent(event);
++            if (event.isCancelled()) {
++                return;
++            }
+         }
++
 +        net.minecraftforge.common.brewing.BrewingRecipeRegistry.brewPotions(field_145945_j, field_145945_j.get(3), field_145947_i);
  
          itemstack.func_190918_g(1);
@@ -94,7 +194,7 @@
  
              if (itemstack.func_190926_b())
              {
-@@ -206,26 +200,24 @@
+@@ -206,26 +259,24 @@
              }
              else
              {
@@ -125,7 +225,7 @@
          ItemStackHelper.func_191283_b(p_145839_1_, this.field_145945_j);
          this.field_145946_k = p_145839_1_.func_74765_d("BrewTime");
  
-@@ -237,7 +229,6 @@
+@@ -237,7 +288,6 @@
          this.field_184278_m = p_145839_1_.func_74771_c("Fuel");
      }
  
@@ -133,7 +233,7 @@
      public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_)
      {
          super.func_189515_b(p_189515_1_);
-@@ -253,25 +244,21 @@
+@@ -253,25 +303,21 @@
          return p_189515_1_;
      }
  
@@ -160,21 +260,22 @@
      public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_)
      {
          if (p_70299_1_ >= 0 && p_70299_1_ < this.field_145945_j.size())
-@@ -280,13 +267,11 @@
+@@ -280,13 +326,11 @@
          }
      }
  
 -    @Override
      public int func_70297_j_()
      {
-         return 64;
+-        return 64;
++        return this.maxStack;
      }
  
 -    @Override
      public boolean func_70300_a(EntityPlayer p_70300_1_)
      {
          if (this.field_145850_b.func_175625_s(this.field_174879_c) != this)
-@@ -295,33 +280,23 @@
+@@ -295,33 +339,23 @@
          }
          else
          {
@@ -210,7 +311,7 @@
          }
          else
          {
-@@ -333,13 +308,11 @@
+@@ -333,13 +367,11 @@
              }
              else
              {
@@ -225,7 +326,7 @@
      public int[] func_180463_a(EnumFacing p_180463_1_)
      {
          if (p_180463_1_ == EnumFacing.UP)
-@@ -352,13 +325,11 @@
+@@ -352,13 +384,11 @@
          }
      }
  
@@ -239,7 +340,7 @@
      public boolean func_180461_b(int p_180461_1_, ItemStack p_180461_2_, EnumFacing p_180461_3_)
      {
          if (p_180461_1_ == 3)
-@@ -371,19 +342,16 @@
+@@ -371,19 +401,16 @@
          }
      }
  
@@ -259,7 +360,7 @@
      public int func_174887_a_(int p_174887_1_)
      {
          switch (p_174887_1_)
-@@ -397,7 +365,6 @@
+@@ -397,7 +424,6 @@
          }
      }
  
@@ -267,7 +368,7 @@
      public void func_174885_b(int p_174885_1_, int p_174885_2_)
      {
          switch (p_174885_1_)
-@@ -410,13 +377,32 @@
+@@ -410,13 +436,32 @@
          }
      }
  

@@ -54,4 +54,9 @@ public class ForgeNetworkHandler
         clientChannel.pipeline().addAfter(handlerName, "DimensionHandler", new DimensionMessageHandler());
         clientChannel.pipeline().addAfter(handlerName, "FluidIdRegistryHandler", new FluidIdRegistryMessageHandler());
     }
+
+    public static FMLEmbeddedChannel getServerChannel()
+    {
+        return channelPair.get(Side.SERVER);
+    }
 }

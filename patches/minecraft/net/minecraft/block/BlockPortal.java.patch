@@ -8,7 +8,12 @@
  import net.minecraft.block.properties.PropertyEnum;
  import net.minecraft.block.state.BlockFaceShape;
  import net.minecraft.block.state.BlockStateContainer;
-@@ -31,12 +32,10 @@
+@@ -28,15 +29,15 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.event.entity.EntityPortalEnterEvent;
++import org.bukkit.event.world.PortalCreateEvent;
  
  public class BlockPortal extends BlockBreakable
  {
@@ -25,7 +30,7 @@
  
      public BlockPortal()
      {
-@@ -45,7 +44,6 @@
+@@ -45,7 +46,6 @@
          this.func_149675_a(true);
      }
  
@@ -33,7 +38,7 @@
      public AxisAlignedBB func_185496_a(IBlockState p_185496_1_, IBlockAccess p_185496_2_, BlockPos p_185496_3_)
      {
          switch ((EnumFacing.Axis)p_185496_1_.func_177229_b(field_176550_a))
-@@ -60,32 +58,23 @@
+@@ -60,32 +60,23 @@
          }
      }
  
@@ -45,7 +50,7 @@
 -        if (p_180650_1_.field_73011_w.func_76569_d()
 -                && p_180650_1_.func_82736_K().func_82766_b("doMobSpawning")
 -                && p_180650_4_.nextInt(2000) < p_180650_1_.func_175659_aa().func_151525_a())
-+        if (p_180650_1_.field_73011_w.func_76569_d() && p_180650_1_.func_82736_K().func_82766_b("doMobSpawning") && p_180650_4_.nextInt(2000) < p_180650_1_.func_175659_aa().func_151525_a())
++        if (p_180650_1_.spigotConfig.enableZombiePigmenPortalSpawns && p_180650_1_.field_73011_w.func_76569_d() && p_180650_1_.func_82736_K().func_82766_b("doMobSpawning") && p_180650_4_.nextInt(2000) < p_180650_1_.func_175659_aa().func_151525_a()) // Spigot
          {
              int i = p_180650_2_.func_177956_o();
 -            BlockPos blockpos = p_180650_2_;
@@ -67,11 +72,11 @@
 -                                    (double)blockpos.func_177956_o() + 1.1,
 -                                    (double)blockpos.func_177952_p() + 0.5
 -                                );
-+                Entity entity = ItemMonsterPlacer.func_77840_a(p_180650_1_, EntityList.func_191306_a(EntityPigZombie.class), (double)blockpos.func_177958_n() + 0.5D, (double)blockpos.func_177956_o() + 1.1D, (double)blockpos.func_177952_p() + 0.5D);
++                Entity entity = ItemMonsterPlacer.spawnCreature(p_180650_1_, EntityList.func_191306_a(EntityPigZombie.class), (double)blockpos.func_177958_n() + 0.5D, (double)blockpos.func_177956_o() + 1.1D, (double)blockpos.func_177952_p() + 0.5D, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.NETHER_PORTAL);
  
                  if (entity != null)
                  {
-@@ -96,7 +85,6 @@
+@@ -96,7 +87,6 @@
      }
  
      @Nullable
@@ -79,7 +84,7 @@
      public AxisAlignedBB func_180646_a(IBlockState p_180646_1_, IBlockAccess p_180646_2_, BlockPos p_180646_3_)
      {
          return field_185506_k;
-@@ -114,7 +102,6 @@
+@@ -114,7 +104,6 @@
          }
      }
  
@@ -87,25 +92,33 @@
      public boolean func_149686_d(IBlockState p_149686_1_)
      {
          return false;
-@@ -124,7 +111,7 @@
+@@ -124,19 +113,19 @@
      {
          BlockPortal.Size blockportal$size = new BlockPortal.Size(p_176548_1_, p_176548_2_, EnumFacing.Axis.X);
  
 -        if (blockportal$size.func_150860_b() && blockportal$size.field_150864_e == 0)
 +        if (blockportal$size.func_150860_b() && blockportal$size.field_150864_e == 0 && !net.minecraftforge.event.ForgeEventFactory.onTrySpawnPortal(p_176548_1_, p_176548_2_, blockportal$size))
          {
-             blockportal$size.func_150859_c();
-             return true;
-@@ -133,7 +120,7 @@
+-            blockportal$size.func_150859_c();
+-            return true;
++            return blockportal$size.placePortalBlocksCB();
++//            return true;
+         }
+         else
          {
              BlockPortal.Size blockportal$size1 = new BlockPortal.Size(p_176548_1_, p_176548_2_, EnumFacing.Axis.Z);
  
 -            if (blockportal$size1.func_150860_b() && blockportal$size1.field_150864_e == 0)
 +            if (blockportal$size1.func_150860_b() && blockportal$size1.field_150864_e == 0 && !net.minecraftforge.event.ForgeEventFactory.onTrySpawnPortal(p_176548_1_, p_176548_2_, blockportal$size1))
              {
-                 blockportal$size1.func_150859_c();
-                 return true;
-@@ -145,10 +132,9 @@
+-                blockportal$size1.func_150859_c();
+-                return true;
++                return blockportal$size1.placePortalBlocksCB();
++//                return true;
+             }
+             else
+             {
+@@ -145,10 +134,9 @@
          }
      }
  
@@ -117,7 +130,7 @@
  
          if (enumfacing$axis == EnumFacing.Axis.X)
          {
-@@ -171,7 +157,6 @@
+@@ -171,7 +159,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -125,7 +138,7 @@
      public boolean func_176225_a(IBlockState p_176225_1_, IBlockAccess p_176225_2_, BlockPos p_176225_3_, EnumFacing p_176225_4_)
      {
          p_176225_3_ = p_176225_3_.func_177972_a(p_176225_4_);
-@@ -179,7 +164,7 @@
+@@ -179,7 +166,7 @@
  
          if (p_176225_1_.func_177230_c() == this)
          {
@@ -134,7 +147,7 @@
  
              if (enumfacing$axis == null)
              {
-@@ -197,14 +182,10 @@
+@@ -197,14 +184,10 @@
              }
          }
  
@@ -153,7 +166,7 @@
          boolean flag4 = flag || flag1 || enumfacing$axis == EnumFacing.Axis.X;
          boolean flag5 = flag2 || flag3 || enumfacing$axis == EnumFacing.Axis.Z;
  
-@@ -226,20 +207,17 @@
+@@ -226,44 +209,33 @@
          }
      }
  
@@ -174,7 +187,11 @@
      public void func_180634_a(World p_180634_1_, BlockPos p_180634_2_, IBlockState p_180634_3_, Entity p_180634_4_)
      {
          if (!p_180634_4_.func_184218_aH() && !p_180634_4_.func_184207_aI() && p_180634_4_.func_184222_aU())
-@@ -249,21 +227,11 @@
+         {
++            EntityPortalEnterEvent event = new EntityPortalEnterEvent(p_180634_4_.getBukkitEntity(), new org.bukkit.Location(p_180634_1_.getWorld(), p_180634_2_.func_177958_n(), p_180634_2_.func_177956_o(), p_180634_2_.func_177952_p()));
++            p_180634_1_.getServer().getPluginManager().callEvent(event);
+             p_180634_4_.func_181015_d(p_180634_2_);
+         }
      }
  
      @SideOnly(Side.CLIENT)
@@ -197,7 +214,7 @@
          }
  
          for (int i = 0; i < 4; ++i)
-@@ -271,20 +239,19 @@
+@@ -271,20 +243,19 @@
              double d0 = (double)((float)p_180655_3_.func_177958_n() + p_180655_4_.nextFloat());
              double d1 = (double)((float)p_180655_3_.func_177956_o() + p_180655_4_.nextFloat());
              double d2 = (double)((float)p_180655_3_.func_177952_p() + p_180655_4_.nextFloat());
@@ -224,7 +241,7 @@
                  d5 = (double)(p_180655_4_.nextFloat() * 2.0F * (float)j);
              }
  
-@@ -292,25 +259,21 @@
+@@ -292,25 +263,21 @@
          }
      }
  
@@ -250,7 +267,7 @@
      public IBlockState func_185499_a(IBlockState p_185499_1_, Rotation p_185499_2_)
      {
          switch (p_185499_2_)
-@@ -333,10 +296,9 @@
+@@ -333,10 +300,9 @@
          }
      }
  
@@ -262,7 +279,7 @@
      }
  
      public BlockPattern.PatternHelper func_181089_f(World p_181089_1_, BlockPos p_181089_2_)
-@@ -363,17 +325,7 @@
+@@ -363,17 +329,7 @@
  
              for (EnumFacing.AxisDirection enumfacing$axisdirection : EnumFacing.AxisDirection.values())
              {
@@ -281,7 +298,7 @@
  
                  for (int i = 0; i < blockportal$size.func_181101_b(); ++i)
                  {
-@@ -383,7 +335,7 @@
+@@ -383,7 +339,7 @@
  
                          if (blockworldstate.func_177509_a() != null && blockworldstate.func_177509_a().func_185904_a() != Material.field_151579_a)
                          {
@@ -290,7 +307,7 @@
                          }
                      }
                  }
-@@ -399,21 +351,10 @@
+@@ -399,21 +355,10 @@
                  }
              }
  
@@ -313,7 +330,15 @@
      public BlockFaceShape func_193383_a(IBlockAccess p_193383_1_, IBlockState p_193383_2_, BlockPos p_193383_3_, EnumFacing p_193383_4_)
      {
          return BlockFaceShape.UNDEFINED;
-@@ -446,15 +387,9 @@
+@@ -429,6 +374,7 @@
+             private BlockPos field_150861_f;
+             private int field_150862_g;
+             private int field_150868_h;
++            java.util.Collection<org.bukkit.block.Block> blocks = new java.util.HashSet<org.bukkit.block.Block>();
+ 
+             public Size(World p_i45694_1_, BlockPos p_i45694_2_, EnumFacing.Axis p_i45694_3_)
+             {
+@@ -446,15 +392,9 @@
                      this.field_150866_c = EnumFacing.SOUTH;
                  }
  
@@ -331,7 +356,7 @@
                  }
  
                  int i = this.func_180120_a(p_i45694_2_, this.field_150863_d) - 1;
-@@ -485,8 +420,7 @@
+@@ -485,8 +425,7 @@
                  {
                      BlockPos blockpos = p_180120_1_.func_177967_a(p_180120_2_, i);
  
@@ -341,7 +366,36 @@
                      {
                          break;
                      }
-@@ -550,8 +484,7 @@
+@@ -508,6 +447,8 @@
+ 
+             protected int func_150858_a()
+             {
++                this.blocks.clear();
++                org.bukkit.World bworld = this.field_150867_a.getWorld();
+                 label56:
+ 
+                 for (this.field_150862_g = 0; this.field_150862_g < 21; ++this.field_150862_g)
+@@ -534,6 +475,9 @@
+                             if (block != Blocks.field_150343_Z)
+                             {
+                                 break label56;
++                            } else {
++                                BlockPos pos = blockpos.func_177972_a(this.field_150863_d);
++                                blocks.add(bworld.getBlockAt(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p()));
+                             }
+                         }
+                         else if (i == this.field_150868_h - 1)
+@@ -543,6 +487,9 @@
+                             if (block != Blocks.field_150343_Z)
+                             {
+                                 break label56;
++                            } else {
++                                BlockPos pos = blockpos.func_177972_a(this.field_150866_c);
++                                blocks.add(bworld.getBlockAt(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p()));
+                             }
+                         }
+                     }
+@@ -550,11 +497,13 @@
  
                  for (int j = 0; j < this.field_150868_h; ++j)
                  {
@@ -351,7 +405,13 @@
                      {
                          this.field_150862_g = 0;
                          break;
-@@ -589,10 +522,7 @@
++                    } else {
++                        BlockPos pos = this.field_150861_f.func_177967_a(this.field_150866_c, j).func_177981_b(this.field_150862_g);
++                        blocks.add(bworld.getBlockAt(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p()));
+                     }
+                 }
+ 
+@@ -589,12 +538,42 @@
  
                      for (int j = 0; j < this.field_150862_g; ++j)
                      {
@@ -359,7 +419,44 @@
 -                        .func_180501_a(
 -                            blockpos.func_177981_b(j), Blocks.field_150427_aO.func_176223_P().func_177226_a(BlockPortal.field_176550_a, this.field_150865_b), 2
 -                        );
+-                    }
+-                }
 +                        this.field_150867_a.func_180501_a(blockpos.func_177981_b(j), Blocks.field_150427_aO.func_176223_P().func_177226_a(BlockPortal.field_176550_a, this.field_150865_b), 2);
-                     }
-                 }
++                    }
++                }
++            }
++
++            public boolean placePortalBlocksCB()
++            {
++                org.bukkit.World bworld = this.field_150867_a.getWorld();
++
++                // Copy below for loop
++                for (int i = 0; i < this.field_150868_h; ++i) {
++                    BlockPos blockposition = this.field_150861_f.func_177967_a(this.field_150866_c, i);
++
++                    for (int j = 0; j < this.field_150862_g; ++j) {
++                        BlockPos pos = blockposition.func_177981_b(j);
++                        blocks.add(bworld.getBlockAt(pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p()));
++                    }
++                }
++
++                PortalCreateEvent event = new PortalCreateEvent(blocks, bworld, PortalCreateEvent.CreateReason.FIRE);
++                this.field_150867_a.getServer().getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    return false;
++                }
++                for (int i = 0; i < this.field_150868_h; ++i)
++                {
++                    BlockPos blockpos = this.field_150861_f.func_177967_a(this.field_150866_c, i);
++
++                    for (int j = 0; j < this.field_150862_g; ++j)
++                    {
++                        this.field_150867_a.func_180501_a(blockpos.func_177981_b(j), Blocks.field_150427_aO.func_176223_P().func_177226_a(BlockPortal.field_176550_a, this.field_150865_b), 2);
++                    }
++                }
++
++                return true;
              }
+         }
+ }

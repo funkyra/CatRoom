@@ -1,0 +1,24 @@
+--- before/net/minecraft/command/CommandExecuteAt.java
++++ after/net/minecraft/command/CommandExecuteAt.java
+@@ -7,9 +7,11 @@
+ import net.minecraft.block.state.IBlockState;
+ import net.minecraft.entity.Entity;
+ import net.minecraft.server.MinecraftServer;
++import net.minecraft.tileentity.CommandBlockBaseLogic;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.Vec3d;
+ import net.minecraft.world.World;
++import org.bukkit.craftbukkit.v1_12_R1.command.ProxiedNativeCommandSender;
+ 
+ public class CommandExecuteAt extends CommandBase
+ {
+@@ -84,7 +86,8 @@
+ 
+             try
+             {
+-                int j = icommandmanager.func_71556_a(icommandsender, s);
++                org.bukkit.command.CommandSender bukkitSender = CommandBlockBaseLogic.unwrapSender(p_184881_2_);
++                int j = CommandBlockBaseLogic.executeCommand(icommandsender, new ProxiedNativeCommandSender(icommandsender, bukkitSender, entity.getBukkitEntity()), s);
+ 
+                 if (j < 1)
+                 {

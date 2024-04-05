@@ -59,7 +59,7 @@
      public boolean contains(Object p_contains_1_)
      {
          return Iterators.contains(this.func_180215_b(p_contains_1_.getClass()).iterator(), p_contains_1_);
-@@ -123,14 +121,13 @@
+@@ -123,31 +121,40 @@
      {
          return new Iterable<S>()
          {
@@ -67,16 +67,34 @@
              public Iterator<S> iterator()
              {
 -                List<T> list = ClassInheritanceMultiMap.this.field_180218_a.get(ClassInheritanceMultiMap.this.func_181157_b(p_180215_1_));
-+                List<T> list = (List)ClassInheritanceMultiMap.this.field_180218_a.get(ClassInheritanceMultiMap.this.func_181157_b(p_180215_1_));
- 
-                 if (list == null)
-                 {
--                    return Collections.emptyIterator();
+-
+-                if (list == null)
+-                {
++                // CatServer start - Optimization from Foamfix
++                Class c = ClassInheritanceMultiMap.this.func_181157_b(p_180215_1_);
++                List<T> list = ClassInheritanceMultiMap.this.field_180218_a.get(c);
++                if (list == null) {
+                     return Collections.emptyIterator();
++                } else {
++                    Iterator<T> iterator = list.iterator();
++                    return p_180215_1_ == c ? (Iterator<S>) iterator : Iterators.filter(iterator, p_180215_1_);
++                }
++                // CatServer end
++                /*
++                List<T> list = (List)ClassInheritanceMultiMap.this.map.get(ClassInheritanceMultiMap.this.initializeClassLookup(clazz));
++
++                if (list == null)
++                {
 +                    return Collections.<S>emptyIterator();
                  }
                  else
                  {
-@@ -141,13 +138,11 @@
+                     Iterator<T> iterator = list.iterator();
+-                    return Iterators.filter(iterator, p_180215_1_);
++                    return Iterators.filter(iterator, clazz);
+                 }
++                */
+             }
          };
      }
  

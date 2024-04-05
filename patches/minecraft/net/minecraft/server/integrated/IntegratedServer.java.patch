@@ -1,14 +1,31 @@
 --- before/net/minecraft/server/integrated/IntegratedServer.java
 +++ after/net/minecraft/server/integrated/IntegratedServer.java
-@@ -7,6 +7,7 @@
+@@ -7,6 +7,9 @@
  import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
  import java.io.File;
  import java.io.IOException;
 +import java.net.InetAddress;
++
++import joptsimple.OptionSet;
  import net.minecraft.client.ClientBrandRetriever;
  import net.minecraft.client.Minecraft;
  import net.minecraft.client.multiplayer.ThreadLanServerPing;
-@@ -45,26 +46,9 @@
+@@ -16,12 +19,14 @@
+ import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.profiler.Snooper;
+ import net.minecraft.server.MinecraftServer;
++import net.minecraft.server.dedicated.PropertyManager;
+ import net.minecraft.server.management.PlayerProfileCache;
+ import net.minecraft.util.CryptManager;
+ import net.minecraft.util.HttpUtil;
+ import net.minecraft.util.Util;
+ import net.minecraft.world.EnumDifficulty;
+ import net.minecraft.world.GameType;
++import net.minecraft.world.MinecraftException;
+ import net.minecraft.world.ServerWorldEventHandler;
+ import net.minecraft.world.WorldServer;
+ import net.minecraft.world.WorldServerDemo;
+@@ -45,26 +50,9 @@
      private boolean field_71346_p;
      private ThreadLanServerPing field_71345_q;
  
@@ -33,15 +50,18 @@
 -            p_i46523_7_,
 -            p_i46523_8_
 -        );
-+        super(new File(p_i46523_1_.field_71412_D, "saves"), p_i46523_1_.func_110437_J(), p_i46523_1_.func_184126_aj(), p_i46523_5_, p_i46523_6_, p_i46523_7_, p_i46523_8_);
++        super(null, p_i46523_1_.func_110437_J(), p_i46523_1_.func_184126_aj(), p_i46523_5_, p_i46523_6_, p_i46523_7_, p_i46523_8_);
          this.func_71224_l(p_i46523_1_.func_110432_I().func_111285_a());
          this.func_71261_m(p_i46523_2_);
          this.func_71246_n(p_i46523_3_);
-@@ -76,18 +60,14 @@
-         this.field_71350_m = this.func_71242_L() ? WorldServerDemo.field_73071_a : p_i46523_4_;
+@@ -77,17 +65,18 @@
      }
  
--    @Override
+     @Override
++    public PropertyManager getPropertyManager() {
++        return null;
++    }
++
      public ServerCommandManager func_175582_h()
      {
          return new IntegratedServerCommandManager(this);
@@ -56,7 +76,7 @@
          ISaveHandler isavehandler = this.func_71254_M().func_75804_a(p_71247_1_, true);
          this.func_175584_a(this.func_71270_I(), isavehandler);
          WorldInfo worldinfo = isavehandler.func_75757_d();
-@@ -101,6 +81,7 @@
+@@ -101,6 +90,7 @@
              worldinfo.func_76062_a(p_71247_2_);
          }
  
@@ -64,7 +84,7 @@
          for (int i = 0; i < this.field_71305_c.length; ++i)
          {
              int j = 0;
-@@ -119,26 +100,41 @@
+@@ -119,26 +109,41 @@
              {
                  if (this.func_71242_L())
                  {
@@ -113,7 +133,7 @@
          {
              this.func_147139_a(this.field_71349_l.field_71474_y.field_74318_M);
          }
-@@ -146,7 +142,6 @@
+@@ -146,7 +151,6 @@
          this.func_71222_d();
      }
  
@@ -121,7 +141,7 @@
      public boolean func_71197_b() throws IOException
      {
          field_147148_h.info("Starting integrated minecraft server version 1.12.2");
-@@ -157,14 +152,12 @@
+@@ -157,14 +161,12 @@
          this.func_71245_h(true);
          field_147148_h.info("Generating keypair");
          this.func_71253_a(CryptManager.func_75891_b());
@@ -139,7 +159,7 @@
      public void func_71217_p()
      {
          boolean flag = this.field_71348_o;
-@@ -193,7 +186,7 @@
+@@ -193,7 +195,7 @@
  
              if (this.field_71349_l.field_71474_y.field_151451_c != this.func_184103_al().func_72395_o())
              {
@@ -148,7 +168,7 @@
                  this.func_184103_al().func_152611_a(this.field_71349_l.field_71474_y.field_151451_c);
              }
  
-@@ -209,7 +202,7 @@
+@@ -209,7 +211,7 @@
                  }
                  else if (worldinfo.func_176123_z() && !worldinfo1.func_176123_z())
                  {
@@ -157,7 +177,7 @@
  
                      for (WorldServer worldserver : this.field_71305_c)
                      {
-@@ -223,73 +216,62 @@
+@@ -223,73 +225,62 @@
          }
      }
  
@@ -232,7 +252,7 @@
      public CrashReport func_71230_b(CrashReport p_71230_1_)
      {
          p_71230_1_ = super.func_71230_b(p_71230_1_);
-@@ -300,10 +282,7 @@
+@@ -300,10 +291,7 @@
                  return "Integrated Server (map_client.txt)";
              }
          });
@@ -244,7 +264,7 @@
          {
              public String call() throws Exception
              {
-@@ -323,18 +302,14 @@
+@@ -323,18 +311,14 @@
                      }
                      else
                      {
@@ -265,7 +285,7 @@
      public void func_147139_a(EnumDifficulty p_147139_1_)
      {
          super.func_147139_a(p_147139_1_);
-@@ -345,20 +320,17 @@
+@@ -345,20 +329,17 @@
          }
      }
  
@@ -286,7 +306,7 @@
      public String func_71206_a(GameType p_71206_1_, boolean p_71206_2_)
      {
          try
-@@ -369,8 +341,9 @@
+@@ -369,8 +350,9 @@
              {
                  i = HttpUtil.func_76181_a();
              }
@@ -297,7 +317,7 @@
              }
  
              if (i <= 0)
-@@ -378,8 +351,8 @@
+@@ -378,8 +360,8 @@
                  i = 25564;
              }
  
@@ -308,7 +328,7 @@
              this.field_71346_p = true;
              this.field_71345_q = new ThreadLanServerPing(this.func_71273_Y(), i + "");
              this.field_71345_q.start();
-@@ -388,13 +361,12 @@
+@@ -388,16 +370,19 @@
              this.field_71349_l.field_71439_g.func_184839_n(p_71206_2_ ? 4 : 0);
              return i + "";
          }
@@ -322,8 +342,16 @@
 -    @Override
      public void func_71260_j()
      {
-         super.func_71260_j();
-@@ -406,12 +378,11 @@
+-        super.func_71260_j();
++        try {
++            super.func_71260_j();
++        } catch (MinecraftException e) {
++            e.printStackTrace();
++        }
+ 
+         if (this.field_71345_q != null)
+         {
+@@ -406,19 +391,18 @@
          }
      }
  
@@ -337,7 +365,15 @@
              public void run()
              {
                  for (EntityPlayerMP entityplayermp : Lists.newArrayList(IntegratedServer.this.func_184103_al().func_181057_v()))
-@@ -437,20 +408,17 @@
+                 {
+                     if (!entityplayermp.func_110124_au().equals(IntegratedServer.this.field_71349_l.field_71439_g.func_110124_au()))
+                     {
+-                        IntegratedServer.this.func_184103_al().func_72367_e(entityplayermp);
++                        IntegratedServer.this.func_184103_al().playerLoggedOut(entityplayermp);
+                     }
+                 }
+             }
+@@ -437,20 +421,17 @@
          return this.field_71346_p;
      }
  

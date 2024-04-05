@@ -36,3 +36,13 @@
                              {
                                  this.func_175903_a(p_180709_1_, blockpos, this.field_150528_a);
                              }
+@@ -64,6 +60,9 @@
+                     }
+                 }
+             }
++        // CraftBukkit start - Return false if gen was unsuccessful
++        } else {
++            return false;
+         }
+ 
+         return true;

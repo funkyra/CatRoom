@@ -1,6 +1,24 @@
 --- before/net/minecraft/entity/item/EntityXPOrb.java
 +++ after/net/minecraft/entity/item/EntityXPOrb.java
-@@ -31,14 +31,13 @@
+@@ -3,6 +3,7 @@
+ import net.minecraft.block.material.Material;
+ import net.minecraft.enchantment.EnchantmentHelper;
+ import net.minecraft.entity.Entity;
++import net.minecraft.entity.EntityLivingBase;
+ import net.minecraft.entity.MoverType;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.init.Enchantments;
+@@ -15,6 +16,9 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
++import org.bukkit.event.entity.EntityTargetEvent;
++import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+ 
+ public class EntityXPOrb extends Entity
+ {
+@@ -31,14 +35,13 @@
          super(p_i1585_1_);
          this.func_70105_a(0.5F, 0.5F);
          this.func_70107_b(p_i1585_2_, p_i1585_4_, p_i1585_6_);
@@ -19,7 +37,7 @@
      protected boolean func_70041_e_()
      {
          return false;
-@@ -50,20 +49,18 @@
+@@ -50,20 +53,18 @@
          this.func_70105_a(0.25F, 0.25F);
      }
  
@@ -42,7 +60,7 @@
          j += (int)(f * 15.0F * 16.0F);
  
          if (j > 240)
-@@ -74,7 +71,6 @@
+@@ -74,10 +75,10 @@
          return j | k << 16;
      }
  
@@ -50,7 +68,11 @@
      public void func_70071_h_()
      {
          super.func_70071_h_();
-@@ -90,25 +86,25 @@
++        EntityPlayer prevTarget = this.field_80001_f;// CraftBukkit - store old target
+ 
+         if (this.field_70532_c > 0)
+         {
+@@ -90,25 +91,25 @@
  
          if (!this.func_189652_ae())
          {
@@ -82,34 +104,47 @@
              }
  
              this.field_80002_g = this.field_70533_a;
-@@ -121,18 +117,18 @@
+@@ -121,18 +122,27 @@
  
          if (this.field_80001_f != null)
          {
 -            double d1 = (this.field_80001_f.field_70165_t - this.field_70165_t) / 8.0;
 -            double d2 = (this.field_80001_f.field_70163_u + (double)this.field_80001_f.func_70047_e() / 2.0 - this.field_70163_u) / 8.0;
 -            double d3 = (this.field_80001_f.field_70161_v - this.field_70161_v) / 8.0;
-+            double d1 = (this.field_80001_f.field_70165_t - this.field_70165_t) / 8.0D;
-+            double d2 = (this.field_80001_f.field_70163_u + (double)this.field_80001_f.func_70047_e() / 2.0D - this.field_70163_u) / 8.0D;
-+            double d3 = (this.field_80001_f.field_70161_v - this.field_70161_v) / 8.0D;
-             double d4 = Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3);
+-            double d4 = Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3);
 -            double d5 = 1.0 - d4;
-+            double d5 = 1.0D - d4;
- 
+-
 -            if (d5 > 0.0)
-+            if (d5 > 0.0D)
-             {
-                 d5 *= d5;
+-            {
+-                d5 *= d5;
 -                this.field_70159_w += d1 / d4 * d5 * 0.1;
 -                this.field_70181_x += d2 / d4 * d5 * 0.1;
 -                this.field_70179_y += d3 / d4 * d5 * 0.1;
-+                this.field_70159_w += d1 / d4 * d5 * 0.1D;
-+                this.field_70181_x += d2 / d4 * d5 * 0.1D;
-+                this.field_70179_y += d3 / d4 * d5 * 0.1D;
++            boolean cancelled = false;
++            if (this.field_80001_f != prevTarget) {
++                EntityTargetLivingEntityEvent event = CraftEventFactory.callEntityTargetLivingEvent(this, field_80001_f, EntityTargetEvent.TargetReason.CLOSEST_PLAYER);
++                EntityLivingBase target = event.getTarget() == null ? null : ((org.bukkit.craftbukkit.v1_12_R1.entity.CraftLivingEntity) event.getTarget()).getHandle();
++                field_80001_f = target instanceof EntityPlayer ? (EntityPlayer) target : null;
++                cancelled = event.isCancelled();
++            }
++
++            if (!cancelled && field_80001_f != null) {
++                double d1 = (this.field_80001_f.field_70165_t - this.field_70165_t) / 8.0D;
++                double d2 = (this.field_80001_f.field_70163_u + (double) this.field_80001_f.func_70047_e() / 2.0D - this.field_70163_u) / 8.0D;
++                double d3 = (this.field_80001_f.field_70161_v - this.field_70161_v) / 8.0D;
++                double d4 = Math.sqrt(d1 * d1 + d2 * d2 + d3 * d3);
++                double d5 = 1.0D - d4;
++
++                if (d5 > 0.0D) {
++                    d5 = d5 * d5;
++                    this.field_70159_w += d1 / d4 * d5 * 0.1D;
++                    this.field_70181_x += d2 / d4 * d5 * 0.1D;
++                    this.field_70179_y += d3 / d4 * d5 * 0.1D;
++                }
              }
          }
  
-@@ -141,26 +137,18 @@
+@@ -141,26 +151,18 @@
  
          if (this.field_70122_E)
          {
@@ -141,7 +176,7 @@
          }
  
          ++this.field_70533_a;
-@@ -172,21 +160,19 @@
+@@ -172,21 +174,19 @@
          }
      }
  
@@ -164,7 +199,7 @@
          if (this.func_180431_b(p_70097_1_))
          {
              return false;
-@@ -205,7 +191,6 @@
+@@ -205,7 +205,6 @@
          }
      }
  
@@ -172,7 +207,7 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          p_70014_1_.func_74777_a("Health", (short)this.field_70529_d);
-@@ -213,7 +198,6 @@
+@@ -213,7 +212,6 @@
          p_70014_1_.func_74777_a("Value", (short)this.field_70530_e);
      }
  
@@ -180,7 +215,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          this.field_70529_d = p_70037_1_.func_74765_d("Health");
-@@ -221,21 +205,22 @@
+@@ -221,27 +219,34 @@
          this.field_70530_e = p_70037_1_.func_74765_d("Value");
      }
  
@@ -200,13 +235,52 @@
                  {
 -                    int i = Math.min(this.func_184514_c(this.field_70530_e), itemstack.func_77952_i());
 -                    this.field_70530_e -= this.func_184515_b(i);
+-                    itemstack.func_77964_b(itemstack.func_77952_i() - i);
 +                    float ratio = itemstack.func_77973_b().getXpRepairRatio(itemstack);
 +                    int i = Math.min(roundAverage(this.field_70530_e * ratio), itemstack.func_77952_i());
-+                    this.field_70530_e -= roundAverage(i / ratio);
-                     itemstack.func_77964_b(itemstack.func_77952_i() - i);
++//                    this.xpValue -= roundAverage(i / ratio);
++//                    itemstack.setItemDamage(itemstack.getItemDamage() - i);
++                    org.bukkit.event.player.PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(p_70100_1_, this, itemstack, i);
++                    i = event.getRepairAmount();
++                    if (!event.isCancelled()) {
++                        this.field_70530_e -= roundAverage(i / ratio);
++                        itemstack.func_77964_b(itemstack.func_77952_i() - i);
++                    }
                  }
  
-@@ -353,9 +338,14 @@
+                 if (this.field_70530_e > 0)
+                 {
+-                    p_70100_1_.func_71023_q(this.field_70530_e);
++                    p_70100_1_.func_71023_q(CraftEventFactory.callPlayerExpChangeEvent(p_70100_1_, this.field_70530_e).getAmount()); // CraftBukkit - this.value -> event.getAmount()
+                 }
+ 
+                 this.func_70106_y();
+@@ -311,6 +316,24 @@
+ 
+     public static int func_70527_a(int p_70527_0_)
+     {
++        // CraftBukkit start
++        if (p_70527_0_ > 162670129) return p_70527_0_ - 100000;
++        if (p_70527_0_ > 81335063) return 81335063;
++        if (p_70527_0_ > 40667527) return 40667527;
++        if (p_70527_0_ > 20333759) return 20333759;
++        if (p_70527_0_ > 10166857) return 10166857;
++        if (p_70527_0_ > 5083423) return 5083423;
++        if (p_70527_0_ > 2541701) return 2541701;
++        if (p_70527_0_ > 1270849) return 1270849;
++        if (p_70527_0_ > 635413) return 635413;
++        if (p_70527_0_ > 317701) return 317701;
++        if (p_70527_0_ > 158849) return 158849;
++        if (p_70527_0_ > 79423) return 79423;
++        if (p_70527_0_ > 39709) return 39709;
++        if (p_70527_0_ > 19853) return 19853;
++        if (p_70527_0_ > 9923) return 9923;
++        if (p_70527_0_ > 4957) return 4957;
++        // CraftBukkit end
+         if (p_70527_0_ >= 2477)
+         {
+             return 2477;
+@@ -353,9 +376,14 @@
          }
      }
  

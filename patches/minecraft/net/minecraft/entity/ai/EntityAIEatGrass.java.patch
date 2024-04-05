@@ -1,6 +1,11 @@
 --- before/net/minecraft/entity/ai/EntityAIEatGrass.java
 +++ after/net/minecraft/entity/ai/EntityAIEatGrass.java
-@@ -13,8 +13,7 @@
+@@ -10,11 +10,12 @@
+ import net.minecraft.init.Blocks;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.Material;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
  
  public class EntityAIEatGrass extends EntityAIBase
  {
@@ -10,7 +15,7 @@
      private final EntityLiving field_151500_b;
      private final World field_151501_c;
      int field_151502_a;
-@@ -26,7 +25,6 @@
+@@ -26,7 +27,6 @@
          this.func_75248_a(7);
      }
  
@@ -18,7 +23,7 @@
      public boolean func_75250_a()
      {
          if (this.field_151500_b.func_70681_au().nextInt(this.field_151500_b.func_70631_g_() ? 50 : 1000) != 0)
-@@ -48,7 +46,6 @@
+@@ -48,7 +48,6 @@
          }
      }
  
@@ -26,7 +31,7 @@
      public void func_75249_e()
      {
          this.field_151502_a = 40;
-@@ -56,13 +53,11 @@
+@@ -56,13 +55,11 @@
          this.field_151500_b.func_70661_as().func_75499_g();
      }
  
@@ -40,7 +45,7 @@
      public boolean func_75253_b()
      {
          return this.field_151502_a > 0;
-@@ -73,7 +68,6 @@
+@@ -73,7 +70,6 @@
          return this.field_151502_a;
      }
  
@@ -48,21 +53,23 @@
      public void func_75246_d()
      {
          this.field_151502_a = Math.max(0, this.field_151502_a - 1);
-@@ -84,7 +78,7 @@
+@@ -84,7 +80,8 @@
  
              if (field_179505_b.apply(this.field_151501_c.func_180495_p(blockpos)))
              {
 -                if (this.field_151501_c.func_82736_K().func_82766_b("mobGriefing"))
-+                if (net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.field_151501_c, this.field_151500_b))
++                // TODO: Needs testing
++                if (!CraftEventFactory.callEntityChangeBlockEvent(this.field_151500_b, this.field_151500_b.field_70170_p.getWorld().getBlockAt(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p()), Material.AIR, !net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.field_151501_c, this.field_151500_b)).isCancelled())
                  {
                      this.field_151501_c.func_175655_b(blockpos, false);
                  }
-@@ -97,7 +91,7 @@
+@@ -97,7 +94,8 @@
  
                  if (this.field_151501_c.func_180495_p(blockpos1).func_177230_c() == Blocks.field_150349_c)
                  {
 -                    if (this.field_151501_c.func_82736_K().func_82766_b("mobGriefing"))
-+                    if (net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.field_151501_c, this.field_151500_b))
++                    // TODO: Needs testing
++                    if (!CraftEventFactory.callEntityChangeBlockEvent(this.field_151500_b, this.field_151500_b.field_70170_p.getWorld().getBlockAt(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p()), Material.AIR, !net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.field_151501_c, this.field_151500_b)).isCancelled())
                      {
                          this.field_151501_c.func_175718_b(2001, blockpos1, Block.func_149682_b(Blocks.field_150349_c));
                          this.field_151501_c.func_180501_a(blockpos1, Blocks.field_150346_d.func_176223_P(), 2);

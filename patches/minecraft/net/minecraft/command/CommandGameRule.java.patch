@@ -1,6 +1,6 @@
 --- before/net/minecraft/command/CommandGameRule.java
 +++ after/net/minecraft/command/CommandGameRule.java
-@@ -12,25 +12,21 @@
+@@ -12,28 +12,24 @@
  
  public class CommandGameRule extends CommandBase
  {
@@ -25,7 +25,11 @@
 -    @Override
      public void func_184881_a(MinecraftServer p_184881_1_, ICommandSender p_184881_2_, String[] p_184881_3_) throws CommandException
      {
-         GameRules gamerules = this.func_184897_a(p_184881_1_);
+-        GameRules gamerules = this.func_184897_a(p_184881_1_);
++        GameRules gamerules = p_184881_2_.func_130014_f_().func_82736_K(); // CraftBukkit - Use current world
+         String s = p_184881_3_.length > 0 ? p_184881_3_[0] : "";
+         String s1 = p_184881_3_.length > 1 ? func_180529_a(p_184881_3_, 1) : "";
+ 
 @@ -46,18 +42,18 @@
  
                  if (!gamerules.func_82765_e(s))

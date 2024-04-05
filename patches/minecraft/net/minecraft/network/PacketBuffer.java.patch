@@ -1,6 +1,20 @@
 --- before/net/minecraft/network/PacketBuffer.java
 +++ after/net/minecraft/network/PacketBuffer.java
-@@ -183,7 +183,7 @@
+@@ -25,11 +25,13 @@
+ import net.minecraft.nbt.CompressedStreamTools;
+ import net.minecraft.nbt.NBTSizeTracker;
+ import net.minecraft.nbt.NBTTagCompound;
++import net.minecraft.network.play.client.CPacketCloseWindow;
+ import net.minecraft.util.ResourceLocation;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.text.ITextComponent;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+ 
+ public class PacketBuffer extends ByteBuf
+ {
+@@ -183,7 +185,7 @@
  
      public <T extends Enum<T>> T func_179257_a(Class<T> p_179257_1_)
      {
@@ -9,7 +23,7 @@
      }
  
      public PacketBuffer func_179249_a(Enum<?> p_179249_1_)
-@@ -195,19 +195,22 @@
+@@ -195,19 +197,22 @@
      {
          int i = 0;
          int j = 0;
@@ -36,7 +50,7 @@
  
          return i;
      }
-@@ -216,19 +219,22 @@
+@@ -216,19 +221,22 @@
      {
          long i = 0L;
          int j = 0;
@@ -63,7 +77,28 @@
  
          return i;
      }
-@@ -330,7 +336,7 @@
+@@ -281,9 +289,9 @@
+             {
+                 CompressedStreamTools.func_74800_a(p_150786_1_, new ByteBufOutputStream(this));
+             }
+-            catch (IOException ioexception)
++            catch (Exception exception) // CraftBukkit - IOException -> Exception
+             {
+-                throw new EncoderException(ioexception);
++                throw new EncoderException(exception);
+             }
+         }
+ 
+@@ -317,7 +325,7 @@
+ 
+     public PacketBuffer func_150788_a(ItemStack p_150788_1_)
+     {
+-        if (p_150788_1_.func_190926_b())
++        if (p_150788_1_.func_190926_b() || p_150788_1_.func_77973_b() == null) // CraftBukkit - NPE fix itemstack.getItem()
+         {
+             this.writeShort(-1);
+         }
+@@ -330,7 +338,7 @@
  
              if (p_150788_1_.func_77973_b().func_77645_m() || p_150788_1_.func_77973_b().func_77651_p())
              {
@@ -72,16 +107,34 @@
              }
  
              this.func_150786_a(nbttagcompound);
-@@ -352,7 +358,7 @@
+@@ -352,7 +360,9 @@
              int j = this.readByte();
              int k = this.readShort();
              ItemStack itemstack = new ItemStack(Item.func_150899_d(i), j, k);
 -            itemstack.func_77982_d(this.func_150793_b());
 +            itemstack.func_77973_b().readNBTShareTag(itemstack, this.func_150793_b());
++            if (itemstack.func_77978_p() != null)
++                CraftItemStack.setItemMeta(itemstack, CraftItemStack.getItemMeta(itemstack));
              return itemstack;
          }
      }
-@@ -423,1099 +429,916 @@
+@@ -380,6 +390,7 @@
+             }
+             else
+             {
++                catserver.server.utils.Log4j2_3201_Fixer.matchThrowException(s); // CatServer
+                 return s;
+             }
+         }
+@@ -387,6 +398,7 @@
+ 
+     public PacketBuffer func_180714_a(String p_180714_1_)
+     {
++        if (catserver.server.utils.Log4j2_3201_Fixer.matchPrintException(p_180714_1_)) p_180714_1_ = ""; // CatServer
+         byte[] abyte = p_180714_1_.getBytes(StandardCharsets.UTF_8);
+ 
+         if (abyte.length > 32767)
+@@ -423,1099 +435,916 @@
          return this;
      }
  

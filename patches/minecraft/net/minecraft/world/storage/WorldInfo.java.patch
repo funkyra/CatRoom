@@ -1,6 +1,32 @@
 --- before/net/minecraft/world/storage/WorldInfo.java
 +++ after/net/minecraft/world/storage/WorldInfo.java
-@@ -56,15 +56,16 @@
+@@ -6,7 +6,10 @@
+ import javax.annotation.Nullable;
+ import net.minecraft.crash.CrashReportCategory;
+ import net.minecraft.crash.ICrashReportDetail;
++import net.minecraft.entity.player.EntityPlayer;
++import net.minecraft.entity.player.EntityPlayerMP;
+ import net.minecraft.nbt.NBTTagCompound;
++import net.minecraft.network.play.server.SPacketServerDifficulty;
+ import net.minecraft.server.MinecraftServer;
+ import net.minecraft.util.datafix.DataFixer;
+ import net.minecraft.util.datafix.FixTypes;
+@@ -17,10 +20,14 @@
+ import net.minecraft.world.EnumDifficulty;
+ import net.minecraft.world.GameRules;
+ import net.minecraft.world.GameType;
++import net.minecraft.world.WorldServer;
+ import net.minecraft.world.WorldSettings;
+ import net.minecraft.world.WorldType;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.Bukkit;
++import org.bukkit.event.weather.ThunderChangeEvent;
++import org.bukkit.event.weather.WeatherChangeEvent;
+ 
+ public class WorldInfo
+ {
+@@ -56,15 +63,18 @@
      private boolean field_176150_A;
      private double field_176151_B;
      private double field_176152_C;
@@ -18,10 +44,12 @@
 +    private final Map<Integer, NBTTagCompound> field_186348_N = Maps.newHashMap();
      private GameRules field_82577_x = new GameRules();
 +    private java.util.Map<String, net.minecraft.nbt.NBTBase> additionalProperties;
++
++    public WorldServer world;
  
      protected WorldInfo()
      {
-@@ -74,7 +75,6 @@
+@@ -74,7 +84,6 @@
      {
          p_189967_0_.func_188258_a(FixTypes.LEVEL, new IDataWalker()
          {
@@ -29,7 +57,15 @@
              public NBTTagCompound func_188266_a(IDataFixer p_188266_1_, NBTTagCompound p_188266_2_, int p_188266_3_)
              {
                  if (p_188266_2_.func_150297_b("Player", 10))
-@@ -252,7 +252,7 @@
+@@ -161,6 +170,7 @@
+         this.field_76114_p = p_i2157_1_.func_74762_e("thunderTime");
+         this.field_76102_o = p_i2157_1_.func_74767_n("thundering");
+         this.field_76111_s = p_i2157_1_.func_74767_n("hardcore");
++        this.field_76105_j = p_i2157_1_.func_74762_e("dimension");
+ 
+         if (p_i2157_1_.func_150297_b("initialized", 99))
+         {
+@@ -252,7 +262,7 @@
  
              for (String s : nbttagcompound1.func_150296_c())
              {
@@ -38,7 +74,7 @@
              }
          }
      }
-@@ -367,6 +367,7 @@
+@@ -367,6 +377,7 @@
          p_76064_1_.func_74780_a("BorderSizeLerpTarget", this.field_176148_F);
          p_76064_1_.func_74780_a("BorderWarningBlocks", (double)this.field_176154_I);
          p_76064_1_.func_74780_a("BorderWarningTime", (double)this.field_176155_J);
@@ -46,8 +82,11 @@
  
          if (this.field_176158_z != null)
          {
-@@ -377,9 +378,10 @@
+@@ -375,11 +386,13 @@
+ 
+         p_76064_1_.func_74757_a("DifficultyLocked", this.field_176150_A);
          p_76064_1_.func_74782_a("GameRules", this.field_82577_x.func_82770_a());
++        p_76064_1_.func_74768_a("dimension", this.field_76105_j);
          NBTTagCompound nbttagcompound1 = new NBTTagCompound();
  
 -        for (Entry<DimensionType, NBTTagCompound> entry : this.field_186348_N.entrySet())
@@ -59,7 +98,7 @@
          }
  
          p_76064_1_.func_74782_a("DimensionData", nbttagcompound1);
-@@ -443,17 +445,17 @@
+@@ -443,17 +456,17 @@
          this.field_76096_d = p_76056_1_;
      }
  
@@ -83,15 +122,49 @@
      public void func_76068_b(long p_76068_1_)
      {
          this.field_76094_f = p_76068_1_;
-@@ -709,6 +711,7 @@
+@@ -509,6 +522,14 @@
+ 
+     public void func_76069_a(boolean p_76069_1_)
+     {
++        org.bukkit.World world = Bukkit.getWorld(func_76065_j());
++        if (world != null) {
++            ThunderChangeEvent thunder = new ThunderChangeEvent(world, p_76069_1_);
++            Bukkit.getServer().getPluginManager().callEvent(thunder);
++            if (thunder.isCancelled()) {
++                return;
++            }
++        }
+         this.field_76102_o = p_76069_1_;
+     }
+ 
+@@ -529,6 +550,14 @@
+ 
+     public void func_76084_b(boolean p_76084_1_)
+     {
++        org.bukkit.World world = Bukkit.getWorld(func_76065_j());
++        if (world != null) {
++            WeatherChangeEvent weather = new WeatherChangeEvent(world, p_76084_1_);
++            Bukkit.getServer().getPluginManager().callEvent(weather);
++            if (weather.isCancelled()) {
++                return;
++            }
++        }
+         this.field_76104_m = p_76084_1_;
+     }
+ 
+@@ -709,6 +738,11 @@
  
      public void func_176144_a(EnumDifficulty p_176144_1_)
      {
 +        net.minecraftforge.common.ForgeHooks.onDifficultyChange(p_176144_1_, this.field_176158_z);
++        SPacketServerDifficulty packet = new SPacketServerDifficulty(this.func_176130_y(), this.func_176123_z());
++        for (EntityPlayerMP player :(java.util.List<EntityPlayerMP>) (java.util.List) world.field_73010_i) {
++            player.field_71135_a.func_147359_a(packet);
++        }
          this.field_176158_z = p_176144_1_;
      }
  
-@@ -731,22 +734,13 @@
+@@ -731,22 +765,13 @@
                  return String.valueOf(WorldInfo.this.func_76063_b());
              }
          });
@@ -117,7 +190,7 @@
          p_85118_1_.func_189529_a("Level generator options", new ICrashReportDetail<String>()
          {
              public String call() throws Exception
-@@ -792,56 +786,70 @@
+@@ -792,56 +817,70 @@
                              s = "Anvil";
                      }
                  }
@@ -225,3 +298,30 @@
      }
  
      @SideOnly(Side.CLIENT)
+@@ -860,5 +899,26 @@
+     public String func_186346_M()
+     {
+         return this.field_186349_b;
++    }
++
++    // CraftBukkit start - Check if the name stored in NBT is the correct one
++    public void checkName(String name) {
++        if (!this.field_76106_k.equals(name)) {
++            this.field_76106_k = name;
++        }
++    }
++    // CraftBukkit end
++
++    /**
++     * Sets the Dimension.
++     */
++    public void setDimension(int dim)
++    {
++        this.field_76105_j = dim;
++    }
++
++    public int getDimension()
++    {
++        return this.field_76105_j;
+     }
+ }

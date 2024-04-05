@@ -1,0 +1,11 @@
+--- before/net/minecraft/network/play/client/CPacketCloseWindow.java
++++ after/net/minecraft/network/play/client/CPacketCloseWindow.java
+@@ -9,7 +9,7 @@
+ 
+ public class CPacketCloseWindow implements Packet<INetHandlerPlayServer>
+ {
+-    private int field_149556_a;
++    public int field_149556_a;
+ 
+     public CPacketCloseWindow()
+     {

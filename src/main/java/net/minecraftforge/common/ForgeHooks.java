@@ -44,9 +44,7 @@ import com.google.gson.JsonParseException;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementManager;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockFarmland;
-import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -66,16 +64,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemAxe;
-import net.minecraft.item.ItemBucket;
-import net.minecraft.item.ItemEnchantedBook;
-import net.minecraft.item.ItemMonsterPlacer;
-import net.minecraft.item.ItemPickaxe;
-import net.minecraft.item.ItemPotion;
-import net.minecraft.item.ItemSpade;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemTippedArrow;
+import net.minecraft.item.*;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -90,15 +79,7 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityNote;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.IntIdentityHashBiMap;
-import net.minecraft.util.JsonUtils;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.WeightedRandom;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -119,6 +100,7 @@ import net.minecraft.world.storage.loot.conditions.LootCondition;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.DifficultyChangeEvent;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -154,17 +136,19 @@ import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher.ConnectionType;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
-import net.minecraftforge.registries.DataSerializerEntry;
-import net.minecraftforge.registries.ForgeRegistry;
-import net.minecraftforge.registries.GameData;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
+import net.minecraftforge.registries.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.bukkit.Location;
+import org.bukkit.TreeType;
+import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockState;
+import org.bukkit.entity.Player;
+import org.bukkit.event.world.StructureGrowEvent;
 
 public class ForgeHooks
 {
@@ -818,7 +802,7 @@ public class ForgeHooks
     public static int onBlockBreakEvent(World world, GameType gameType, EntityPlayerMP entityPlayer, BlockPos pos)
     {
         // Logic from tryHarvestBlock for pre-canceling the event
-        boolean preCancelEvent = false;
+        /*boolean preCancelEvent = false;
         ItemStack itemstack = entityPlayer.getHeldItemMainhand();
         if (gameType.isCreative() && !itemstack.isEmpty()
                 && !itemstack.getItem().canDestroyBlockInCreative(world, pos, itemstack, entityPlayer))
@@ -834,10 +818,10 @@ public class ForgeHooks
                 if (itemstack.isEmpty() || !itemstack.canDestroy(world.getBlockState(pos).getBlock()))
                     preCancelEvent = true;
             }
-        }
+        }*/
 
         // Tell client the block is gone immediately then process events
-        if (world.getTileEntity(pos) == null)
+        if (world.getTileEntity(pos) == null  && !(entityPlayer instanceof FakePlayer))
         {
             SPacketBlockChange packet = new SPacketBlockChange(world, pos);
             packet.blockState = Blocks.AIR.getDefaultState();
@@ -847,11 +831,11 @@ public class ForgeHooks
         // Post the block break event
         IBlockState state = world.getBlockState(pos);
         BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, pos, state, entityPlayer);
-        event.setCanceled(preCancelEvent);
+        //event.setCanceled(preCancelEvent);
         MinecraftForge.EVENT_BUS.post(event);
 
         // Handle if the event is canceled
-        if (event.isCanceled())
+        if (event.isCanceled() && !(entityPlayer instanceof FakePlayer))
         {
             // Let the client know the block still exists
             entityPlayer.connection.sendPacket(new SPacketBlockChange(world, pos));
@@ -866,6 +850,12 @@ public class ForgeHooks
                     entityPlayer.connection.sendPacket(pkt);
                 }
             }
+
+            // Send other half of the door
+            if (state.getBlock() instanceof BlockDoor) {
+                boolean bottom = state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER;
+                entityPlayer.connection.sendPacket(new SPacketBlockChange(world, bottom ? pos.up() : pos.down()));
+            }
         }
         return event.isCanceled() ? -1 : event.getExpToDrop();
     }
@@ -875,19 +865,63 @@ public class ForgeHooks
         // handle all placement events here
         int meta = itemstack.getItemDamage();
         int size = itemstack.getCount();
+        int data = itemstack.getMetadata();
         NBTTagCompound nbt = null;
         if (itemstack.getTagCompound() != null)
         {
             nbt = itemstack.getTagCompound().copy();
         }
 
+        boolean oldBlockReplaceable = world.getBlockState(pos).getMaterial().isReplaceable();
+
         if (!(itemstack.getItem() instanceof ItemBucket)) // if not bucket
         {
             world.captureBlockSnapshots = true;
+            // CraftBukkit start
+            if(itemstack.getItem() instanceof ItemDye && itemstack.getMetadata() == 15){
+                Block block = world.getBlockState(pos).getBlock();
+                if(block == Blocks.SAPLING || block instanceof BlockMushroom){
+                    world.captureTreeGeneration = true;
+                }
+            }
+            // CraftBukkit end
         }
 
         EnumActionResult ret = itemstack.getItem().onItemUse(player, world, pos, hand, side, hitX, hitY, hitZ);
         world.captureBlockSnapshots = false;
+
+        // CraftBukkit start
+        int newCount = itemstack.getCount();
+        if (ret == EnumActionResult.SUCCESS && world.captureTreeGeneration && world.capturedBlockSnapshots.size() > 0) {
+            List<BlockState> blocks = new ArrayList();
+            for (net.minecraftforge.common.util.BlockSnapshot snapshot : world.capturedBlockSnapshots) {
+                blocks.add(new CraftBlockState(snapshot));
+            }
+
+            world.captureTreeGeneration = false;
+            Location location = new Location(world.getWorld(), pos.getX(), pos.getY(), pos.getZ());
+            TreeType treeType = BlockSapling.treeType;
+            BlockSapling.treeType = null;
+            world.capturedBlockSnapshots.clear();
+            StructureGrowEvent event = null;
+            if (treeType != null) {
+                boolean isBonemeal = itemstack.getItem() == Items.DYE && data == 15;
+                event = new StructureGrowEvent(location, treeType, isBonemeal, (Player) player.getBukkitEntity(), blocks);
+                org.bukkit.Bukkit.getPluginManager().callEvent(event);
+            }
+            if (event == null || !event.isCancelled()) {
+                // Change the stack to its new contents if it hasn't been tampered with.
+                if (itemstack.getCount() == size && itemstack.getMetadata() == data) {
+                    itemstack.setCount(newCount);
+                }
+                for (BlockState blockstate : blocks) {
+                    blockstate.update(true);
+                }
+            }
+            return ret;
+        }
+        world.captureTreeGeneration = false;
+        // CraftBukkit end
 
         if (ret == EnumActionResult.SUCCESS)
         {
@@ -930,6 +964,8 @@ public class ForgeHooks
                     blocksnapshot.restore(true, false);
                     world.restoringBlockSnapshots = false;
                 }
+
+                ((org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer) player.getBukkitEntity()).updateInventory(); // CatServer - update inventory
             }
             else
             {
@@ -954,6 +990,39 @@ public class ForgeHooks
                     world.markAndNotifyBlock(snap.getPos(), null, oldBlock, newBlock, updateFlag);
                 }
                 player.addStat(StatList.getObjectUseStats(itemstack.getItem()));
+
+                // CatServer - play after only for vanilla
+                if (itemstack.item instanceof net.minecraft.item.ItemRecord && ((net.minecraft.item.ItemRecord)itemstack.item).playAfter) {
+                    world.playEvent((EntityPlayer) null, 1010, pos, Item.getIdFromItem(itemstack.item));
+                    player.addStat(StatList.RECORD_PLAYED);
+                    ((net.minecraft.item.ItemRecord)itemstack.item).playAfter = false;
+                }
+
+                if (itemstack.item == Items.SKULL) { // Special case skulls to allow wither spawns to be cancelled
+                    BlockPos bp = pos;
+                    if (!oldBlockReplaceable) {
+                        if (!world.getBlockState(pos).getMaterial().isSolid()) {
+                            bp = null;
+                        } else {
+                            bp = bp.offset(side);
+                        }
+                    }
+                    if (bp != null) {
+                        TileEntity te = world.getTileEntity(bp);
+                        if (te instanceof net.minecraft.tileentity.TileEntitySkull) {
+                            Blocks.SKULL.checkWitherSpawn(world, bp, (net.minecraft.tileentity.TileEntitySkull) te);
+                        }
+                    }
+                }
+
+                // SPIGOT-1288 - play sound stripped from ItemBlock
+                if (itemstack.item instanceof ItemBlock && ((ItemBlock)itemstack.item).playAfter) {
+                    BlockPos bp = !oldBlockReplaceable ? pos.offset(side) : pos;
+                    IBlockState iblockstate = world.getBlockState(bp);
+                    SoundType soundeffecttype = iblockstate.getBlock().getSoundType(iblockstate, world, bp, player);
+                    world.playSound(player, bp, soundeffecttype.getPlaceSound(), SoundCategory.BLOCKS, (soundeffecttype.getVolume() + 1.0F) / 2.0F, soundeffecttype.getPitch() * 0.8F);
+                    ((ItemBlock) itemstack.item).playAfter = false;
+                }
             }
         }
         world.capturedBlockSnapshots.clear();
@@ -1405,6 +1474,7 @@ public class ForgeHooks
 
     public static void sendRecipeBook(NetHandlerPlayServer connection, State state, List<IRecipe> recipes, List<IRecipe> display, boolean isGuiOpen, boolean isFilteringCraftable)
     {
+        if (connection == null) return; // CatServer
         NetworkDispatcher disp = NetworkDispatcher.get(connection.getNetworkManager());
         //Not sure how it could ever be null, but screw it lets protect against it. Could Error the client but we dont care if they are asking for this stuff in the wrong state!
         ConnectionType type = disp == null || disp.getConnectionType() == null ? ConnectionType.MODDED : disp.getConnectionType();

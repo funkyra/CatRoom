@@ -1,6 +1,21 @@
 --- before/net/minecraft/entity/projectile/EntityArrow.java
 +++ after/net/minecraft/entity/projectile/EntityArrow.java
-@@ -39,34 +39,37 @@
+@@ -12,6 +12,7 @@
+ import net.minecraft.entity.EntityLivingBase;
+ import net.minecraft.entity.IProjectile;
+ import net.minecraft.entity.MoverType;
++import net.minecraft.entity.item.EntityItem;
+ import net.minecraft.entity.monster.EntityEnderman;
+ import net.minecraft.entity.player.EntityPlayer;
+ import net.minecraft.entity.player.EntityPlayerMP;
+@@ -36,37 +37,56 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.entity.LivingEntity;
++import org.bukkit.event.entity.EntityCombustByEntityEvent;
++import org.bukkit.event.entity.EntityCombustEvent;
++import org.bukkit.event.player.PlayerPickupArrowEvent;
  
  public abstract class EntityArrow extends Entity implements IProjectile
  {
@@ -20,12 +35,13 @@
 -    private int field_145789_f = -1;
 +    });
 +    private static final DataParameter<Byte> field_184554_g = EntityDataManager.<Byte>func_187226_a(EntityArrow.class, DataSerializers.field_187191_a);
-+    private int field_145791_d;
-+    private int field_145792_e;
-+    private int field_145789_f;
++    public int field_145791_d; // PAIL: private->public
++    public int field_145792_e; // PAIL: private->public
++    public int field_145789_f; // PAIL: private->public
      private Block field_145790_g;
      private int field_70253_h;
-     protected boolean field_70254_i;
+-    protected boolean field_70254_i;
++    public boolean field_70254_i; // Spigot
      protected int field_184552_b;
 -    public EntityArrow.PickupStatus field_70251_a = EntityArrow.PickupStatus.DISALLOWED;
 +    public EntityArrow.PickupStatus field_70251_a;
@@ -34,8 +50,21 @@
      private int field_70252_j;
      private int field_70257_an;
 -    private double field_70255_ao = 2.0;
+-    private int field_70256_ap;
 +    private double field_70255_ao;
-     private int field_70256_ap;
++    public int field_70256_ap;
++
++    // Spigot Start
++    @Override
++    public void inactiveTick()
++    {
++        if ( this.field_70254_i )
++        {
++            this.field_70252_j += 1; // Despawn counter. First int after shooter
++        }
++        super.inactiveTick();
++    }
++    // Spigot End
  
      public EntityArrow(World p_i1753_1_)
      {
@@ -48,16 +77,18 @@
          this.func_70105_a(0.5F, 0.5F);
      }
  
-@@ -78,7 +81,7 @@
+@@ -78,8 +98,9 @@
  
      public EntityArrow(World p_i46777_1_, EntityLivingBase p_i46777_2_)
      {
 -        this(p_i46777_1_, p_i46777_2_.field_70165_t, p_i46777_2_.field_70163_u + (double)p_i46777_2_.func_70047_e() - 0.1F, p_i46777_2_.field_70161_v);
 +        this(p_i46777_1_, p_i46777_2_.field_70165_t, p_i46777_2_.field_70163_u + (double)p_i46777_2_.func_70047_e() - 0.10000000149011612D, p_i46777_2_.field_70161_v);
          this.field_70250_c = p_i46777_2_;
++        this.projectileSource = (LivingEntity) p_i46777_2_.getBukkitEntity();
  
          if (p_i46777_2_ instanceof EntityPlayer)
-@@ -88,31 +91,29 @@
+         {
+@@ -88,31 +109,29 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -96,7 +127,7 @@
          this.func_70186_c((double)f, (double)f1, (double)f2, p_184547_5_, p_184547_6_);
          this.field_70159_w += p_184547_1_.field_70159_w;
          this.field_70179_y += p_184547_1_.field_70179_y;
-@@ -123,42 +124,37 @@
+@@ -123,42 +142,37 @@
          }
      }
  
@@ -151,7 +182,7 @@
      public void func_70016_h(double p_70016_1_, double p_70016_3_, double p_70016_5_)
      {
          this.field_70159_w = p_70016_1_;
-@@ -168,8 +164,8 @@
+@@ -168,8 +182,8 @@
          if (this.field_70127_C == 0.0F && this.field_70126_B == 0.0F)
          {
              float f = MathHelper.func_76133_a(p_70016_1_ * p_70016_1_ + p_70016_5_ * p_70016_5_);
@@ -162,7 +193,7 @@
              this.field_70127_C = this.field_70125_A;
              this.field_70126_B = this.field_70177_z;
              this.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, this.field_70177_z, this.field_70125_A);
-@@ -177,7 +173,6 @@
+@@ -177,7 +191,6 @@
          }
      }
  
@@ -170,7 +201,7 @@
      public void func_70071_h_()
      {
          super.func_70071_h_();
-@@ -185,8 +180,8 @@
+@@ -185,8 +198,8 @@
          if (this.field_70127_C == 0.0F && this.field_70126_B == 0.0F)
          {
              float f = MathHelper.func_76133_a(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
@@ -181,7 +212,7 @@
              this.field_70126_B = this.field_70177_z;
              this.field_70127_C = this.field_70125_A;
          }
-@@ -199,8 +194,7 @@
+@@ -199,8 +212,7 @@
          {
              AxisAlignedBB axisalignedbb = iblockstate.func_185890_d(this.field_70170_p, blockpos);
  
@@ -191,7 +222,7 @@
              {
                  this.field_70254_i = true;
              }
-@@ -215,7 +209,7 @@
+@@ -215,7 +227,7 @@
          {
              int j = block.func_176201_c(iblockstate);
  
@@ -200,7 +231,16 @@
              {
                  this.field_70254_i = false;
                  this.field_70159_w *= (double)(this.field_70146_Z.nextFloat() * 0.2F);
-@@ -248,9 +242,7 @@
+@@ -228,7 +240,7 @@
+             {
+                 ++this.field_70252_j;
+ 
+-                if (this.field_70252_j >= 1200)
++                if (this.field_70252_j >= field_70170_p.spigotConfig.arrowDespawnRate) // Spigot - First int after shooter
+                 {
+                     this.func_70106_y();
+                 }
+@@ -248,9 +260,7 @@
  
              if (raytraceresult != null)
              {
@@ -211,7 +251,7 @@
              }
  
              Entity entity = this.func_184551_a(vec3d1, vec3d);
-@@ -270,7 +262,7 @@
+@@ -270,7 +280,7 @@
                  }
              }
  
@@ -220,7 +260,7 @@
              {
                  this.func_184549_a(raytraceresult);
              }
-@@ -279,16 +271,7 @@
+@@ -279,16 +289,7 @@
              {
                  for (int k = 0; k < 4; ++k)
                  {
@@ -238,7 +278,7 @@
                  }
              }
  
-@@ -296,12 +279,11 @@
+@@ -296,12 +297,11 @@
              this.field_70163_u += this.field_70181_x;
              this.field_70161_v += this.field_70179_y;
              float f4 = MathHelper.func_76133_a(this.field_70159_w * this.field_70159_w + this.field_70179_y * this.field_70179_y);
@@ -254,7 +294,7 @@
              }
  
              while (this.field_70125_A - this.field_70127_C >= 180.0F)
-@@ -329,16 +311,7 @@
+@@ -329,16 +329,7 @@
                  for (int i = 0; i < 4; ++i)
                  {
                      float f3 = 0.25F;
@@ -272,7 +312,7 @@
                  }
  
                  f1 = 0.6F;
-@@ -355,7 +328,7 @@
+@@ -355,7 +346,7 @@
  
              if (!this.func_189652_ae())
              {
@@ -281,8 +321,12 @@
              }
  
              this.func_70107_b(this.field_70165_t, this.field_70163_u, this.field_70161_v);
-@@ -369,9 +342,7 @@
- 
+@@ -366,12 +357,10 @@
+     protected void func_184549_a(RayTraceResult p_184549_1_)
+     {
+         Entity entity = p_184549_1_.field_72308_g;
+-
++        org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callProjectileHitEvent(this, p_184549_1_);
          if (entity != null)
          {
 -            float f = MathHelper.func_76133_a(
@@ -292,7 +336,21 @@
              int i = MathHelper.func_76143_f((double)f * this.field_70255_ao);
  
              if (this.func_70241_g())
-@@ -412,11 +383,7 @@
+@@ -392,7 +381,12 @@
+ 
+             if (this.func_70027_ad() && !(entity instanceof EntityEnderman))
+             {
+-                entity.func_70015_d(5);
++//                entity.setFire(5);
++                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), 5);
++                org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
++                if (!combustEvent.isCancelled()) {
++                    entity.func_70015_d(combustEvent.getDuration());
++                }
+             }
+ 
+             if (entity.func_70097_a(damagesource, (float)i))
+@@ -412,11 +406,7 @@
  
                          if (f1 > 0.0F)
                          {
@@ -305,7 +363,7 @@
                          }
                      }
  
-@@ -428,10 +395,7 @@
+@@ -428,10 +418,7 @@
  
                      this.func_184548_a(entitylivingbase);
  
@@ -317,7 +375,7 @@
                      {
                          ((EntityPlayerMP)this.field_70250_c).field_71135_a.func_147359_a(new SPacketChangeGameState(6, 0.0F));
                      }
-@@ -446,15 +410,14 @@
+@@ -446,15 +433,14 @@
              }
              else
              {
@@ -337,7 +395,7 @@
                  {
                      if (this.field_70251_a == EntityArrow.PickupStatus.ALLOWED)
                      {
-@@ -477,12 +440,10 @@
+@@ -477,12 +463,10 @@
              this.field_70159_w = (double)((float)(p_184549_1_.field_72307_f.field_72450_a - this.field_70165_t));
              this.field_70181_x = (double)((float)(p_184549_1_.field_72307_f.field_72448_b - this.field_70163_u));
              this.field_70179_y = (double)((float)(p_184549_1_.field_72307_f.field_72449_c - this.field_70161_v));
@@ -354,7 +412,7 @@
              this.func_184185_a(SoundEvents.field_187731_t, 1.0F, 1.2F / (this.field_70146_Z.nextFloat() * 0.2F + 0.9F));
              this.field_70254_i = true;
              this.field_70249_b = 7;
-@@ -495,7 +456,6 @@
+@@ -495,7 +479,6 @@
          }
      }
  
@@ -362,7 +420,7 @@
      public void func_70091_d(MoverType p_70091_1_, double p_70091_2_, double p_70091_4_, double p_70091_6_)
      {
          super.func_70091_d(p_70091_1_, p_70091_2_, p_70091_4_, p_70091_6_);
-@@ -516,9 +476,8 @@
+@@ -516,9 +499,8 @@
      protected Entity func_184551_a(Vec3d p_184551_1_, Vec3d p_184551_2_)
      {
          Entity entity = null;
@@ -374,7 +432,7 @@
  
          for (int i = 0; i < list.size(); ++i)
          {
-@@ -526,14 +485,14 @@
+@@ -526,14 +508,14 @@
  
              if (entity1 != this.field_70250_c || this.field_70257_an >= 5)
              {
@@ -391,7 +449,7 @@
                      {
                          entity = entity1;
                          d0 = d1;
-@@ -554,7 +513,6 @@
+@@ -554,7 +536,6 @@
          func_189657_a(p_189658_0_, "Arrow");
      }
  
@@ -399,7 +457,7 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          p_70014_1_.func_74768_a("xTile", this.field_145791_d);
-@@ -571,7 +529,6 @@
+@@ -571,7 +552,6 @@
          p_70014_1_.func_74757_a("crit", this.func_70241_g());
      }
  
@@ -407,7 +465,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          this.field_145791_d = p_70037_1_.func_74762_e("xTile");
-@@ -609,13 +566,11 @@
+@@ -609,15 +589,24 @@
          this.func_70243_d(p_70037_1_.func_74767_n("crit"));
      }
  
@@ -418,11 +476,26 @@
          {
 -            boolean flag = this.field_70251_a == EntityArrow.PickupStatus.ALLOWED
 -                           || this.field_70251_a == EntityArrow.PickupStatus.CREATIVE_ONLY && p_70100_1_.field_71075_bZ.field_75098_d;
-+            boolean flag = this.field_70251_a == EntityArrow.PickupStatus.ALLOWED || this.field_70251_a == EntityArrow.PickupStatus.CREATIVE_ONLY && p_70100_1_.field_71075_bZ.field_75098_d;
- 
-             if (this.field_70251_a == EntityArrow.PickupStatus.ALLOWED && !p_70100_1_.field_71071_by.func_70441_a(this.func_184550_j()))
+-
+-            if (this.field_70251_a == EntityArrow.PickupStatus.ALLOWED && !p_70100_1_.field_71071_by.func_70441_a(this.func_184550_j()))
++            ItemStack itemstack = this.func_184550_j();
++            EntityItem item = new EntityItem(this.field_70170_p, this.field_70165_t, this.field_70163_u, this.field_70161_v, itemstack);
++            if (this.field_70251_a == PickupStatus.ALLOWED && p_70100_1_.field_71071_by.canHold(itemstack) > 0) {
++                PlayerPickupArrowEvent event = new PlayerPickupArrowEvent((org.bukkit.entity.Player) p_70100_1_.getBukkitEntity(), new org.bukkit.craftbukkit.v1_12_R1.entity.CraftItem(this.field_70170_p.getServer(), this, item), (org.bukkit.entity.Arrow) this.getBukkitEntity());
++                // event.setCancelled(!entityhuman.canPickUpLoot); TODO
++                this.field_70170_p.getServer().getPluginManager().callEvent(event);
++
++                if (event.isCancelled()) {
++                    return;
++                }
++            }
++            boolean flag = this.field_70251_a == PickupStatus.ALLOWED || this.field_70251_a == PickupStatus.CREATIVE_ONLY && p_70100_1_.field_71075_bZ.field_75098_d;
++
++            if (this.field_70251_a == PickupStatus.ALLOWED && !p_70100_1_.field_71071_by.func_70441_a(item.func_92059_d()))
              {
-@@ -632,7 +587,6 @@
+                 flag = false;
+             }
+@@ -632,7 +621,6 @@
  
      protected abstract ItemStack func_184550_j();
  
@@ -430,7 +503,7 @@
      protected boolean func_70041_e_()
      {
          return false;
-@@ -653,13 +607,11 @@
+@@ -653,13 +641,11 @@
          this.field_70256_ap = p_70240_1_;
      }
  
@@ -444,7 +517,7 @@
      public float func_70047_e()
      {
          return 0.0F;
-@@ -667,21 +619,21 @@
+@@ -667,21 +653,21 @@
  
      public void func_70243_d(boolean p_70243_1_)
      {
@@ -470,7 +543,7 @@
          return (b0 & 1) != 0;
      }
  
-@@ -689,13 +641,11 @@
+@@ -689,13 +675,11 @@
      {
          int i = EnchantmentHelper.func_185284_a(Enchantments.field_185309_u, p_190547_1_);
          int j = EnchantmentHelper.func_185284_a(Enchantments.field_185310_v, p_190547_1_);
@@ -486,3 +559,18 @@
          }
  
          if (j > 0)
+@@ -705,7 +689,13 @@
+ 
+         if (EnchantmentHelper.func_185284_a(Enchantments.field_185311_w, p_190547_1_) > 0)
+         {
+-            this.func_70015_d(100);
++//            this.setFire(100);
++            EntityCombustEvent event = new EntityCombustEvent(this.getBukkitEntity(), 100);
++            this.field_70170_p.getServer().getPluginManager().callEvent(event);
++
++            if (!event.isCancelled()) {
++                this.func_70015_d(event.getDuration());
++            }
+         }
+     }
+ 

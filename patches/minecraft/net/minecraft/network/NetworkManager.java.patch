@@ -1,6 +1,6 @@
 --- before/net/minecraft/network/NetworkManager.java
 +++ after/net/minecraft/network/NetworkManager.java
-@@ -51,30 +51,30 @@
+@@ -51,33 +51,38 @@
      private static final Logger field_150735_g = LogManager.getLogger();
      public static final Marker field_150740_a = MarkerManager.getMarker("NETWORK");
      public static final Marker field_150738_b = MarkerManager.getMarker("NETWORK_PACKETS", field_150740_a);
@@ -34,9 +34,19 @@
 -    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> field_150745_j = Queues.newConcurrentLinkedQueue();
 +    private final Queue<NetworkManager.InboundHandlerTuplePacketListener> field_150745_j = Queues.<NetworkManager.InboundHandlerTuplePacketListener>newConcurrentLinkedQueue();
      private final ReentrantReadWriteLock field_181680_j = new ReentrantReadWriteLock();
-     private Channel field_150746_k;
-     private SocketAddress field_150743_l;
-@@ -88,7 +88,11 @@
+-    private Channel field_150746_k;
+-    private SocketAddress field_150743_l;
++    public Channel field_150746_k; // CatServer - private -> public
++    // Spigot Start // PAIL
++    public SocketAddress field_150743_l;
++    public java.util.UUID spoofedUUID;
++    public com.mojang.authlib.properties.Property[] spoofedProfile;
++    // Spigot End
++    public boolean preparing = true; // Spigot
+     private INetHandler field_150744_m;
+     private ITextComponent field_150742_o;
+     private boolean field_152463_r;
+@@ -88,12 +93,17 @@
          this.field_179294_g = p_i46004_1_;
      }
  
@@ -49,7 +59,13 @@
      public void channelActive(ChannelHandlerContext p_channelActive_1_) throws Exception
      {
          super.channelActive(p_channelActive_1_);
-@@ -112,40 +116,39 @@
+         this.field_150746_k = p_channelActive_1_.channel();
+         this.field_150743_l = this.field_150746_k.remoteAddress();
++        this.preparing = false; // Spigot
+ 
+         try
+         {
+@@ -112,40 +122,39 @@
          field_150735_g.debug("Enabled auto read");
      }
  
@@ -97,7 +113,7 @@
              }
          }
      }
-@@ -162,7 +165,7 @@
+@@ -162,7 +171,7 @@
          if (this.func_150724_d())
          {
              this.func_150733_h();
@@ -106,7 +122,7 @@
          }
          else
          {
-@@ -170,7 +173,7 @@
+@@ -170,7 +179,7 @@
  
              try
              {
@@ -115,7 +131,7 @@
              }
              finally
              {
-@@ -179,16 +182,12 @@
+@@ -179,16 +188,12 @@
          }
      }
  
@@ -134,7 +150,7 @@
          }
          else
          {
-@@ -196,7 +195,7 @@
+@@ -196,7 +201,7 @@
  
              try
              {
@@ -143,7 +159,7 @@
              }
              finally
              {
-@@ -208,9 +207,9 @@
+@@ -208,9 +213,9 @@
      private void func_150732_b(final Packet<?> p_150732_1_, @Nullable final GenericFutureListener <? extends Future <? super Void >> [] p_150732_2_)
      {
          final EnumConnectionState enumconnectionstate = EnumConnectionState.func_150752_a(p_150732_1_);
@@ -155,7 +171,7 @@
          {
              field_150735_g.debug("Disabled auto read");
              this.field_150746_k.config().setAutoRead(false);
-@@ -218,7 +217,7 @@
+@@ -218,7 +223,7 @@
  
          if (this.field_150746_k.eventLoop().inEventLoop())
          {
@@ -164,7 +180,7 @@
              {
                  this.func_150723_a(enumconnectionstate);
              }
-@@ -236,10 +235,9 @@
+@@ -236,10 +241,9 @@
          {
              this.field_150746_k.eventLoop().execute(new Runnable()
              {
@@ -176,7 +192,7 @@
                      {
                          NetworkManager.this.func_150723_a(enumconnectionstate);
                      }
-@@ -268,9 +266,7 @@
+@@ -268,9 +272,7 @@
                  while (!this.field_150745_j.isEmpty())
                  {
                      NetworkManager.InboundHandlerTuplePacketListener networkmanager$inboundhandlertuplepacketlistener = this.field_150745_j.poll();
@@ -187,7 +203,25 @@
                  }
              }
              finally
-@@ -317,6 +313,7 @@
+@@ -300,11 +302,12 @@
+         return this.field_150743_l;
+     }
+ 
+-    public void func_150718_a(ITextComponent p_150718_1_)
+-    {
+-        if (this.field_150746_k.isOpen())
+-        {
+-            this.field_150746_k.close().awaitUninterruptibly();
++    public void func_150718_a(ITextComponent p_150718_1_) {
++        this.preparing = false; // Spigot
++        if (this.field_150746_k.isOpen()) {
++            // We can't wait as this may be called from an event loop.
++            // this.channel.close().awaitUninterruptibly();
++            this.field_150746_k.close();
+             this.field_150742_o = p_150718_1_;
+         }
+     }
+@@ -317,6 +320,7 @@
      @SideOnly(Side.CLIENT)
      public static NetworkManager func_181124_a(InetAddress p_181124_0_, int p_181124_1_, boolean p_181124_2_)
      {
@@ -195,7 +229,7 @@
          final NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
          Class <? extends SocketChannel > oclass;
          LazyLoadBase <? extends EventLoopGroup > lazyloadbase;
-@@ -332,35 +329,22 @@
+@@ -332,35 +336,22 @@
              lazyloadbase = field_179295_d;
          }
  
@@ -237,7 +271,7 @@
          return networkmanager;
      }
  
-@@ -368,14 +352,13 @@
+@@ -368,14 +359,13 @@
      public static NetworkManager func_150722_a(SocketAddress p_150722_0_)
      {
          final NetworkManager networkmanager = new NetworkManager(EnumPacketDirection.CLIENTBOUND);
@@ -254,7 +288,16 @@
          return networkmanager;
      }
  
-@@ -471,10 +454,15 @@
+@@ -427,7 +417,7 @@
+             }
+             else
+             {
+-                this.field_150746_k.pipeline().addBefore("decoder", "decompress", new NettyCompressionDecoder(p_179289_1_));
++                this.field_150746_k.pipeline().addAfter("splitter", "decompress", new NettyCompressionDecoder(p_179289_1_)); // CatServer
+             }
+ 
+             if (this.field_150746_k.pipeline().get("compress") instanceof NettyCompressionEncoder)
+@@ -471,10 +461,15 @@
                  }
                  else if (this.func_150729_e() != null)
                  {
@@ -271,3 +314,15 @@
      }
  
      static class InboundHandlerTuplePacketListener
+@@ -488,4 +483,11 @@
+                 this.field_150773_b = p_i45146_2_;
+             }
+         }
++    // Spigot Start
++    public SocketAddress getRawAddress()
++    {
++        return this.field_150746_k.remoteAddress();
++    }
++// Spigot End
++
+ }

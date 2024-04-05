@@ -1,6 +1,6 @@
 --- before/net/minecraft/item/crafting/RecipeBookCloning.java
 +++ after/net/minecraft/item/crafting/RecipeBookCloning.java
-@@ -6,12 +6,9 @@
+@@ -6,12 +6,13 @@
  import net.minecraft.item.ItemWrittenBook;
  import net.minecraft.util.NonNullList;
  import net.minecraft.world.World;
@@ -8,13 +8,17 @@
 -import net.minecraftforge.fml.relauncher.SideOnly;
  
 -public class RecipeBookCloning implements IRecipe
-+public class RecipeBookCloning extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
++public class RecipeBookCloning extends ShapelessRecipes implements IRecipe
  {
 -    @Override
++    public RecipeBookCloning() {
++        super("", new ItemStack(Items.field_151164_bB, 0, -1), NonNullList.func_193580_a(Ingredient.field_193370_a, Ingredient.func_193367_a(Items.field_151099_bA)));
++    }
++
      public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
      {
          int i = 0;
-@@ -47,7 +44,6 @@
+@@ -47,7 +48,6 @@
          return !itemstack.func_190926_b() && itemstack.func_77942_o() && i > 0;
      }
  
@@ -22,7 +26,7 @@
      public ItemStack func_77572_b(InventoryCrafting p_77572_1_)
      {
          int i = 0;
-@@ -99,16 +95,14 @@
+@@ -99,16 +99,14 @@
          }
      }
  
@@ -40,7 +44,7 @@
  
          for (int i = 0; i < nonnulllist.size(); ++i)
          {
-@@ -126,14 +120,11 @@
+@@ -126,14 +124,11 @@
          return nonnulllist;
      }
  

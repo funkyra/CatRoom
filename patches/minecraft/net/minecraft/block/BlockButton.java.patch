@@ -8,7 +8,13 @@
  import net.minecraft.block.properties.PropertyBool;
  import net.minecraft.block.state.BlockFaceShape;
  import net.minecraft.block.state.BlockStateContainer;
-@@ -26,61 +27,55 @@
+@@ -22,65 +23,61 @@
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.IBlockAccess;
+ import net.minecraft.world.World;
++import org.bukkit.event.block.BlockRedstoneEvent;
++import org.bukkit.event.entity.EntityInteractEvent;
+ 
  public abstract class BlockButton extends BlockDirectional
  {
      public static final PropertyBool field_176584_b = PropertyBool.func_177716_a("powered");
@@ -83,7 +89,7 @@
      public boolean func_176196_c(World p_176196_1_, BlockPos p_176196_2_)
      {
          for (EnumFacing enumfacing : EnumFacing.values())
-@@ -103,7 +98,7 @@
+@@ -103,7 +100,7 @@
  
          if (p_181088_2_ == EnumFacing.UP)
          {
@@ -92,7 +98,7 @@
          }
          else
          {
-@@ -111,27 +106,14 @@
+@@ -111,27 +108,14 @@
          }
      }
  
@@ -123,7 +129,7 @@
          {
              this.func_176226_b(p_189540_2_, p_189540_3_, p_189540_1_, 0);
              p_189540_2_.func_175698_g(p_189540_3_);
-@@ -152,11 +134,10 @@
+@@ -152,11 +136,10 @@
          }
      }
  
@@ -137,7 +143,7 @@
  
          switch (enumfacing)
          {
-@@ -176,29 +157,18 @@
+@@ -176,29 +159,29 @@
          }
      }
  
@@ -163,6 +169,17 @@
          else
          {
 -            p_180639_1_.func_180501_a(p_180639_2_, p_180639_3_.func_177226_a(field_176584_b, true), 3);
++            boolean powered = ((Boolean) p_180639_3_.func_177229_b(field_176584_b));
++            org.bukkit.block.Block block = p_180639_1_.getWorld().getBlockAt(p_180639_2_.func_177958_n(), p_180639_2_.func_177956_o(), p_180639_2_.func_177952_p());
++            int old = (powered) ? 15 : 0;
++            int current = (!powered) ? 15 : 0;
++
++            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, old, current);
++            p_180639_1_.getServer().getPluginManager().callEvent(eventRedstone);
++
++            if ((eventRedstone.getNewCurrent() > 0) != (!powered)) {
++                return true;
++            }
 +            p_180639_1_.func_180501_a(p_180639_2_, p_180639_3_.func_177226_a(field_176584_b, Boolean.valueOf(true)), 3);
              p_180639_1_.func_175704_b(p_180639_2_, p_180639_2_);
              this.func_185615_a(p_180639_4_, p_180639_1_, p_180639_2_);
@@ -171,7 +188,7 @@
              p_180639_1_.func_175684_a(p_180639_2_, this, this.func_149738_a(p_180639_1_));
              return true;
          }
-@@ -208,27 +178,24 @@
+@@ -208,27 +191,24 @@
  
      protected abstract void func_185617_b(World p_185617_1_, BlockPos p_185617_2_);
  
@@ -203,7 +220,7 @@
          {
              return 0;
          }
-@@ -238,23 +205,20 @@
+@@ -238,23 +218,20 @@
          }
      }
  
@@ -228,18 +245,26 @@
              {
                  if (this.field_150047_a)
                  {
-@@ -262,8 +226,8 @@
+@@ -262,8 +239,16 @@
                  }
                  else
                  {
 -                    p_180650_1_.func_175656_a(p_180650_2_, p_180650_3_.func_177226_a(field_176584_b, false));
 -                    this.func_176582_b(p_180650_1_, p_180650_2_, p_180650_3_.func_177229_b(field_176387_N));
++                    org.bukkit.block.Block block = p_180650_1_.getWorld().getBlockAt(p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p());
++
++                    BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 15, 0);
++                    p_180650_1_.getServer().getPluginManager().callEvent(eventRedstone);
++
++                    if (eventRedstone.getNewCurrent() > 0) {
++                        return;
++                    }
 +                    p_180650_1_.func_175656_a(p_180650_2_, p_180650_3_.func_177226_a(field_176584_b, Boolean.valueOf(false)));
 +                    this.func_176582_b(p_180650_1_, p_180650_2_, (EnumFacing)p_180650_3_.func_177229_b(field_176387_N));
                      this.func_185617_b(p_180650_1_, p_180650_2_);
                      p_180650_1_.func_175704_b(p_180650_2_, p_180650_2_);
                  }
-@@ -271,14 +235,13 @@
+@@ -271,14 +256,13 @@
          }
      }
  
@@ -255,7 +280,7 @@
                  {
                      this.func_185616_e(p_180634_3_, p_180634_1_, p_180634_2_);
                  }
-@@ -288,22 +251,22 @@
+@@ -288,22 +272,61 @@
  
      private void func_185616_e(IBlockState p_185616_1_, World p_185616_2_, BlockPos p_185616_3_)
      {
@@ -264,11 +289,42 @@
          boolean flag = !list.isEmpty();
 -        boolean flag1 = p_185616_1_.func_177229_b(field_176584_b);
 +        boolean flag1 = ((Boolean)p_185616_1_.func_177229_b(field_176584_b)).booleanValue();
++
++        // CraftBukkit start - Call interact event when arrows turn on wooden buttons
++        if (flag1 != flag && flag) {
++            org.bukkit.block.Block block = p_185616_2_.getWorld().getBlockAt(p_185616_3_.func_177958_n(), p_185616_3_.func_177956_o(), p_185616_3_.func_177952_p());
++            boolean allowed = false;
++
++            // If all of the events are cancelled block the button press, else allow
++            for (Object object : list) {
++                if (object != null) {
++                    EntityInteractEvent event = new EntityInteractEvent(((Entity) object).getBukkitEntity(), block);
++                    p_185616_2_.getServer().getPluginManager().callEvent(event);
++
++                    if (!event.isCancelled()) {
++                        allowed = true;
++                        break;
++                    }
++                }
++            }
++
++            if (!allowed) {
++                return;
++            }
++        }
  
          if (flag && !flag1)
          {
 -            p_185616_2_.func_175656_a(p_185616_3_, p_185616_1_.func_177226_a(field_176584_b, true));
 -            this.func_176582_b(p_185616_2_, p_185616_3_, p_185616_1_.func_177229_b(field_176387_N));
++            org.bukkit.block.Block block = p_185616_2_.getWorld().getBlockAt(p_185616_3_.func_177958_n(), p_185616_3_.func_177956_o(), p_185616_3_.func_177952_p());
++
++            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 0, 15);
++            p_185616_2_.getServer().getPluginManager().callEvent(eventRedstone);
++
++            if (eventRedstone.getNewCurrent() <= 0) {
++                return;
++            }
 +            p_185616_2_.func_175656_a(p_185616_3_, p_185616_1_.func_177226_a(field_176584_b, Boolean.valueOf(true)));
 +            this.func_176582_b(p_185616_2_, p_185616_3_, (EnumFacing)p_185616_1_.func_177229_b(field_176387_N));
              p_185616_2_.func_175704_b(p_185616_3_, p_185616_3_);
@@ -280,12 +336,20 @@
          {
 -            p_185616_2_.func_175656_a(p_185616_3_, p_185616_1_.func_177226_a(field_176584_b, false));
 -            this.func_176582_b(p_185616_2_, p_185616_3_, p_185616_1_.func_177229_b(field_176387_N));
++            org.bukkit.block.Block block = p_185616_2_.getWorld().getBlockAt(p_185616_3_.func_177958_n(), p_185616_3_.func_177956_o(), p_185616_3_.func_177952_p());
++
++            BlockRedstoneEvent eventRedstone = new BlockRedstoneEvent(block, 15, 0);
++            p_185616_2_.getServer().getPluginManager().callEvent(eventRedstone);
++
++            if (eventRedstone.getNewCurrent() > 0) {
++                return;
++            }
 +            p_185616_2_.func_175656_a(p_185616_3_, p_185616_1_.func_177226_a(field_176584_b, Boolean.valueOf(false)));
 +            this.func_176582_b(p_185616_2_, p_185616_3_, (EnumFacing)p_185616_1_.func_177229_b(field_176387_N));
              p_185616_2_.func_175704_b(p_185616_3_, p_185616_3_);
              this.func_185617_b(p_185616_2_, p_185616_3_);
          }
-@@ -320,7 +283,6 @@
+@@ -320,7 +343,6 @@
          p_176582_1_.func_175685_c(p_176582_2_.func_177972_a(p_176582_3_.func_176734_d()), this, false);
      }
  
@@ -293,7 +357,7 @@
      public IBlockState func_176203_a(int p_176203_1_)
      {
          EnumFacing enumfacing;
-@@ -347,10 +309,9 @@
+@@ -347,10 +369,9 @@
                  enumfacing = EnumFacing.UP;
          }
  
@@ -305,7 +369,7 @@
      public int func_176201_c(IBlockState p_176201_1_)
      {
          int i;
-@@ -377,7 +338,7 @@
+@@ -377,7 +398,7 @@
                  i = 0;
          }
  
@@ -314,7 +378,7 @@
          {
              i |= 8;
          }
-@@ -385,25 +346,21 @@
+@@ -385,25 +406,21 @@
          return i;
      }
  

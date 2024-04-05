@@ -1,8 +1,10 @@
 --- before/net/minecraft/entity/monster/EntitySnowman.java
 +++ after/net/minecraft/entity/monster/EntitySnowman.java
-@@ -31,9 +31,9 @@
+@@ -30,10 +30,11 @@
+ import net.minecraft.util.math.MathHelper;
  import net.minecraft.world.World;
  import net.minecraft.world.storage.loot.LootTableList;
++import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
  
 -public class EntitySnowman extends EntityGolem implements IRangedAttackMob
 +public class EntitySnowman extends EntityGolem implements IRangedAttackMob, net.minecraftforge.common.IShearable
@@ -12,7 +14,7 @@
  
      public EntitySnowman(World p_i1692_1_)
      {
-@@ -46,39 +46,34 @@
+@@ -46,39 +47,34 @@
          EntityLiving.func_189752_a(p_189783_0_, EntitySnowman.class);
      }
  
@@ -58,7 +60,7 @@
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          super.func_70037_a(p_70037_1_);
-@@ -89,7 +84,6 @@
+@@ -89,7 +85,6 @@
          }
      }
  
@@ -66,8 +68,14 @@
      public void func_70636_d()
      {
          super.func_70636_d();
-@@ -110,7 +104,7 @@
-                 this.func_70097_a(DamageSource.field_76370_b, 1.0F);
+@@ -107,10 +102,12 @@
+ 
+             if (this.field_70170_p.func_180494_b(new BlockPos(i, 0, k)).func_180626_a(new BlockPos(i, j, k)) > 1.0F)
+             {
+-                this.func_70097_a(DamageSource.field_76370_b, 1.0F);
++                // CraftBukkit - DamageSource.BURN -> CraftEventFactory.MELTING
++                // this.attackEntityFrom(DamageSource.ON_FIRE, 1.0F);
++                this.func_70097_a(CraftEventFactory.MELTING, 1.0F);
              }
  
 -            if (!this.field_70170_p.func_82736_K().func_82766_b("mobGriefing"))
@@ -75,7 +83,7 @@
              {
                  return;
              }
-@@ -122,9 +116,7 @@
+@@ -122,28 +119,25 @@
                  k = MathHelper.func_76128_c(this.field_70161_v + (double)((float)(l / 2 % 2 * 2 - 1) * 0.25F));
                  BlockPos blockpos = new BlockPos(i, j, k);
  
@@ -84,9 +92,12 @@
 -                        && Blocks.field_150431_aC.func_176196_c(this.field_70170_p, blockpos))
 +                if (this.field_70170_p.func_180495_p(blockpos).func_185904_a() == Material.field_151579_a && this.field_70170_p.func_180494_b(blockpos).func_180626_a(blockpos) < 0.8F && Blocks.field_150431_aC.func_176196_c(this.field_70170_p, blockpos))
                  {
-                     this.field_70170_p.func_175656_a(blockpos, Blocks.field_150431_aC.func_176223_P());
+-                    this.field_70170_p.func_175656_a(blockpos, Blocks.field_150431_aC.func_176223_P());
++                    // this.world.setBlockState(blockpos, Blocks.SNOW_LAYER.getDefaultState());
++                    org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleBlockFormEvent(this.field_70170_p, blockpos, Blocks.field_150431_aC.func_176223_P(), this);
                  }
-@@ -133,17 +125,15 @@
+             }
+         }
      }
  
      @Nullable
@@ -105,7 +116,7 @@
          double d1 = p_82196_1_.field_70165_t - this.field_70165_t;
          double d2 = d0 - entitysnowball.field_70163_u;
          double d3 = p_82196_1_.field_70161_v - this.field_70161_v;
-@@ -153,18 +143,16 @@
+@@ -153,18 +147,16 @@
          this.field_70170_p.func_72838_d(entitysnowball);
      }
  
@@ -125,7 +136,7 @@
          {
              this.func_184747_a(false);
              itemstack.func_77972_a(1, p_184645_1_);
-@@ -175,45 +163,49 @@
+@@ -175,45 +167,49 @@
  
      public boolean func_184748_o()
      {

@@ -1,17 +1,28 @@
 --- before/net/minecraft/item/crafting/FurnaceRecipes.java
 +++ after/net/minecraft/item/crafting/FurnaceRecipes.java
-@@ -15,8 +15,8 @@
+@@ -15,15 +15,18 @@
  public class FurnaceRecipes
  {
      private static final FurnaceRecipes field_77606_a = new FurnaceRecipes();
 -    private final Map<ItemStack, ItemStack> field_77604_b = Maps.newHashMap();
 -    private final Map<ItemStack, Float> field_77605_c = Maps.newHashMap();
-+    private final Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap();
++    public Map<ItemStack, ItemStack> field_77604_b = Maps.<ItemStack, ItemStack>newHashMap();
 +    private final Map<ItemStack, Float> field_77605_c = Maps.<ItemStack, Float>newHashMap();
++
++    public Map<ItemStack,ItemStack> customRecipes = Maps.newHashMap();
++    public Map<ItemStack,Float> customExperience = Maps.newHashMap();
  
      public static FurnaceRecipes func_77602_a()
      {
-@@ -35,11 +35,7 @@
+         return field_77606_a;
+     }
+ 
+-    private FurnaceRecipes()
++    public FurnaceRecipes()
+     {
+         this.func_151393_a(Blocks.field_150366_p, new ItemStack(Items.field_151042_j), 0.7F);
+         this.func_151393_a(Blocks.field_150352_o, new ItemStack(Items.field_151043_k), 1.0F);
+@@ -35,11 +38,7 @@
          this.func_151396_a(Items.field_179558_bo, new ItemStack(Items.field_179559_bp), 0.35F);
          this.func_151396_a(Items.field_179561_bm, new ItemStack(Items.field_179557_bn), 0.35F);
          this.func_151393_a(Blocks.field_150347_e, new ItemStack(Blocks.field_150348_b), 0.1F);
@@ -24,7 +35,7 @@
          this.func_151396_a(Items.field_151119_aD, new ItemStack(Items.field_151118_aC), 0.3F);
          this.func_151393_a(Blocks.field_150435_aG, new ItemStack(Blocks.field_150405_ch), 0.35F);
          this.func_151393_a(Blocks.field_150434_aF, new ItemStack(Items.field_151100_aR, 1, EnumDyeColor.GREEN.func_176767_b()), 0.2F);
-@@ -55,11 +51,7 @@
+@@ -55,11 +54,7 @@
          {
              if (itemfishfood$fishtype.func_150973_i())
              {
@@ -37,7 +48,19 @@
              }
          }
  
-@@ -121,8 +113,9 @@
+@@ -109,6 +104,11 @@
+         this.func_151394_a(new ItemStack(Blocks.field_150406_ce, 1, EnumDyeColor.BLACK.func_176765_a()), new ItemStack(Blocks.field_192442_dQ), 0.1F);
+     }
+ 
++    public void registerRecipe(ItemStack itemstack, ItemStack itemstack1, float f) {
++        this.customRecipes.put(itemstack, itemstack1);
++        this.customExperience.put(itemstack, f);
++    }
++
+     public void func_151393_a(Block p_151393_1_, ItemStack p_151393_2_, float p_151393_3_)
+     {
+         this.func_151396_a(Item.func_150898_a(p_151393_1_), p_151393_2_, p_151393_3_);
+@@ -121,12 +121,22 @@
  
      public void func_151394_a(ItemStack p_151394_1_, ItemStack p_151394_2_, float p_151394_3_)
      {
@@ -47,8 +70,21 @@
 +        this.field_77605_c.put(p_151394_2_, Float.valueOf(p_151394_3_));
      }
  
++    // TODO: Test this
      public ItemStack func_151395_a(ItemStack p_151395_1_)
-@@ -140,8 +133,7 @@
+     {
++        for (Entry<ItemStack, ItemStack> entry : this.customRecipes.entrySet())
++        {
++            if (this.func_151397_a(p_151395_1_, entry.getKey()))
++            {
++                return entry.getValue();
++            }
++        }
++
+         for (Entry<ItemStack, ItemStack> entry : this.field_77604_b.entrySet())
+         {
+             if (this.func_151397_a(p_151395_1_, entry.getKey()))
+@@ -140,8 +150,7 @@
  
      private boolean func_151397_a(ItemStack p_151397_1_, ItemStack p_151397_2_)
      {
@@ -58,12 +94,23 @@
      }
  
      public Map<ItemStack, ItemStack> func_77599_b()
-@@ -151,11 +143,14 @@
+@@ -149,13 +158,25 @@
+         return this.field_77604_b;
+     }
  
++    // TODO: Test this
      public float func_151398_b(ItemStack p_151398_1_)
      {
 +        float ret = p_151398_1_.func_77973_b().getSmeltingExperience(p_151398_1_);
 +        if (ret != -1) return ret;
++
++        for (Entry<ItemStack, Float> entry : this.customExperience.entrySet())
++        {
++            if (this.func_151397_a(p_151398_1_, entry.getKey()))
++            {
++                return ((Float)entry.getValue()).floatValue();
++            }
++        }
 +
          for (Entry<ItemStack, Float> entry : this.field_77605_c.entrySet())
          {

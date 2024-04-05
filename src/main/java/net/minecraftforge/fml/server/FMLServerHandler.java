@@ -187,11 +187,13 @@ public class FMLServerHandler implements IFMLSidedHandler
                 DedicatedServer dedServer = (DedicatedServer) server;
 
                 // rudimentary command processing, check for fml confirm/cancel and stop commands
-                synchronized (dedServer.pendingCommandList)
+                synchronized (dedServer.field_71341_l)
                 {
-                    for (Iterator<PendingCommand> it = dedServer.pendingCommandList.iterator(); it.hasNext(); )
+                    for (Iterator<PendingCommand> it = dedServer.field_71341_l.iterator(); it.hasNext(); )
                     {
                         String cmd = it.next().command.trim().toLowerCase();
+
+                        if (!cmd.startsWith("/")) cmd = "/" + cmd; // CatServer
 
                         if (cmd.equals("/fml confirm"))
                         {
@@ -200,6 +202,19 @@ public class FMLServerHandler implements IFMLSidedHandler
                             done = true;
                             it.remove();
                         }
+                        // CatServer start
+                        else if (cmd.equals("/fml confirm nobackup"))
+                        {
+                            FMLLog.log.info("confirmed");
+                            if (System.getProperty("fml.doNotBackup") == null)
+                            {
+                                System.setProperty("fml.doNotBackup", "true");
+                            }
+                            query.setResult(true);
+                            done = true;
+                            it.remove();
+                        }
+                        // CatServer end
                         else if (cmd.equals("/fml cancel"))
                         {
                             FMLLog.log.info("cancelled");

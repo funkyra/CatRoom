@@ -10,7 +10,8 @@
 -    };
 +    public final ITextComponent[] field_145915_a = new ITextComponent[] {new TextComponentString(""), new TextComponentString(""), new TextComponentString(""), new TextComponentString("")};
      public int field_145918_i = -1;
-     private boolean field_145916_j = true;
+-    private boolean field_145916_j = true;
++    public boolean field_145916_j = true;
      private EntityPlayer field_145917_k;
      private final CommandResultStats field_174883_i = new CommandResultStats();
  
@@ -18,7 +19,15 @@
      public NBTTagCompound func_189515_b(NBTTagCompound p_189515_1_)
      {
          super.func_189515_b(p_189515_1_);
-@@ -46,49 +42,37 @@
+@@ -42,71 +38,82 @@
+             p_189515_1_.func_74778_a("Text" + (i + 1), s);
+         }
+ 
++        if (Boolean.getBoolean("convertLegacySigns")) {
++            p_189515_1_.func_74757_a("Bukkit.isConverted", true);
++        }
++
+         this.field_174883_i.func_179670_b(p_189515_1_);
          return p_189515_1_;
      }
  
@@ -70,19 +79,50 @@
              public MinecraftServer func_184102_h()
              {
                  return TileEntitySign.this.field_145850_b.func_73046_m();
-@@ -102,9 +86,9 @@
+             }
+         };
+ 
++        // CraftBukkit start - Add an option to convert signs correctly
++        // This is done with a flag instead of all the time because
++        // we have no way to tell whether a sign is from 1.7.10 or 1.8
++
++        boolean oldSign = Boolean.getBoolean("convertLegacySigns") && !p_145839_1_.func_74767_n("Bukkit.isConverted");
++
+         for (int i = 0; i < 4; ++i)
+         {
+             String s = p_145839_1_.func_74779_i("Text" + (i + 1));
+-            ITextComponent itextcomponent = ITextComponent.Serializer.func_150699_a(s);
++            // ITextComponent itextcomponent = ITextComponent.Serializer.jsonToComponent(s);
++            if (s != null && s.length() > 2048) {
++                s = "\"\"";
++            }
  
              try
              {
 -                this.field_145915_a[i] = TextComponentUtils.func_179985_a(icommandsender, itextcomponent, null);
-+                this.field_145915_a[i] = TextComponentUtils.func_179985_a(icommandsender, itextcomponent, (Entity)null);
-             }
+-            }
 -            catch (CommandException commandexception)
-+            catch (CommandException var7)
-             {
-                 this.field_145915_a[i] = itextcomponent;
+-            {
+-                this.field_145915_a[i] = itextcomponent;
++                ITextComponent ichatbasecomponent = ITextComponent.Serializer.func_150699_a(s);
++
++                if (oldSign) {
++                    field_145915_a[i] = org.bukkit.craftbukkit.v1_12_R1.util.CraftChatMessage.fromString(s)[0];
++                    continue;
++                }
++                // CraftBukkit end
++
++                try {
++                    this.field_145915_a[i] = TextComponentUtils.func_179985_a(icommandsender, ichatbasecomponent, (Entity) null);
++                } catch (CommandException commandexception) {
++                    this.field_145915_a[i] = ichatbasecomponent;
++                }
++            } catch (com.google.gson.JsonParseException jsonparseexception) {
++                this.field_145915_a[i] = new TextComponentString(s);
              }
-@@ -114,19 +98,16 @@
+         }
+ 
+@@ -114,19 +121,16 @@
      }
  
      @Nullable
@@ -102,7 +142,7 @@
      public boolean func_183000_F()
      {
          return true;
-@@ -162,55 +143,41 @@
+@@ -162,55 +166,41 @@
      {
          ICommandSender icommandsender = new ICommandSender()
          {
@@ -159,7 +199,7 @@
              public void func_174794_a(CommandResultStats.Type p_174794_1_, int p_174794_2_)
              {
                  if (TileEntitySign.this.field_145850_b != null && !TileEntitySign.this.field_145850_b.field_72995_K)
-@@ -218,7 +185,6 @@
+@@ -218,7 +208,6 @@
                      TileEntitySign.this.field_174883_i.func_184932_a(TileEntitySign.this.field_145850_b.func_73046_m(), this, p_174794_1_, p_174794_2_);
                  }
              }
@@ -167,3 +207,17 @@
              public MinecraftServer func_184102_h()
              {
                  return p_174882_1_.func_184102_h();
+@@ -235,7 +224,12 @@
+ 
+                 if (clickevent.func_150669_a() == ClickEvent.Action.RUN_COMMAND)
+                 {
+-                    p_174882_1_.func_184102_h().func_71187_D().func_71556_a(icommandsender, clickevent.func_150668_b());
++                    // playerIn.getServer().getCommandManager().executeCommand(icommandsender, clickevent.getValue());
++                    CommandBlockBaseLogic.executeSafely(icommandsender, new org.bukkit.craftbukkit.v1_12_R1.command.ProxiedNativeCommandSender(
++                            icommandsender,
++                            new org.bukkit.craftbukkit.v1_12_R1.command.CraftBlockCommandSender(icommandsender),
++                            p_174882_1_.getBukkitEntity()
++                    ), clickevent.func_150668_b());
+                 }
+             }
+         }

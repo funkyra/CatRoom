@@ -1,6 +1,13 @@
 --- before/net/minecraft/item/crafting/ShulkerBoxRecipes.java
 +++ after/net/minecraft/item/crafting/ShulkerBoxRecipes.java
-@@ -8,14 +8,11 @@
+@@ -2,20 +2,24 @@
+ 
+ import net.minecraft.block.Block;
+ import net.minecraft.block.BlockShulkerBox;
++import net.minecraft.init.Blocks;
+ import net.minecraft.init.Items;
+ import net.minecraft.inventory.InventoryCrafting;
+ import net.minecraft.item.EnumDyeColor;
  import net.minecraft.item.ItemStack;
  import net.minecraft.util.NonNullList;
  import net.minecraft.world.World;
@@ -10,13 +17,19 @@
  public class ShulkerBoxRecipes
  {
 -    public static class ShulkerBoxColoring implements IRecipe
-+    public static class ShulkerBoxColoring extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
++    public static class ShulkerBoxColoring extends ShapelessRecipes implements IRecipe
          {
 -            @Override
++            // CraftBukkit start - Delegate to new parent class with bogus info
++            public ShulkerBoxColoring() {
++                super("", new ItemStack(Blocks.field_190977_dl, 0, 0), NonNullList.func_193580_a(Ingredient.field_193370_a, Ingredient.func_193367_a(Items.field_151100_aR)));
++            }
++            // CraftBukkit end
++
              public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
              {
                  int i = 0;
-@@ -33,7 +30,7 @@
+@@ -33,7 +37,7 @@
                          }
                          else
                          {
@@ -25,7 +38,7 @@
                              {
                                  return false;
                              }
-@@ -51,7 +48,6 @@
+@@ -51,7 +55,6 @@
                  return i == 1 && j == 1;
              }
  
@@ -33,7 +46,7 @@
              public ItemStack func_77572_b(InventoryCrafting p_77572_1_)
              {
                  ItemStack itemstack = ItemStack.field_190927_a;
-@@ -67,14 +63,14 @@
+@@ -67,14 +70,14 @@
                          {
                              itemstack = itemstack2;
                          }
@@ -50,7 +63,7 @@
  
                  if (itemstack.func_77942_o())
                  {
-@@ -84,16 +80,14 @@
+@@ -84,16 +87,14 @@
                  return itemstack3;
              }
  
@@ -68,7 +81,7 @@
  
                  for (int i = 0; i < nonnulllist.size(); ++i)
                  {
-@@ -108,14 +102,11 @@
+@@ -108,14 +109,11 @@
                  return nonnulllist;
              }
  

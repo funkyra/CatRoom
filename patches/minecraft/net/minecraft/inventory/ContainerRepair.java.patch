@@ -1,6 +1,11 @@
 --- before/net/minecraft/inventory/ContainerRepair.java
 +++ after/net/minecraft/inventory/ContainerRepair.java
-@@ -22,16 +22,8 @@
+@@ -18,27 +18,24 @@
+ import org.apache.commons.lang3.StringUtils;
+ import org.apache.logging.log4j.LogManager;
+ import org.apache.logging.log4j.Logger;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryView;
+ 
  public class ContainerRepair extends Container
  {
      private static final Logger field_148326_f = LogManager.getLogger();
@@ -19,10 +24,23 @@
      private final World field_82860_h;
      private final BlockPos field_178156_j;
      public int field_82854_e;
-@@ -47,27 +39,30 @@
+     public int field_82856_l;
+-    private String field_82857_m;
++    public String field_82857_m;
+     private final EntityPlayer field_82855_n;
+ 
++    private int lastLevelCost;
++    private CraftInventoryView bukkitEntity;
++    private InventoryPlayer playerInventory;
++
+     @SideOnly(Side.CLIENT)
+     public ContainerRepair(InventoryPlayer p_i45806_1_, World p_i45806_2_, EntityPlayer p_i45806_3_)
+     {
+@@ -47,27 +44,31 @@
  
      public ContainerRepair(InventoryPlayer p_i45807_1_, final World p_i45807_2_, final BlockPos p_i45807_3_, EntityPlayer p_i45807_4_)
      {
++        this.playerInventory = p_i45807_1_;
 +        this.field_82852_f = new InventoryCraftResult();
 +        this.field_82853_g = new InventoryBasic("Repair", true, 2)
 +        {
@@ -58,7 +76,7 @@
              public ItemStack func_190901_a(EntityPlayer p_190901_1_, ItemStack p_190901_2_)
              {
                  if (!p_190901_1_.field_71075_bZ.field_75098_d)
-@@ -75,6 +70,8 @@
+@@ -75,6 +76,8 @@
                      p_190901_1_.func_82242_a(-ContainerRepair.this.field_82854_e);
                  }
  
@@ -67,7 +85,7 @@
                  ContainerRepair.this.field_82853_g.func_70299_a(0, ItemStack.field_190927_a);
  
                  if (ContainerRepair.this.field_82856_l > 0)
-@@ -99,21 +96,19 @@
+@@ -99,21 +102,19 @@
                  ContainerRepair.this.field_82854_e = 0;
                  IBlockState iblockstate = p_i45807_2_.func_180495_p(p_i45807_3_);
  
@@ -94,7 +112,7 @@
                          p_i45807_2_.func_175718_b(1030, p_i45807_3_, 0);
                      }
                  }
-@@ -124,8 +119,7 @@
+@@ -124,8 +125,7 @@
  
                  return p_190901_2_;
              }
@@ -104,7 +122,7 @@
  
          for (int i = 0; i < 3; ++i)
          {
-@@ -141,7 +135,6 @@
+@@ -141,7 +141,6 @@
          }
      }
  
@@ -112,7 +130,17 @@
      public void func_75130_a(IInventory p_75130_1_)
      {
          super.func_75130_a(p_75130_1_);
-@@ -170,12 +163,14 @@
+@@ -162,7 +161,8 @@
+ 
+         if (itemstack.func_190926_b())
+         {
+-            this.field_82852_f.func_70299_a(0, ItemStack.field_190927_a);
++            // this.outputSlot.setInventorySlotContents(0, ItemStack.EMPTY);
++            if (getBukkitView() != null) org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.field_190927_a); // CatServer - mods bypass
+             this.field_82854_e = 0;
+         }
+         else
+@@ -170,12 +170,19 @@
              ItemStack itemstack1 = itemstack.func_77946_l();
              ItemStack itemstack2 = this.field_82853_g.func_70301_a(1);
              Map<Enchantment, Integer> map = EnchantmentHelper.func_82781_a(itemstack1);
@@ -124,12 +152,37 @@
              if (!itemstack2.func_190926_b())
              {
 -                boolean flag = itemstack2.func_77973_b() == Items.field_151134_bR && !ItemEnchantedBook.func_92110_g(itemstack2).func_82582_d();
-+                if (!net.minecraftforge.common.ForgeHooks.onAnvilChange(this, itemstack, itemstack2, field_82852_f, field_82857_m, j)) return;
++                // CatServer start - call bukkit event when forge event cancel
++                if (!net.minecraftforge.common.ForgeHooks.onAnvilChange(this, itemstack, itemstack2, field_82852_f, field_82857_m, j)) {
++                    if (getBukkitView() != null) org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), field_82852_f.func_70301_a(0));
++                    return;
++                }
++                // CatServer end
 +                flag = itemstack2.func_77973_b() == Items.field_151134_bR && !ItemEnchantedBook.func_92110_g(itemstack2).func_82582_d();
  
                  if (itemstack1.func_77984_f() && itemstack1.func_77973_b().func_82789_a(itemstack, itemstack2))
                  {
-@@ -222,7 +217,7 @@
+@@ -183,7 +190,8 @@
+ 
+                     if (l2 <= 0)
+                     {
+-                        this.field_82852_f.func_70299_a(0, ItemStack.field_190927_a);
++//                        this.outputSlot.setInventorySlotContents(0, ItemStack.EMPTY);
++                        if (getBukkitView() != null) org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.field_190927_a); // CatServer - mods bypass
+                         this.field_82854_e = 0;
+                         return;
+                     }
+@@ -204,7 +212,8 @@
+                 {
+                     if (!flag && (itemstack1.func_77973_b() != itemstack2.func_77973_b() || !itemstack1.func_77984_f()))
+                     {
+-                        this.field_82852_f.func_70299_a(0, ItemStack.field_190927_a);
++                        // this.outputSlot.setInventorySlotContents(0, ItemStack.EMPTY);
++                        if (getBukkitView() != null) org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.field_190927_a); // CatServer - mods bypass
+                         this.field_82854_e = 0;
+                         return;
+                     }
+@@ -222,7 +231,7 @@
                              l1 = 0;
                          }
  
@@ -138,7 +191,7 @@
                          {
                              itemstack1.func_77964_b(l1);
                              i += 2;
-@@ -237,8 +232,8 @@
+@@ -237,8 +246,8 @@
                      {
                          if (enchantment1 != null)
                          {
@@ -149,7 +202,7 @@
                              j2 = i2 == j2 ? j2 + 1 : Math.max(j2, i2);
                              boolean flag1 = enchantment1.func_92089_a(itemstack);
  
-@@ -269,7 +264,7 @@
+@@ -269,7 +278,7 @@
                                      j2 = enchantment1.func_77325_b();
                                  }
  
@@ -158,7 +211,17 @@
                                  int k3 = 0;
  
                                  switch (enchantment1.func_77324_c())
-@@ -326,6 +321,7 @@
+@@ -304,7 +313,8 @@
+ 
+                     if (flag3 && !flag2)
+                     {
+-                        this.field_82852_f.func_70299_a(0, ItemStack.field_190927_a);
++//                        this.outputSlot.setInventorySlotContents(0, ItemStack.EMPTY);
++                        if (getBukkitView() != null) org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), ItemStack.field_190927_a); // CatServer - mods bypass
+                         this.field_82854_e = 0;
+                         return;
+                     }
+@@ -326,6 +336,7 @@
                  i += k;
                  itemstack1.func_151001_c(this.field_82857_m);
              }
@@ -166,7 +229,14 @@
  
              this.field_82854_e = j + i;
  
-@@ -367,7 +363,6 @@
+@@ -362,12 +373,12 @@
+                 EnchantmentHelper.func_82782_a(map, itemstack1);
+             }
+ 
+-            this.field_82852_f.func_70299_a(0, itemstack1);
++//            this.outputSlot.setInventorySlotContents(0, itemstack1);
++            if (getBukkitView() != null) org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callPrepareAnvilEvent(getBukkitView(), itemstack1); // CatServer - mods bypass
+             this.func_75142_b();
          }
      }
  
@@ -174,7 +244,7 @@
      public void func_75132_a(IContainerListener p_75132_1_)
      {
          super.func_75132_a(p_75132_1_);
-@@ -375,7 +370,6 @@
+@@ -375,7 +386,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -182,7 +252,7 @@
      public void func_75137_b(int p_75137_1_, int p_75137_2_)
      {
          if (p_75137_1_ == 0)
-@@ -384,7 +378,6 @@
+@@ -384,7 +394,6 @@
          }
      }
  
@@ -190,15 +260,17 @@
      public void func_75134_a(EntityPlayer p_75134_1_)
      {
          super.func_75134_a(p_75134_1_);
-@@ -395,7 +388,6 @@
+@@ -395,25 +404,19 @@
          }
      }
  
 -    @Override
      public boolean func_75145_c(EntityPlayer p_75145_1_)
      {
++        if (!this.checkReachable) return true;
          if (this.field_82860_h.func_180495_p(this.field_178156_j).func_177230_c() != Blocks.field_150467_bQ)
-@@ -404,16 +396,10 @@
+         {
+             return false;
          }
          else
          {
@@ -216,3 +288,35 @@
      public ItemStack func_82846_b(EntityPlayer p_82846_1_, int p_82846_2_)
      {
          ItemStack itemstack = ItemStack.field_190927_a;
+@@ -484,5 +487,31 @@
+         }
+ 
+         this.func_82848_d();
++    }
++
++    @Override
++    public void func_75142_b() {
++        super.func_75142_b();
++        for (int i = 0; i < this.field_75149_d.size(); ++i) {
++            IContainerListener icrafting = this.field_75149_d.get(i);
++
++            if (this.lastLevelCost != this.field_82854_e) {
++                icrafting.func_71112_a(this, 0, this.field_82854_e);
++            }
++        }
++
++        this.lastLevelCost = this.field_82854_e;
++    }
++
++    @Override
++    public CraftInventoryView getBukkitView() {
++        if (bukkitEntity != null) {
++            return bukkitEntity;
++        }
++
++        org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventory inventory = new org.bukkit.craftbukkit.v1_12_R1.inventory.CraftInventoryAnvil(
++                new org.bukkit.Location(field_82860_h.getWorld(), field_178156_j.func_177958_n(), field_178156_j.func_177956_o(), field_178156_j.func_177952_p()), this.field_82853_g, this.field_82852_f, this);
++        bukkitEntity = new CraftInventoryView(this.playerInventory.field_70458_d.getBukkitEntity(), inventory, this);
++        return bukkitEntity;
+     }
+ }

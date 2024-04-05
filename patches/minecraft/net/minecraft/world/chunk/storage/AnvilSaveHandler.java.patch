@@ -1,6 +1,6 @@
 --- before/net/minecraft/world/chunk/storage/AnvilSaveHandler.java
 +++ after/net/minecraft/world/chunk/storage/AnvilSaveHandler.java
-@@ -18,37 +18,28 @@
+@@ -18,37 +18,32 @@
          super(p_i46650_1_, p_i46650_2_, p_i46650_3_, p_i46650_4_);
      }
  
@@ -8,25 +8,32 @@
      public IChunkLoader func_75763_a(WorldProvider p_75763_1_)
      {
          File file1 = this.func_75765_b();
++        // To workaround the issue of Bukkit relying on every world having a seperate container
++        // we won't be generating a DIMXX folder for chunk loaders since this name is already generated
++        // for the world container with provider.getSaveFolder().
  
 -        if (p_75763_1_ instanceof WorldProviderHell)
-+        if (p_75763_1_.getSaveFolder() != null)
++        /*if (provider.getSaveFolder() != null)
          {
 -            File file3 = new File(file1, "DIM-1");
-+            File file3 = new File(file1, p_75763_1_.getSaveFolder());
++            File file3 = new File(file1, provider.getSaveFolder());
              file3.mkdirs();
-             return new AnvilChunkLoader(file3, this.field_186341_a);
-         }
+-            return new AnvilChunkLoader(file3, this.field_186341_a);
+-        }
 -        else if (p_75763_1_ instanceof WorldProviderEnd)
 -        {
 -            File file2 = new File(file1, "DIM1");
 -            file2.mkdirs();
 -            return new AnvilChunkLoader(file2, this.field_186341_a);
--        }
++            return new AnvilChunkLoader(file3, this.dataFixer);
+         }
          else
          {
-             return new AnvilChunkLoader(file1, this.field_186341_a);
-         }
+-            return new AnvilChunkLoader(file1, this.field_186341_a);
+-        }
++            return new AnvilChunkLoader(file1, this.dataFixer);
++        }*/
++        return new AnvilChunkLoader(file1,this.field_186341_a);
      }
  
 -    @Override

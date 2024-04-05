@@ -238,7 +238,7 @@
      }
  
      public final void func_176226_b(World p_176226_1_, BlockPos p_176226_2_, IBlockState p_176226_3_, int p_176226_4_)
-@@ -581,20 +566,16 @@
+@@ -581,20 +566,17 @@
  
      public void func_180653_a(World p_180653_1_, BlockPos p_180653_2_, IBlockState p_180653_3_, float p_180653_4_, int p_180653_5_)
      {
@@ -253,7 +253,8 @@
 +            for (ItemStack drop : drops)
              {
 -                if (!(p_180653_1_.field_73012_v.nextFloat() > p_180653_4_))
-+                if (p_180653_1_.field_73012_v.nextFloat() <= p_180653_4_)
++                // CraftBukkit - <= to < to allow for plugins to completely disable block drops from explosions
++                if (p_180653_1_.field_73012_v.nextFloat() < p_180653_4_)
                  {
 -                    Item item = this.func_180660_a(p_180653_3_, p_180653_1_.field_73012_v, p_180653_5_);
 -
@@ -265,7 +266,7 @@
                  }
              }
          }
-@@ -602,19 +583,18 @@
+@@ -602,21 +584,25 @@
  
      public static void func_180635_a(World p_180635_0_, BlockPos p_180635_1_, ItemStack p_180635_2_)
      {
@@ -293,9 +294,17 @@
 +            double d2 = (double)(p_180635_0_.field_73012_v.nextFloat() * 0.5F) + 0.25D;
 +            EntityItem entityitem = new EntityItem(p_180635_0_, (double)p_180635_1_.func_177958_n() + d0, (double)p_180635_1_.func_177956_o() + d1, (double)p_180635_1_.func_177952_p() + d2, p_180635_2_);
              entityitem.func_174869_p();
-             p_180635_0_.func_72838_d(entityitem);
+-            p_180635_0_.func_72838_d(entityitem);
++            // CaptureDrops Patch
++            if (p_180635_0_.captureDrops != null) {
++                p_180635_0_.captureDrops.add(entityitem);
++            } else {
++                p_180635_0_.func_72838_d(entityitem);
++            }
          }
-@@ -628,15 +608,7 @@
+     }
+ 
+@@ -628,15 +614,7 @@
              {
                  int i = EntityXPOrb.func_70527_a(p_180637_3_);
                  p_180637_3_ -= i;
@@ -312,7 +321,7 @@
              }
          }
      }
-@@ -646,6 +618,7 @@
+@@ -646,6 +624,7 @@
          return 0;
      }
  
@@ -320,7 +329,7 @@
      public float func_149638_a(Entity p_149638_1_)
      {
          return this.field_149781_w / 5.0F;
-@@ -664,14 +637,7 @@
+@@ -664,14 +643,7 @@
          Vec3d vec3d = p_185503_2_.func_178786_a((double)p_185503_1_.func_177958_n(), (double)p_185503_1_.func_177956_o(), (double)p_185503_1_.func_177952_p());
          Vec3d vec3d1 = p_185503_3_.func_178786_a((double)p_185503_1_.func_177958_n(), (double)p_185503_1_.func_177956_o(), (double)p_185503_1_.func_177952_p());
          RayTraceResult raytraceresult = p_185503_4_.func_72327_a(vec3d, vec3d1);
@@ -336,7 +345,7 @@
      }
  
      public void func_180652_a(World p_180652_1_, BlockPos p_180652_2_, Explosion p_180652_3_)
-@@ -691,20 +657,10 @@
+@@ -691,20 +663,10 @@
  
      public boolean func_176196_c(World p_176196_1_, BlockPos p_176196_2_)
      {
@@ -359,7 +368,7 @@
      {
          return false;
      }
-@@ -713,16 +669,9 @@
+@@ -713,16 +675,9 @@
      {
      }
  
@@ -379,7 +388,7 @@
      {
          return this.func_176203_a(p_180642_7_);
      }
-@@ -758,28 +707,40 @@
+@@ -758,28 +713,40 @@
          return 0;
      }
  
@@ -426,7 +435,7 @@
      }
  
      protected ItemStack func_180643_i(IBlockState p_180643_1_)
-@@ -862,9 +823,10 @@
+@@ -862,9 +829,10 @@
  
      public void func_176216_a(World p_176216_1_, Entity p_176216_2_)
      {
@@ -438,7 +447,7 @@
      public ItemStack func_185473_a(World p_185473_1_, BlockPos p_185473_2_, IBlockState p_185473_3_)
      {
          return new ItemStack(Item.func_150898_a(this), 1, this.func_180651_a(p_185473_3_));
-@@ -911,14 +873,14 @@
+@@ -911,14 +879,14 @@
  
      public static boolean func_149680_a(Block p_149680_0_, Block p_149680_1_)
      {
@@ -458,7 +467,7 @@
      }
  
      @Deprecated
-@@ -935,7 +897,7 @@
+@@ -935,7 +903,7 @@
  
      protected BlockStateContainer func_180661_e()
      {
@@ -467,7 +476,7 @@
      }
  
      public BlockStateContainer func_176194_O()
-@@ -970,20 +932,16 @@
+@@ -970,20 +938,16 @@
          else
          {
              long i = MathHelper.func_180187_c(p_190949_3_.func_177958_n(), 0, p_190949_3_.func_177952_p());
@@ -490,7 +499,7 @@
      public String toString()
      {
          return "Block{" + field_149771_c.func_177774_c(this) + "}";
-@@ -994,902 +952,1640 @@
+@@ -994,902 +958,1640 @@
      {
      }
  
@@ -3006,7 +3015,7 @@
          func_176219_a(235, "white_glazed_terracotta", new BlockGlazedTerracotta(EnumDyeColor.WHITE));
          func_176219_a(236, "orange_glazed_terracotta", new BlockGlazedTerracotta(EnumDyeColor.ORANGE));
          func_176219_a(237, "magenta_glazed_terracotta", new BlockGlazedTerracotta(EnumDyeColor.MAGENTA));
-@@ -1906,13 +2602,9 @@
+@@ -1906,13 +2608,9 @@
          func_176219_a(248, "green_glazed_terracotta", new BlockGlazedTerracotta(EnumDyeColor.GREEN));
          func_176219_a(249, "red_glazed_terracotta", new BlockGlazedTerracotta(EnumDyeColor.RED));
          func_176219_a(250, "black_glazed_terracotta", new BlockGlazedTerracotta(EnumDyeColor.BLACK));
@@ -3023,12 +3032,10 @@
          field_149771_c.func_177776_a();
  
          for (Block block15 : field_149771_c)
-@@ -1936,28 +2628,6 @@
-                 }
- 
+@@ -1938,28 +2636,6 @@
                  block15.field_149783_u = flag;
--            }
--        }
+             }
+         }
 -
 -        Set<Block> set = Sets.newHashSet(field_149771_c.func_82594_a(new ResourceLocation("tripwire")));
 -
@@ -3049,6 +3056,27 @@
 -                    int k = field_149771_c.func_148757_b(block16) << 4 | block16.func_176201_c(iblockstate);
 -                    field_176229_d.func_148746_a(iblockstate, k);
 -                }
-             }
-         }
+-            }
+-        }
      }
+ 
+     private static void func_176215_a(int p_176215_0_, ResourceLocation p_176215_1_, Block p_176215_2_)
+@@ -1971,7 +2647,17 @@
+     {
+         func_176215_a(p_176219_0_, new ResourceLocation(p_176219_1_), p_176219_2_);
+     }
+-
++    // Spigot start
++    public static float range(float min, float value, float max) {
++        if (value < min) {
++            return min;
++        }
++        if (value > max) {
++            return max;
++        }
++        return value;
++    }
++    // Spigot end
+     public static enum EnumOffsetType
+     {
+         NONE,

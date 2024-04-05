@@ -1,6 +1,15 @@
 --- before/net/minecraft/block/BlockDynamicLiquid.java
 +++ after/net/minecraft/block/BlockDynamicLiquid.java
-@@ -21,15 +21,13 @@
+@@ -9,6 +9,8 @@
+ import net.minecraft.util.EnumFacing;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.world.World;
++import org.bukkit.block.BlockFace;
++import org.bukkit.event.block.BlockFromToEvent;
+ 
+ public class BlockDynamicLiquid extends BlockLiquid
+ {
+@@ -21,15 +23,13 @@
  
      private void func_180690_f(World p_180690_1_, BlockPos p_180690_2_, IBlockState p_180690_3_)
      {
@@ -19,7 +28,7 @@
          int j = 1;
  
          if (this.field_149764_J == Material.field_151587_i && !p_180650_1_.field_73011_w.func_177500_n())
-@@ -70,7 +68,7 @@
+@@ -70,7 +70,7 @@
                  }
              }
  
@@ -28,7 +37,7 @@
              {
                  IBlockState iblockstate = p_180650_1_.func_180495_p(p_180650_2_.func_177977_b());
  
-@@ -78,7 +76,7 @@
+@@ -78,7 +78,7 @@
                  {
                      i1 = 0;
                  }
@@ -37,7 +46,7 @@
                  {
                      i1 = 0;
                  }
-@@ -103,7 +101,7 @@
+@@ -103,7 +103,7 @@
                  }
                  else
                  {
@@ -46,20 +55,56 @@
                      p_180650_1_.func_180501_a(p_180650_2_, p_180650_3_, 2);
                      p_180650_1_.func_175684_a(p_180650_2_, this, k);
                      p_180650_1_.func_175685_c(p_180650_2_, this, false);
-@@ -119,10 +117,9 @@
+@@ -115,15 +115,22 @@
+             this.func_180690_f(p_180650_1_, p_180650_2_, p_180650_3_);
+         }
+ 
++        org.bukkit.block.Block source = p_180650_1_.getWorld().getBlockAt(p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p());
+         IBlockState iblockstate1 = p_180650_1_.func_180495_p(p_180650_2_.func_177977_b());
  
          if (this.func_176373_h(p_180650_1_, p_180650_2_.func_177977_b(), iblockstate1))
          {
 -            if (this.field_149764_J == Material.field_151587_i
 -                    && p_180650_1_.func_180495_p(p_180650_2_.func_177977_b()).func_185904_a() == Material.field_151586_h)
++            BlockFromToEvent event = new BlockFromToEvent(source, BlockFace.DOWN);
++            p_180650_1_.getServer().getPluginManager().callEvent(event);
++
++            if (event.isCancelled()) {
++                return;
++            }
 +            if (this.field_149764_J == Material.field_151587_i && p_180650_1_.func_180495_p(p_180650_2_.func_177977_b()).func_185904_a() == Material.field_151586_h)
              {
 -                p_180650_1_.func_175656_a(p_180650_2_.func_177977_b(), Blocks.field_150348_b.func_176223_P());
-+                p_180650_1_.func_175656_a(p_180650_2_.func_177977_b(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_180650_1_, p_180650_2_.func_177977_b(), p_180650_2_, Blocks.field_150348_b.func_176223_P()));
-                 this.func_180688_d(p_180650_1_, p_180650_2_.func_177977_b());
+-                this.func_180688_d(p_180650_1_, p_180650_2_.func_177977_b());
++                if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleBlockFormEvent(p_180650_1_, p_180650_2_.func_177977_b(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_180650_1_, p_180650_2_.func_177977_b(), p_180650_2_, Blocks.field_150348_b.func_176223_P()), null)) {
++                    this.func_180688_d(p_180650_1_, p_180650_2_.func_177977_b());
++                }
                  return;
              }
-@@ -170,11 +167,12 @@
+ 
+@@ -153,14 +160,19 @@
+ 
+             for (EnumFacing enumfacing1 : set)
+             {
+-                this.func_176375_a(p_180650_1_, p_180650_2_.func_177972_a(enumfacing1), p_180650_1_.func_180495_p(p_180650_2_.func_177972_a(enumfacing1)), k1);
++                BlockFromToEvent event = new BlockFromToEvent(source, org.bukkit.craftbukkit.v1_12_R1.block.CraftBlock.notchToBlockFace(enumfacing1));
++                p_180650_1_.getServer().getPluginManager().callEvent(event);
++
++                if (!event.isCancelled()) {
++                    this.func_176375_a(p_180650_1_, p_180650_2_.func_177972_a(enumfacing1), p_180650_1_.func_180495_p(p_180650_2_.func_177972_a(enumfacing1)), k1);
++                }
+             }
+         }
+     }
+ 
+     private void func_176375_a(World p_176375_1_, BlockPos p_176375_2_, IBlockState p_176375_3_, int p_176375_4_)
+     {
+-        if (this.func_176373_h(p_176375_1_, p_176375_2_, p_176375_3_))
++        if (p_176375_1_.func_175667_e(p_176375_2_) && this.func_176373_h(p_176375_1_, p_176375_2_, p_176375_3_)) // CraftBukkit - add isLoaded check
+         {
+             if (p_176375_3_.func_185904_a() != Material.field_151579_a)
+             {
+@@ -170,11 +182,12 @@
                  }
                  else
                  {
@@ -73,7 +118,7 @@
          }
      }
  
-@@ -189,10 +187,9 @@
+@@ -189,10 +202,9 @@
                  BlockPos blockpos = p_176374_2_.func_177972_a(enumfacing);
                  IBlockState iblockstate = p_176374_1_.func_180495_p(blockpos);
  
@@ -86,7 +131,7 @@
                      {
                          return p_176374_3_;
                      }
-@@ -221,15 +218,14 @@
+@@ -221,15 +233,14 @@
      private Set<EnumFacing> func_176376_e(World p_176376_1_, BlockPos p_176376_2_)
      {
          int i = 1000;
@@ -104,7 +149,7 @@
              {
                  int j;
  
-@@ -260,16 +256,17 @@
+@@ -260,16 +271,17 @@
  
      private boolean func_176372_g(World p_176372_1_, BlockPos p_176372_2_, IBlockState p_176372_3_)
      {
@@ -128,7 +173,7 @@
      }
  
      protected int func_176371_a(World p_176371_1_, BlockPos p_176371_2_, int p_176371_3_)
-@@ -302,7 +299,6 @@
+@@ -302,7 +314,6 @@
          return material != this.field_149764_J && material != Material.field_151587_i && !this.func_176372_g(p_176373_1_, p_176373_2_, p_176373_3_);
      }
  

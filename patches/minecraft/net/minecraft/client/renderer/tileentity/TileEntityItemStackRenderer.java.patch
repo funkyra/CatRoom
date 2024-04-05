@@ -36,15 +36,17 @@
              }
              else
              {
-@@ -94,7 +90,7 @@
+@@ -94,8 +90,8 @@
                  }
                  else if (nbttagcompound.func_150297_b("SkullOwner", 8) && !StringUtils.isBlank(nbttagcompound.func_74779_i("SkullOwner")))
                  {
 -                    GameProfile gameprofile1 = new GameProfile(null, nbttagcompound.func_74779_i("SkullOwner"));
+-                    gameprofile = TileEntitySkull.func_174884_b(gameprofile1);
 +                    GameProfile gameprofile1 = new GameProfile((UUID)null, nbttagcompound.func_74779_i("SkullOwner"));
-                     gameprofile = TileEntitySkull.func_174884_b(gameprofile1);
++                    gameprofile = TileEntitySkull.updateGameprofile(gameprofile1);
                      nbttagcompound.func_82580_o("SkullOwner");
                      nbttagcompound.func_74782_a("SkullOwner", NBTUtil.func_180708_a(new NBTTagCompound(), gameprofile));
+                 }
 @@ -112,20 +108,20 @@
          }
          else if (item == Item.func_150898_a(Blocks.field_150477_bB))

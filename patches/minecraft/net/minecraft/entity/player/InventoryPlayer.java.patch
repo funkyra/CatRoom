@@ -1,14 +1,21 @@
 --- before/net/minecraft/entity/player/InventoryPlayer.java
 +++ after/net/minecraft/entity/player/InventoryPlayer.java
-@@ -1,6 +1,7 @@
+@@ -1,6 +1,8 @@
  package net.minecraft.entity.player;
  
++import java.util.ArrayList;
  import java.util.Arrays;
 +import java.util.Iterator;
  import java.util.List;
  import javax.annotation.Nullable;
  import net.minecraft.block.state.IBlockState;
-@@ -28,23 +29,25 @@
+@@ -25,26 +27,73 @@
+ import net.minecraft.world.World;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.Location;
++import org.bukkit.craftbukkit.v1_12_R1.entity.CraftHumanEntity;
++import org.bukkit.entity.HumanEntity;
  
  public class InventoryPlayer implements IInventory
  {
@@ -25,6 +32,48 @@
 -    private ItemStack field_70457_g = ItemStack.field_190927_a;
 +    private ItemStack field_70457_g;
      private int field_194017_h;
++    // CraftBukkit start - add fields and methods
++    public List<HumanEntity> transaction = new java.util.ArrayList<HumanEntity>();
++    private int maxStack = MAX_STACK;
++    
++    public List<ItemStack> getContents() {
++        List<ItemStack> combined = new ArrayList<>(field_70462_a.size() + field_70460_b.size() + field_184439_c.size());
++        for (List<net.minecraft.item.ItemStack> sub : this.field_184440_g) {
++            combined.addAll(sub);
++        }
++
++        return combined;
++    }
++    
++    public List<ItemStack> getArmorContents() {
++        return this.field_70460_b;
++    }
++    
++    public void onOpen(CraftHumanEntity who) {
++        transaction.add(who);
++    }
++    
++    public void onClose(CraftHumanEntity who) {
++        transaction.remove(who);
++    }
++    
++    public List<HumanEntity> getViewers() {
++        return transaction;
++    }
++    
++    public org.bukkit.inventory.InventoryHolder getOwner() {
++        return this.field_70458_d.getBukkitEntity();
++    }
++    
++    public void setMaxStackSize(int size) {
++        maxStack = size;
++    }
++    
++    @Override
++    public Location getLocation() {
++        return field_70458_d.getBukkitEntity().getLocation();
++    }
++    // CraftBukkit end
  
      public InventoryPlayer(EntityPlayer p_i1750_1_)
      {
@@ -40,7 +89,7 @@
      }
  
      public static int func_70451_h()
-@@ -54,25 +57,19 @@
+@@ -54,25 +103,36 @@
  
      private boolean func_184436_a(ItemStack p_184436_1_, ItemStack p_184436_2_)
      {
@@ -57,8 +106,26 @@
 -        return p_184431_1_.func_77973_b() == p_184431_2_.func_77973_b()
 -               && (!p_184431_1_.func_77981_g() || p_184431_1_.func_77960_j() == p_184431_2_.func_77960_j())
 -               && ItemStack.func_77970_a(p_184431_1_, p_184431_2_);
+-    }
 +        return p_184431_1_.func_77973_b() == p_184431_2_.func_77973_b() && (!p_184431_1_.func_77981_g() || p_184431_1_.func_77960_j() == p_184431_2_.func_77960_j()) && ItemStack.func_77970_a(p_184431_1_, p_184431_2_);
-     }
++    }
++
++    // CraftBukkit start - Watch method above! :D
++    public int canHold(ItemStack itemstack) {
++        int remains = itemstack.func_190916_E();
++        for (int i = 0; i < this.field_70462_a.size(); ++i) {
++            ItemStack itemstack1 = this.func_70301_a(i);
++            if (itemstack1.func_190926_b()) return itemstack.func_190916_E();
++
++            // Taken from firstPartial(ItemStack)
++            if (!itemstack1.func_190926_b() && itemstack1.func_77973_b() == itemstack.func_77973_b() && itemstack1.func_77985_e() && itemstack1.func_190916_E() < itemstack1.func_77976_d() && itemstack1.func_190916_E() < this.func_70297_j_() && (!itemstack1.func_77981_g() || itemstack1.func_77960_j() == itemstack.func_77960_j()) && ItemStack.func_77970_a(itemstack1, itemstack)) {
++                remains -= (itemstack1.func_77976_d() < this.func_70297_j_() ? itemstack1.func_77976_d() : this.func_70297_j_()) - itemstack1.func_190916_E();
++            }
++            if (remains <= 0) return itemstack.func_190916_E();
++        }
++        return itemstack.func_190916_E() - remains;
++    }
++    // CraftBukkit end
  
      public int func_70447_i()
      {
@@ -69,7 +136,7 @@
              {
                  return i;
              }
-@@ -96,7 +93,7 @@
+@@ -96,7 +156,7 @@
              {
                  this.field_70461_c = this.func_184433_k();
  
@@ -78,7 +145,7 @@
                  {
                      int j = this.func_70447_i();
  
-@@ -133,7 +130,7 @@
+@@ -133,7 +193,7 @@
      {
          for (int i = 0; i < this.field_70462_a.size(); ++i)
          {
@@ -87,7 +154,7 @@
              {
                  return i;
              }
-@@ -148,11 +145,7 @@
+@@ -148,11 +208,7 @@
          {
              ItemStack itemstack = this.field_70462_a.get(i);
  
@@ -100,7 +167,7 @@
              {
                  return i;
              }
-@@ -167,7 +160,7 @@
+@@ -167,7 +223,7 @@
          {
              int j = (this.field_70461_c + i) % 9;
  
@@ -109,7 +176,7 @@
              {
                  return j;
              }
-@@ -177,7 +170,7 @@
+@@ -177,7 +233,7 @@
          {
              int l = (this.field_70461_c + k) % 9;
  
@@ -118,7 +185,7 @@
              {
                  return l;
              }
-@@ -199,11 +192,9 @@
+@@ -199,11 +255,9 @@
              p_70453_1_ = -1;
          }
  
@@ -132,7 +199,7 @@
          }
  
          while (this.field_70461_c >= 9)
-@@ -220,10 +211,7 @@
+@@ -220,10 +274,7 @@
          {
              ItemStack itemstack = this.func_70301_a(j);
  
@@ -144,7 +211,7 @@
              {
                  int k = p_174925_3_ <= 0 ? itemstack.func_190916_E() : Math.min(p_174925_3_ - i, itemstack.func_190916_E());
                  i += k;
-@@ -304,7 +292,8 @@
+@@ -304,7 +355,8 @@
  
          if (itemstack.func_190926_b())
          {
@@ -154,7 +221,7 @@
  
              if (p_191973_2_.func_77942_o())
              {
-@@ -332,7 +321,7 @@
+@@ -332,7 +384,7 @@
          }
          else
          {
@@ -163,7 +230,7 @@
              itemstack.func_190917_f(j);
              itemstack.func_190915_d(5);
              return i;
-@@ -369,10 +358,17 @@
+@@ -369,10 +421,17 @@
          {
              for (int i = 0; i < nonnulllist.size(); ++i)
              {
@@ -183,7 +250,7 @@
              }
          }
      }
-@@ -402,7 +398,7 @@
+@@ -402,7 +461,7 @@
                      if (p_191971_1_ >= 0)
                      {
                          this.field_70462_a.set(p_191971_1_, p_191971_2_.func_77946_l());
@@ -192,7 +259,7 @@
                          p_191971_2_.func_190920_e(0);
                          return true;
                      }
-@@ -420,7 +416,7 @@
+@@ -420,7 +479,7 @@
                  {
                      int i;
  
@@ -201,7 +268,7 @@
                      {
                          i = p_191971_2_.func_190916_E();
  
-@@ -432,8 +428,12 @@
+@@ -432,8 +491,12 @@
                          {
                              p_191971_2_.func_190920_e(this.func_191973_d(p_191971_1_, p_191971_2_));
                          }
@@ -215,7 +282,7 @@
  
                      if (p_191971_2_.func_190916_E() == i && this.field_70458_d.field_71075_bZ.field_75098_d)
                      {
-@@ -450,8 +450,10 @@
+@@ -450,8 +513,10 @@
              {
                  CrashReport crashreport = CrashReport.func_85055_a(throwable, "Adding item to inventory");
                  CrashReportCategory crashreportcategory = crashreport.func_85058_a("Item being added");
@@ -228,7 +295,7 @@
                  crashreportcategory.func_189529_a("Item name", new ICrashReportDetail<String>()
                  {
                      public String call() throws Exception
-@@ -493,7 +495,6 @@
+@@ -493,7 +558,6 @@
          }
      }
  
@@ -236,7 +303,7 @@
      public ItemStack func_70298_a(int p_70298_1_, int p_70298_2_)
      {
          List<ItemStack> list = null;
-@@ -509,7 +510,7 @@
+@@ -509,7 +573,7 @@
              p_70298_1_ -= nonnulllist.size();
          }
  
@@ -245,7 +312,7 @@
      }
  
      public void func_184437_d(ItemStack p_184437_1_)
-@@ -527,7 +528,6 @@
+@@ -527,7 +591,6 @@
          }
      }
  
@@ -253,7 +320,7 @@
      public ItemStack func_70304_b(int p_70304_1_)
      {
          NonNullList<ItemStack> nonnulllist = null;
-@@ -543,7 +543,7 @@
+@@ -543,7 +606,7 @@
              p_70304_1_ -= nonnulllist1.size();
          }
  
@@ -262,7 +329,7 @@
          {
              ItemStack itemstack = nonnulllist.get(p_70304_1_);
              nonnulllist.set(p_70304_1_, ItemStack.field_190927_a);
-@@ -555,7 +555,6 @@
+@@ -555,7 +618,6 @@
          }
      }
  
@@ -270,7 +337,7 @@
      public void func_70299_a(int p_70299_1_, ItemStack p_70299_2_)
      {
          NonNullList<ItemStack> nonnulllist = null;
-@@ -581,9 +580,9 @@
+@@ -581,9 +643,9 @@
      {
          float f = 1.0F;
  
@@ -282,7 +349,7 @@
          }
  
          return f;
-@@ -593,33 +592,33 @@
+@@ -593,33 +655,33 @@
      {
          for (int i = 0; i < this.field_70462_a.size(); ++i)
          {
@@ -322,7 +389,7 @@
                  p_70442_1_.func_74742_a(nbttagcompound2);
              }
          }
-@@ -657,13 +656,11 @@
+@@ -657,13 +719,11 @@
          }
      }
  
@@ -336,7 +403,7 @@
      public boolean func_191420_l()
      {
          for (ItemStack itemstack : this.field_70462_a)
-@@ -693,7 +690,6 @@
+@@ -693,7 +753,6 @@
          return true;
      }
  
@@ -344,7 +411,7 @@
      public ItemStack func_70301_a(int p_70301_1_)
      {
          List<ItemStack> list = null;
-@@ -709,28 +705,24 @@
+@@ -709,31 +768,27 @@
              p_70301_1_ -= nonnulllist.size();
          }
  
@@ -374,8 +441,12 @@
 -    @Override
      public int func_70297_j_()
      {
-         return 64;
-@@ -757,7 +749,7 @@
+-        return 64;
++        return maxStack;
+     }
+ 
+     public boolean func_184432_b(IBlockState p_184432_1_)
+@@ -757,7 +812,7 @@
  
      public void func_70449_g(float p_70449_1_)
      {
@@ -384,7 +455,7 @@
  
          if (p_70449_1_ < 1.0F)
          {
-@@ -792,7 +784,6 @@
+@@ -792,7 +847,6 @@
          }
      }
  
@@ -392,7 +463,13 @@
      public void func_70296_d()
      {
          ++this.field_194017_h;
-@@ -814,7 +805,6 @@
+@@ -811,10 +865,12 @@
+ 
+     public ItemStack func_70445_o()
+     {
++        if (this.field_70457_g.func_190926_b()) {
++            this.func_70437_b(ItemStack.field_190927_a);
++        }
          return this.field_70457_g;
      }
  
@@ -400,7 +477,7 @@
      public boolean func_70300_a(EntityPlayer p_70300_1_)
      {
          if (this.field_70458_d.field_70128_L)
-@@ -823,37 +813,47 @@
+@@ -823,37 +879,47 @@
          }
          else
          {
@@ -454,7 +531,7 @@
      public boolean func_94041_b(int p_94041_1_, ItemStack p_94041_2_)
      {
          return true;
-@@ -869,24 +869,20 @@
+@@ -869,24 +935,20 @@
          this.field_70461_c = p_70455_1_.field_70461_c;
      }
  

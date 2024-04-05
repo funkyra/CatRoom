@@ -11,7 +11,7 @@
      public final File field_75825_d;
      private final DataFixer field_193416_e;
      private boolean field_183014_e;
-@@ -49,10 +49,31 @@
+@@ -49,29 +49,50 @@
          this.field_193416_e = p_i46673_2_;
      }
  
@@ -25,8 +25,9 @@
 -    @Override
      public Chunk func_75815_a(World p_75815_1_, int p_75815_2_, int p_75815_3_) throws IOException
      {
++        p_75815_1_.timings.syncChunkLoadDataTimer.startTiming(); // Spigot
 +        Object[] data = this.loadChunk__Async(p_75815_1_, p_75815_2_, p_75815_3_);
-+
++        p_75815_1_.timings.syncChunkLoadDataTimer.stopTiming(); // Spigot
 +        if (data != null)
 +        {
 +            Chunk chunk = (Chunk) data[0];
@@ -44,11 +45,19 @@
          ChunkPos chunkpos = new ChunkPos(p_75815_2_, p_75815_3_);
          NBTTagCompound nbttagcompound = this.field_75828_a.get(chunkpos);
  
-@@ -66,12 +87,12 @@
+         if (nbttagcompound == null)
+         {
+-            DataInputStream datainputstream = RegionFileCache.func_76549_c(this.field_75825_d, p_75815_2_, p_75815_3_);
++            NBTTagCompound nbtTagCompound = RegionFileCache.getChunkInputStreamCB(this.field_75825_d, p_75815_2_, p_75815_3_);
+ 
+-            if (datainputstream == null)
++            if (nbtTagCompound == null)
+             {
+                 return null;
              }
  
-             nbttagcompound = this.field_193416_e.func_188257_a(FixTypes.CHUNK, CompressedStreamTools.func_74794_a(datainputstream));
-+            datainputstream.close(); // Forge: close stream after use
+-            nbttagcompound = this.field_193416_e.func_188257_a(FixTypes.CHUNK, CompressedStreamTools.func_74794_a(datainputstream));
++            nbttagcompound = this.field_193416_e.func_188257_a(FixTypes.CHUNK, nbtTagCompound);
          }
  
 -        return this.func_75822_a(p_75815_1_, p_75815_2_, p_75815_3_, nbttagcompound);
@@ -161,8 +170,17 @@
              }
  
              return false;
-@@ -202,26 +243,21 @@
-         dataoutputstream.close();
+@@ -197,31 +238,27 @@
+ 
+     private void func_183013_b(ChunkPos p_183013_1_, NBTTagCompound p_183013_2_) throws IOException
+     {
+-        DataOutputStream dataoutputstream = RegionFileCache.func_76552_d(this.field_75825_d, p_183013_1_.field_77276_a, p_183013_1_.field_77275_b);
+-        CompressedStreamTools.func_74800_a(p_183013_2_, dataoutputstream);
+-        dataoutputstream.close();
++        // DataOutputStream dataoutputstream = RegionFileCache.getChunkOutputStream(this.chunkSaveLocation, pos.x, pos.z);
++        // CompressedStreamTools.write(compound, dataoutputstream);
++        // dataoutputstream.close();
++        RegionFileCache.getChunkOutputStream(this.field_75825_d, p_183013_1_.field_77276_a, p_183013_1_.field_77275_b, p_183013_2_);
      }
  
 -    @Override
@@ -189,7 +207,7 @@
          }
          finally
          {
-@@ -233,7 +269,6 @@
+@@ -233,7 +270,6 @@
      {
          p_189889_0_.func_188258_a(FixTypes.CHUNK, new IDataWalker()
          {
@@ -197,7 +215,7 @@
              public NBTTagCompound func_188266_a(IDataFixer p_188266_1_, NBTTagCompound p_188266_2_, int p_188266_3_)
              {
                  if (p_188266_2_.func_150297_b("Level", 10))
-@@ -284,7 +319,7 @@
+@@ -284,7 +320,7 @@
              if (extendedblockstorage != Chunk.field_186036_a)
              {
                  NBTTagCompound nbttagcompound = new NBTTagCompound();
@@ -206,7 +224,7 @@
                  byte[] abyte = new byte[4096];
                  NibbleArray nibblearray = new NibbleArray();
                  NibbleArray nibblearray1 = extendedblockstorage.func_186049_g().func_186017_a(abyte, nibblearray);
-@@ -322,11 +357,19 @@
+@@ -322,11 +358,19 @@
              {
                  NBTTagCompound nbttagcompound2 = new NBTTagCompound();
  
@@ -226,7 +244,7 @@
              }
          }
  
-@@ -335,8 +378,16 @@
+@@ -335,8 +379,16 @@
  
          for (TileEntity tileentity : p_75820_1_.func_177434_r().values())
          {
@@ -243,7 +261,7 @@
          }
  
          p_75820_3_.func_74782_a("TileEntities", nbttaglist2);
-@@ -362,6 +413,18 @@
+@@ -362,6 +414,18 @@
  
              p_75820_3_.func_74782_a("TileTicks", nbttaglist3);
          }
@@ -262,7 +280,7 @@
      }
  
      private Chunk func_75823_a(World p_75823_1_, NBTTagCompound p_75823_2_)
-@@ -405,6 +468,16 @@
+@@ -405,6 +469,17 @@
              chunk.func_76616_a(p_75823_2_.func_74770_j("Biomes"));
          }
  
@@ -276,10 +294,31 @@
 +
 +    public void loadEntities(World p_75823_1_, NBTTagCompound p_75823_2_, Chunk chunk)
 +    {
++        p_75823_1_.timings.syncChunkLoadEntitiesTimer.startTiming(); // Spigot
          NBTTagList nbttaglist1 = p_75823_2_.func_150295_c("Entities", 10);
  
          for (int j1 = 0; j1 < nbttaglist1.func_74745_c(); ++j1)
-@@ -445,16 +518,9 @@
+@@ -413,7 +488,8 @@
+             func_186050_a(nbttagcompound1, p_75823_1_, chunk);
+             chunk.func_177409_g(true);
+         }
+-
++        p_75823_1_.timings.syncChunkLoadEntitiesTimer.stopTiming(); // Spigot
++        p_75823_1_.timings.syncChunkLoadTileEntitiesTimer.startTiming(); // Spigot
+         NBTTagList nbttaglist2 = p_75823_2_.func_150295_c("TileEntities", 10);
+ 
+         for (int k1 = 0; k1 < nbttaglist2.func_74745_c(); ++k1)
+@@ -426,7 +502,8 @@
+                 chunk.func_150813_a(tileentity);
+             }
+         }
+-
++        p_75823_1_.timings.syncChunkLoadTileEntitiesTimer.stopTiming(); // Spigot
++        p_75823_1_.timings.syncChunkLoadTileTicksTimer.startTiming(); // Spigot
+         if (p_75823_2_.func_150297_b("TileTicks", 9))
+         {
+             NBTTagList nbttaglist3 = p_75823_2_.func_150295_c("TileTicks", 10);
+@@ -445,16 +522,10 @@
                      block = Block.func_149729_e(nbttagcompound3.func_74762_e("i"));
                  }
  
@@ -294,10 +333,11 @@
          }
 -
 -        return chunk;
++        p_75823_1_.timings.syncChunkLoadTileTicksTimer.stopTiming(); // Spigot
      }
  
      @Nullable
-@@ -490,9 +556,7 @@
+@@ -490,9 +561,7 @@
      }
  
      @Nullable
@@ -308,7 +348,7 @@
      {
          Entity entity = func_186053_a(p_186054_0_, p_186054_1_);
  
-@@ -537,7 +601,7 @@
+@@ -537,7 +606,7 @@
          {
              return EntityList.func_75615_a(p_186053_0_, p_186053_1_);
          }
@@ -317,14 +357,38 @@
          {
              return null;
          }
-@@ -586,5 +650,10 @@
+@@ -545,11 +614,14 @@
  
+     public static void func_186052_a(Entity p_186052_0_, World p_186052_1_)
+     {
+-        if (p_186052_1_.func_72838_d(p_186052_0_) && p_186052_0_.func_184207_aI())
+-        {
+-            for (Entity entity : p_186052_0_.func_184188_bt())
++        spawnEntity(p_186052_0_, p_186052_1_, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.DEFAULT);
++    }
++
++    public static void spawnEntity(Entity entityIn, World worldIn, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason reason) {
++        if (worldIn.addEntity(entityIn, reason) && entityIn.func_184207_aI()) {
++            for (Entity entity : entityIn.func_184188_bt())
+             {
+-                func_186052_a(entity, p_186052_1_);
++                func_186052_a(entity, worldIn);
+             }
+         }
+     }
+@@ -587,4 +659,15 @@
              return entity;
          }
-+    }
+     }
 +
 +    public int getPendingSaveCount()
 +    {
 +        return this.field_75828_a.size();
-     }
++    }
++
++    // CatServer start - Add spigot method
++    public void saveChunk(World world, Chunk chunk, boolean unloaded) throws MinecraftException, IOException {
++        func_75816_a(world, chunk);
++    }
++    // CatServer end
  }

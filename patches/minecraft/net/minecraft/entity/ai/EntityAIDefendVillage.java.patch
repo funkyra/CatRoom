@@ -1,0 +1,11 @@
+--- before/net/minecraft/entity/ai/EntityAIDefendVillage.java
++++ after/net/minecraft/entity/ai/EntityAIDefendVillage.java
+@@ -53,7 +53,7 @@
+     @Override
+     public void func_75249_e()
+     {
+-        this.field_75305_a.func_70624_b(this.field_75304_b);
++        this.field_75305_a.setGoalTarget(this.field_75304_b, org.bukkit.event.entity.EntityTargetEvent.TargetReason.DEFEND_VILLAGE, true);
+         super.func_75249_e();
+     }
+ }

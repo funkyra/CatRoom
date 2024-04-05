@@ -1,6 +1,6 @@
 --- before/net/minecraft/item/crafting/RecipesArmorDyes.java
 +++ after/net/minecraft/item/crafting/RecipesArmorDyes.java
-@@ -9,16 +9,13 @@
+@@ -9,16 +9,19 @@
  import net.minecraft.item.ItemStack;
  import net.minecraft.util.NonNullList;
  import net.minecraft.world.World;
@@ -8,9 +8,15 @@
 -import net.minecraftforge.fml.relauncher.SideOnly;
  
 -public class RecipesArmorDyes implements IRecipe
-+public class RecipesArmorDyes extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
++public class RecipesArmorDyes extends ShapelessRecipes implements IRecipe
  {
 -    @Override
++    // CraftBukkit start - Delegate to new parent class with bogus info
++    public RecipesArmorDyes() {
++        super("", new ItemStack(Items.field_151024_Q, 0, 0), NonNullList.func_193580_a(Ingredient.field_193370_a, Ingredient.func_193367_a(Items.field_151100_aR)));
++    }
++    // CraftBukkit end
++
      public boolean func_77569_a(InventoryCrafting p_77569_1_, World p_77569_2_)
      {
          ItemStack itemstack = ItemStack.field_190927_a;
@@ -19,7 +25,7 @@
  
          for (int i = 0; i < p_77569_1_.func_70302_i_(); ++i)
          {
-@@ -39,7 +36,7 @@
+@@ -39,7 +42,7 @@
                  }
                  else
                  {
@@ -28,7 +34,7 @@
                      {
                          return false;
                      }
-@@ -52,7 +49,6 @@
+@@ -52,7 +55,6 @@
          return !itemstack.func_190926_b() && !list.isEmpty();
      }
  
@@ -36,7 +42,7 @@
      public ItemStack func_77572_b(InventoryCrafting p_77572_1_)
      {
          ItemStack itemstack = ItemStack.field_190927_a;
-@@ -82,9 +78,9 @@
+@@ -82,9 +84,9 @@
                      if (itemarmor.func_82816_b_(itemstack1))
                      {
                          int l = itemarmor.func_82814_b(itemstack);
@@ -49,7 +55,7 @@
                          i = (int)((float)i + Math.max(f, Math.max(f1, f2)) * 255.0F);
                          aint[0] = (int)((float)aint[0] + f * 255.0F);
                          aint[1] = (int)((float)aint[1] + f1 * 255.0F);
-@@ -94,12 +90,12 @@
+@@ -94,12 +96,12 @@
                  }
                  else
                  {
@@ -64,7 +70,7 @@
                      int l1 = (int)(afloat[0] * 255.0F);
                      int i2 = (int)(afloat[1] * 255.0F);
                      int j2 = (int)(afloat[2] * 255.0F);
-@@ -133,38 +129,29 @@
+@@ -133,38 +135,29 @@
          }
      }
  

@@ -1,0 +1,12 @@
+--- before/net/minecraft/entity/projectile/EntityEvokerFangs.java
++++ after/net/minecraft/entity/projectile/EntityEvokerFangs.java
+@@ -141,7 +141,9 @@
+         {
+             if (entitylivingbase == null)
+             {
++                org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.entityDamage = this;
+                 p_190551_1_.func_70097_a(DamageSource.field_76376_m, 6.0F);
++                org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.entityDamage = null;
+             }
+             else
+             {

@@ -8,7 +8,14 @@
  import net.minecraft.entity.player.EntityPlayer;
  import net.minecraft.entity.player.EntityPlayerMP;
  import net.minecraft.init.Blocks;
-@@ -33,17 +34,7 @@
+@@ -27,23 +28,14 @@
+ public class ItemBlock extends Item
+ {
+     protected final Block field_150939_a;
++    public boolean playAfter = false;
+ 
+     public ItemBlock(Block p_i45328_1_)
+     {
          this.field_150939_a = p_i45328_1_;
      }
  
@@ -27,7 +34,7 @@
      {
          IBlockState iblockstate = p_180614_2_.func_180495_p(p_180614_3_);
          Block block = iblockstate.func_177230_c();
-@@ -55,38 +46,16 @@
+@@ -55,38 +47,17 @@
  
          ItemStack itemstack = p_180614_1_.func_184586_b(p_180614_4_);
  
@@ -67,11 +74,12 @@
 -                    soundtype.func_185847_b() * 0.8F
 -                );
 +                SoundType soundtype = iblockstate1.func_177230_c().getSoundType(iblockstate1, p_180614_2_, p_180614_3_, p_180614_1_);
-+                p_180614_2_.func_184133_a(p_180614_1_, p_180614_3_, soundtype.func_185841_e(), SoundCategory.BLOCKS, (soundtype.func_185843_a() + 1.0F) / 2.0F, soundtype.func_185847_b() * 0.8F);
++                // worldIn.playSound(player, pos, soundtype.getPlaceSound(), SoundCategory.BLOCKS, (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F); // CraftBukkit - SPIGOT-1288
++                playAfter = true; // CatServer - handle in ForgeHook
                  itemstack.func_190918_g(1);
              }
  
-@@ -146,7 +115,7 @@
+@@ -146,7 +117,7 @@
      {
          Block block = p_179222_1_.func_180495_p(p_179222_2_).func_177230_c();
  
@@ -80,7 +88,7 @@
          {
              p_179222_3_ = EnumFacing.UP;
          }
-@@ -155,28 +124,24 @@
+@@ -155,28 +126,24 @@
              p_179222_2_ = p_179222_2_.func_177972_a(p_179222_3_);
          }
  
@@ -110,7 +118,7 @@
      public void func_150895_a(CreativeTabs p_150895_1_, NonNullList<ItemStack> p_150895_2_)
      {
          if (this.func_194125_a(p_150895_1_))
-@@ -186,7 +151,6 @@
+@@ -186,7 +153,6 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -118,7 +126,7 @@
      public void func_77624_a(ItemStack p_77624_1_, @Nullable World p_77624_2_, List<String> p_77624_3_, ITooltipFlag p_77624_4_)
      {
          super.func_77624_a(p_77624_1_, p_77624_2_, p_77624_3_, p_77624_4_);
-@@ -195,6 +159,36 @@
+@@ -195,6 +161,36 @@
  
      public Block func_179223_d()
      {

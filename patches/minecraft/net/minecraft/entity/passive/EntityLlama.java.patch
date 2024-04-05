@@ -1,5 +1,14 @@
 --- before/net/minecraft/entity/passive/EntityLlama.java
 +++ after/net/minecraft/entity/passive/EntityLlama.java
+@@ -65,7 +65,7 @@
+         this.func_70105_a(0.9F, 1.87F);
+     }
+ 
+-    private void func_190706_p(int p_190706_1_)
++    public void func_190706_p(int p_190706_1_)
+     {
+         this.field_70180_af.func_187227_b(field_190720_bG, Math.max(1, Math.min(5, p_190706_1_)));
+     }
 @@ -488,6 +488,9 @@
      @Override
      public void func_180430_e(float p_180430_1_, float p_180430_2_)

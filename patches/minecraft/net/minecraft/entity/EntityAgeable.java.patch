@@ -1,6 +1,6 @@
 --- before/net/minecraft/entity/EntityAgeable.java
 +++ after/net/minecraft/entity/EntityAgeable.java
-@@ -15,7 +15,7 @@
+@@ -15,13 +15,40 @@
  
  public abstract class EntityAgeable extends EntityCreature
  {
@@ -9,7 +9,40 @@
      protected int field_175504_a;
      protected int field_175502_b;
      protected int field_175503_c;
-@@ -30,7 +30,6 @@
+     private float field_98056_d = -1.0F;
+     private float field_98057_e;
+ 
++    public boolean ageLocked;
++
++    // Spigot start
++    @Override
++    public void inactiveTick()
++    {
++        super.inactiveTick();
++        if ( this.field_70170_p.field_72995_K || this.ageLocked )
++        { // CraftBukkit
++            this.func_98054_a( this.func_70631_g_() );
++        } else
++        {
++            int i = this.func_70874_b();
++
++            if ( i < 0 )
++            {
++                ++i;
++                this.func_70873_a( i );
++            } else if ( i > 0 )
++            {
++                --i;
++                this.func_70873_a( i );
++            }
++        }
++    }
++    // Spigot end
++
+     public EntityAgeable(World p_i1578_1_)
+     {
+         super(p_i1578_1_);
+@@ -30,7 +57,6 @@
      @Nullable
      public abstract EntityAgeable func_90011_a(EntityAgeable p_90011_1_);
  
@@ -17,7 +50,7 @@
      public boolean func_184645_a(EntityPlayer p_184645_1_, EnumHand p_184645_2_)
      {
          ItemStack itemstack = p_184645_1_.func_184586_b(p_184645_2_);
-@@ -39,7 +38,7 @@
+@@ -39,7 +65,7 @@
          {
              if (!this.field_70170_p.field_72995_K)
              {
@@ -26,7 +59,16 @@
  
                  if (oclass != null && this.getClass() == oclass)
                  {
-@@ -80,23 +79,22 @@
+@@ -49,7 +75,7 @@
+                     {
+                         entityageable.func_70873_a(-24000);
+                         entityageable.func_70012_b(this.field_70165_t, this.field_70163_u, this.field_70161_v, 0.0F, 0.0F);
+-                        this.field_70170_p.func_72838_d(entityageable);
++                        this.field_70170_p.addEntity(entityageable, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.SPAWNER_EGG);
+ 
+                         if (itemstack.func_82837_s())
+                         {
+@@ -80,23 +106,22 @@
          }
          else
          {
@@ -53,7 +95,7 @@
          }
          else
          {
-@@ -107,24 +105,25 @@
+@@ -107,24 +132,25 @@
      public void func_175501_a(int p_175501_1_, boolean p_175501_2_)
      {
          int i = this.func_70874_b();
@@ -83,7 +125,7 @@
  
              if (this.field_175503_c == 0)
              {
-@@ -145,12 +144,11 @@
+@@ -145,28 +171,27 @@
  
      public void func_70873_a(int p_70873_1_)
      {
@@ -97,23 +139,25 @@
      public void func_70014_b(NBTTagCompound p_70014_1_)
      {
          super.func_70014_b(p_70014_1_);
-@@ -158,7 +156,6 @@
+         p_70014_1_.func_74768_a("Age", this.func_70874_b());
          p_70014_1_.func_74768_a("ForcedAge", this.field_175502_b);
++        p_70014_1_.func_74757_a("AgeLocked", this.ageLocked);
      }
  
 -    @Override
      public void func_70037_a(NBTTagCompound p_70037_1_)
      {
          super.func_70037_a(p_70037_1_);
-@@ -166,7 +163,6 @@
+         this.func_70873_a(p_70037_1_.func_74762_e("Age"));
          this.field_175502_b = p_70037_1_.func_74762_e("ForcedAge");
++        this.ageLocked = p_70037_1_.func_74767_n("AgeLocked");
      }
  
 -    @Override
      public void func_184206_a(DataParameter<?> p_184206_1_)
      {
          if (field_184751_bv.equals(p_184206_1_))
-@@ -177,7 +173,6 @@
+@@ -177,27 +202,17 @@
          super.func_184206_a(p_184206_1_);
      }
  
@@ -121,7 +165,11 @@
      public void func_70636_d()
      {
          super.func_70636_d();
-@@ -188,16 +183,7 @@
+ 
+-        if (this.field_70170_p.field_72995_K)
++        if (this.field_70170_p.field_72995_K || ageLocked)
+         {
+             if (this.field_175503_c > 0)
              {
                  if (this.field_175503_c % 4 == 0)
                  {
@@ -139,7 +187,7 @@
                  }
  
                  --this.field_175503_c;
-@@ -209,7 +195,8 @@
+@@ -209,7 +224,8 @@
  
              if (i < 0)
              {
@@ -149,7 +197,7 @@
  
                  if (i == 0)
                  {
-@@ -218,7 +205,8 @@
+@@ -218,7 +234,8 @@
              }
              else if (i > 0)
              {
@@ -159,7 +207,7 @@
              }
          }
      }
-@@ -227,7 +215,6 @@
+@@ -227,7 +244,6 @@
      {
      }
  
@@ -167,7 +215,7 @@
      public boolean func_70631_g_()
      {
          return this.func_70874_b() < 0;
-@@ -238,7 +225,6 @@
+@@ -238,7 +254,6 @@
          this.func_98055_j(p_98054_1_ ? 0.5F : 1.0F);
      }
  

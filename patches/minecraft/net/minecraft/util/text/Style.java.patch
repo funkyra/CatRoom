@@ -244,7 +244,7 @@
      public boolean equals(Object p_equals_1_)
      {
          if (this == p_equals_1_)
-@@ -355,20 +304,61 @@
+@@ -355,31 +304,75 @@
          }
          else
          {
@@ -316,18 +316,31 @@
 -    @Override
      public int hashCode()
      {
-         int i = this.field_150247_b.hashCode();
-@@ -379,7 +369,8 @@
-         i = 31 * i + this.field_150244_g.hashCode();
-         i = 31 * i + this.field_150251_h.hashCode();
-         i = 31 * i + this.field_150252_i.hashCode();
+-        int i = this.field_150247_b.hashCode();
+-        i = 31 * i + this.field_150248_c.hashCode();
+-        i = 31 * i + this.field_150245_d.hashCode();
+-        i = 31 * i + this.field_150246_e.hashCode();
+-        i = 31 * i + this.field_150243_f.hashCode();
+-        i = 31 * i + this.field_150244_g.hashCode();
+-        i = 31 * i + this.field_150251_h.hashCode();
+-        i = 31 * i + this.field_150252_i.hashCode();
 -        return 31 * i + this.field_179990_j.hashCode();
-+        i = 31 * i + this.field_179990_j.hashCode();
++        // CraftBukkit start - fix npe
++        int i = field_150247_b == null ? 0 : this.field_150247_b.hashCode();
++        i = 31 * i + (field_150248_c == null ? 0 : this.field_150248_c.hashCode());
++        i = 31 * i + (field_150245_d == null ? 0 : this.field_150245_d.hashCode());
++        i = 31 * i + (field_150246_e == null ? 0 : this.field_150246_e.hashCode());
++        i = 31 * i + (field_150243_f == null ? 0 : this.field_150243_f.hashCode());
++        i = 31 * i + (field_150244_g == null ? 0 : this.field_150244_g.hashCode());
++        i = 31 * i + (field_150251_h == null ? 0 : this.field_150251_h.hashCode());
++        i = 31 * i + (field_150252_i == null ? 0 : this.field_150252_i.hashCode());
++        i = 31 * i + (field_179990_j == null ? 0 : this.field_179990_j.hashCode());
++        // CraftBukkit end
 +        return i;
      }
  
      public Style func_150232_l()
-@@ -401,11 +392,11 @@
+@@ -401,11 +394,11 @@
      public Style func_150206_m()
      {
          Style style = new Style();
@@ -344,7 +357,7 @@
          style.func_150238_a(this.func_150215_a());
          style.func_150241_a(this.func_150235_h());
          style.func_150209_a(this.func_150210_i());
-@@ -456,7 +447,7 @@
+@@ -456,7 +449,7 @@
  
                          if (jsonobject.has("color"))
                          {
@@ -353,7 +366,7 @@
                          }
  
                          if (jsonobject.has("insertion"))
-@@ -490,7 +481,7 @@
+@@ -490,7 +483,7 @@
                              {
                                  JsonPrimitive jsonprimitive2 = jsonobject2.getAsJsonPrimitive("action");
                                  HoverEvent.Action hoverevent$action = jsonprimitive2 == null ? null : HoverEvent.Action.func_150684_a(jsonprimitive2.getAsString());

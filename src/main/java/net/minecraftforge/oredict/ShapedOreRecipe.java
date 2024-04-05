@@ -22,6 +22,7 @@ package net.minecraftforge.oredict;
 import net.minecraft.block.Block;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.ShapedRecipes;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -50,6 +51,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
+import org.bukkit.inventory.Recipe;
+
 public class ShapedOreRecipe extends IForgeRegistryEntry.Impl<IRecipe> implements IShapedRecipe
 {
     @Deprecated
@@ -64,6 +67,7 @@ public class ShapedOreRecipe extends IForgeRegistryEntry.Impl<IRecipe> implement
     protected int height = 0;
     protected boolean mirrored = true;
     protected ResourceLocation group;
+    private Recipe bukkitRecip; // CatServer - bukkit compatibility
 
     public ShapedOreRecipe(ResourceLocation group, Block     result, Object... recipe){ this(group, new ItemStack(result), recipe); }
     public ShapedOreRecipe(ResourceLocation group, Item      result, Object... recipe){ this(group, new ItemStack(result), recipe); }
@@ -253,5 +257,17 @@ public class ShapedOreRecipe extends IForgeRegistryEntry.Impl<IRecipe> implement
 
         ItemStack result = CraftingHelper.getItemStack(JsonUtils.getJsonObject(json, "result"), context);
         return new ShapedOreRecipe(group.isEmpty() ? null : new ResourceLocation(group), result, primer);
+    }
+
+    @Override
+    public Recipe toBukkitRecipe() {
+        if (bukkitRecip == null)
+            bukkitRecip = new catserver.server.inventory.CustomModRecipe(this, this.getRegistryName());
+        return this.bukkitRecip;
+    }
+
+    @Override
+    public void setKey(ResourceLocation key) {
+
     }
 }

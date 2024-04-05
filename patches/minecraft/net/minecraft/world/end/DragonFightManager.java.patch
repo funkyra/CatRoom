@@ -180,7 +180,7 @@
          this.field_186110_d.func_72838_d(entitydragon);
          this.field_186119_m = entitydragon.func_110124_au();
          return entitydragon;
-@@ -539,13 +523,12 @@
+@@ -539,19 +523,26 @@
                  blockpos = this.field_186121_o;
              }
  
@@ -196,7 +196,21 @@
  
                  if (list.isEmpty())
                  {
-@@ -564,10 +547,7 @@
+                     return;
+                 }
+ 
++                // CatServer start
++                if (catserver.server.CatServer.getConfig().fixLessCrystalRespawnDragon) {
++                    for (EntityEnderCrystal entityEnderCrystal : list) {
++                        if (list1.contains(entityEnderCrystal)) return;
++                    }
++                }
++                // CatServer end
++
+                 list1.addAll(list);
+             }
+ 
+@@ -564,10 +555,7 @@
      {
          if (this.field_186117_k && this.field_186122_p == null)
          {
@@ -208,7 +222,7 @@
              {
                  for (int i = 0; i < this.field_186112_f.func_177684_c(); ++i)
                  {
-@@ -577,8 +557,7 @@
+@@ -577,8 +565,7 @@
                          {
                              BlockWorldState blockworldstate = blockpattern$patternhelper.func_177670_a(i, j, k);
  
@@ -218,7 +232,7 @@
                              {
                                  this.field_186110_d.func_175656_a(blockworldstate.func_177508_d(), Blocks.field_150377_bs.func_176223_P());
                              }
-@@ -601,8 +580,18 @@
+@@ -601,8 +588,18 @@
              for (EntityEnderCrystal entityendercrystal : this.field_186110_d.func_72872_a(EntityEnderCrystal.class, worldgenspikes$endspike.func_186153_f()))
              {
                  entityendercrystal.func_184224_h(false);

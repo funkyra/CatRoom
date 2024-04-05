@@ -1,0 +1,20 @@
+--- before/net/minecraft/world/storage/ThreadedFileIOBase.java
++++ after/net/minecraft/world/storage/ThreadedFileIOBase.java
+@@ -46,14 +46,16 @@
+                 ++this.field_75737_d;
+             }
+ 
++            /*
+             try
+             {
+-                Thread.sleep(this.field_75738_e ? 0L : 10L);
++                Thread.sleep(this.isThreadWaiting ? 0L : 10L);
+             }
+             catch (InterruptedException interruptedexception1)
+             {
+                 interruptedexception1.printStackTrace();
+             }
++            */
+         }
+ 
+         if (this.field_75739_b.isEmpty())

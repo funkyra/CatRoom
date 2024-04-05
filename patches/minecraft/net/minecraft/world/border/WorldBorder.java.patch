@@ -1,6 +1,12 @@
 --- before/net/minecraft/world/border/WorldBorder.java
 +++ after/net/minecraft/world/border/WorldBorder.java
-@@ -11,41 +11,42 @@
+@@ -6,46 +6,51 @@
+ import net.minecraft.util.math.AxisAlignedBB;
+ import net.minecraft.util.math.BlockPos;
+ import net.minecraft.util.math.ChunkPos;
++import net.minecraft.world.WorldServer;
+ import net.minecraftforge.fml.relauncher.Side;
+ import net.minecraftforge.fml.relauncher.SideOnly;
  
  public class WorldBorder
  {
@@ -24,6 +30,9 @@
 +    private double field_177760_j;
 +    private int field_177761_k;
 +    private int field_177759_l;
++
++    // TODO: Check if it's initialized properly
++    public WorldServer world;
 +
 +    public WorldBorder()
 +    {
@@ -63,7 +72,7 @@
      }
  
      public double func_177745_a(Entity p_177745_1_)
-@@ -78,7 +79,7 @@
+@@ -78,7 +83,7 @@
  
      public double func_177726_b()
      {
@@ -72,7 +81,7 @@
  
          if (d0 < (double)(-this.field_177762_h))
          {
-@@ -90,7 +91,7 @@
+@@ -90,7 +95,7 @@
  
      public double func_177736_c()
      {
@@ -81,7 +90,7 @@
  
          if (d0 < (double)(-this.field_177762_h))
          {
-@@ -102,7 +103,7 @@
+@@ -102,7 +107,7 @@
  
      public double func_177728_d()
      {
@@ -90,7 +99,7 @@
  
          if (d0 > (double)this.field_177762_h)
          {
-@@ -114,7 +115,7 @@
+@@ -114,7 +119,7 @@
  
      public double func_177733_e()
      {
@@ -99,7 +108,7 @@
  
          if (d0 > (double)this.field_177762_h)
          {
-@@ -151,7 +152,7 @@
+@@ -151,7 +156,7 @@
          {
              double d0 = (double)((float)(System.currentTimeMillis() - this.field_177753_g) / (float)(this.field_177752_f - this.field_177753_g));
  
@@ -108,7 +117,15 @@
              {
                  return this.field_177754_d + (this.field_177755_e - this.field_177754_d) * d0;
              }
-@@ -251,9 +252,7 @@
+@@ -205,6 +210,7 @@
+ 
+     public void func_177737_a(IBorderListener p_177737_1_)
+     {
++        if (field_177758_a.contains(p_177737_1_)) return;
+         this.field_177758_a.add(p_177737_1_);
+     }
+ 
+@@ -251,9 +257,7 @@
      @SideOnly(Side.CLIENT)
      public double func_177749_o()
      {
@@ -119,7 +136,7 @@
      }
  
      public int func_177740_p()
-@@ -284,5 +283,10 @@
+@@ -284,5 +288,10 @@
          {
              iborderlistener.func_177690_b(this, p_177747_1_);
          }

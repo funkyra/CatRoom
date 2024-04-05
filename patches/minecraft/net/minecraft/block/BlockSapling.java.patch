@@ -1,14 +1,22 @@
 --- before/net/minecraft/block/BlockSapling.java
 +++ after/net/minecraft/block/BlockSapling.java
-@@ -1,6 +1,7 @@
+@@ -1,6 +1,8 @@
  package net.minecraft.block;
  
++import java.util.List;
  import java.util.Random;
 +import net.minecraft.block.properties.IProperty;
  import net.minecraft.block.properties.PropertyEnum;
  import net.minecraft.block.properties.PropertyInteger;
  import net.minecraft.block.state.BlockStateContainer;
-@@ -26,35 +27,33 @@
+@@ -23,48 +25,73 @@
+ import net.minecraft.world.gen.feature.WorldGenTaiga2;
+ import net.minecraft.world.gen.feature.WorldGenTrees;
+ import net.minecraft.world.gen.feature.WorldGenerator;
++import org.bukkit.Location;
++import org.bukkit.TreeType;
++import org.bukkit.block.BlockState;
++import org.bukkit.event.world.StructureGrowEvent;
  
  public class BlockSapling extends BlockBush implements IGrowable
  {
@@ -17,6 +25,7 @@
      public static final PropertyInteger field_176479_b = PropertyInteger.func_177719_a("stage", 0, 1);
 -    protected static final AxisAlignedBB field_185520_d = new AxisAlignedBB(0.099999994F, 0.0, 0.099999994F, 0.9F, 0.8F, 0.9F);
 +    protected static final AxisAlignedBB field_185520_d = new AxisAlignedBB(0.09999999403953552D, 0.0D, 0.09999999403953552D, 0.8999999761581421D, 0.800000011920929D, 0.8999999761581421D);
++    public static TreeType treeType;
  
      protected BlockSapling()
      {
@@ -44,11 +53,36 @@
          {
              super.func_180650_b(p_180650_1_, p_180650_2_, p_180650_3_, p_180650_4_);
  
+-            if (p_180650_1_.func_175671_l(p_180650_2_.func_177984_a()) >= 9 && p_180650_4_.nextInt(7) == 0)
 +            if (!p_180650_1_.func_175697_a(p_180650_2_, 1)) return; // Forge: prevent loading unloaded chunks when checking neighbor's light
-             if (p_180650_1_.func_175671_l(p_180650_2_.func_177984_a()) >= 9 && p_180650_4_.nextInt(7) == 0)
++            if (p_180650_1_.func_175671_l(p_180650_2_.func_177984_a()) >= 9 && p_180650_4_.nextInt(Math.max(2, (int) (((100.0F / p_180650_1_.spigotConfig.saplingModifier) * 7) + 0.5F))) == 0)
              {
++                p_180650_1_.captureTreeGeneration = true;
                  this.func_176478_d(p_180650_1_, p_180650_2_, p_180650_3_, p_180650_4_);
-@@ -64,7 +63,7 @@
++                p_180650_1_.captureTreeGeneration = false;
++                if (p_180650_1_.capturedBlockSnapshots.size() > 0) {
++                    TreeType treeType = BlockSapling.treeType;
++                    BlockSapling.treeType = null;
++                    Location location = new Location(p_180650_1_.getWorld(), p_180650_2_.func_177958_n(), p_180650_2_.func_177956_o(), p_180650_2_.func_177952_p());
++                    List<BlockState> blockstates = new java.util.ArrayList();
++                    for (net.minecraftforge.common.util.BlockSnapshot snapshot : p_180650_1_.capturedBlockSnapshots) {
++                        blockstates.add(new org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockState(snapshot));
++                    }
++                    p_180650_1_.capturedBlockSnapshots.clear();
++                    StructureGrowEvent event = null;
++                    if (treeType != null) {
++                        event = new StructureGrowEvent(location, treeType, false, null, blockstates);
++                        org.bukkit.Bukkit.getPluginManager().callEvent(event);
++                    }
++                    if (event == null || !event.isCancelled()) {
++                        for (BlockState blockstate : blockstates) {
++                            blockstate.update(true);
++                        }
++                    }
++                }
+             }
+         }
+     }
  
      public void func_176478_d(World p_176478_1_, BlockPos p_176478_2_, IBlockState p_176478_3_, Random p_176478_4_)
      {
@@ -57,15 +91,46 @@
          {
              p_176478_1_.func_180501_a(p_176478_2_, p_176478_3_.func_177231_a(field_176479_b), 4);
          }
-@@ -76,6 +75,7 @@
+@@ -76,7 +103,18 @@
  
      public void func_176476_e(World p_176476_1_, BlockPos p_176476_2_, IBlockState p_176476_3_, Random p_176476_4_)
      {
+-        WorldGenerator worldgenerator = (WorldGenerator)(p_176476_4_.nextInt(10) == 0 ? new WorldGenBigTree(true) : new WorldGenTrees(true));
 +        if (!net.minecraftforge.event.terraingen.TerrainGen.saplingGrowTree(p_176476_1_, p_176476_4_, p_176476_2_)) return;
-         WorldGenerator worldgenerator = (WorldGenerator)(p_176476_4_.nextInt(10) == 0 ? new WorldGenBigTree(true) : new WorldGenTrees(true));
++        // CraftBukkit start - Turn ternary operator into if statement to set treeType
++        // WorldGenerator worldgenerator = (WorldGenerator)(rand.nextInt(10) == 0 ? new WorldGenBigTree(true) : new WorldGenTrees(true));
++        WorldGenerator worldgenerator;
++        if (p_176476_4_.nextInt(10) == 0) {
++            treeType = TreeType.BIG_TREE;
++            worldgenerator = new WorldGenBigTree(true);
++        } else {
++            treeType = TreeType.TREE;
++            worldgenerator = new WorldGenTrees(true);
++        }
++        // CraftBukkit end
          int i = 0;
          int j = 0;
-@@ -112,10 +112,7 @@
+         boolean flag = false;
+@@ -92,6 +130,7 @@
+                     {
+                         if (this.func_181624_a(p_176476_1_, p_176476_2_, i, j, BlockPlanks.EnumType.SPRUCE))
+                         {
++                            treeType = TreeType.MEGA_REDWOOD;
+                             worldgenerator = new WorldGenMegaPineTree(false, p_176476_4_.nextBoolean());
+                             flag = true;
+                             break label68;
+@@ -103,19 +142,18 @@
+                 {
+                     i = 0;
+                     j = 0;
++                    treeType = TreeType.REDWOOD;
+                     worldgenerator = new WorldGenTaiga2(true);
+                 }
+ 
+                 break;
+             case BIRCH:
++                treeType = TreeType.BIRCH;
+                 worldgenerator = new WorldGenBirchTree(true, false);
                  break;
              case JUNGLE:
                  IBlockState iblockstate = Blocks.field_150364_r.func_176223_P().func_177226_a(BlockOldLog.field_176301_b, BlockPlanks.EnumType.JUNGLE);
@@ -77,7 +142,37 @@
                  label82:
  
                  for (i = 0; i >= -1; --i)
-@@ -198,10 +195,7 @@
+@@ -124,6 +162,7 @@
+                     {
+                         if (this.func_181624_a(p_176476_1_, p_176476_2_, i, j, BlockPlanks.EnumType.JUNGLE))
+                         {
++                            treeType = TreeType.JUNGLE;
+                             worldgenerator = new WorldGenMegaJungle(true, 10, 20, iblockstate, iblockstate1);
+                             flag = true;
+                             break label82;
+@@ -135,11 +174,13 @@
+                 {
+                     i = 0;
+                     j = 0;
++                    treeType = TreeType.SMALL_JUNGLE;
+                     worldgenerator = new WorldGenTrees(true, 4 + p_176476_4_.nextInt(7), iblockstate, iblockstate1, false);
+                 }
+ 
+                 break;
+             case ACACIA:
++                treeType = TreeType.ACACIA;
+                 worldgenerator = new WorldGenSavannaTree(true);
+                 break;
+             case DARK_OAK:
+@@ -151,6 +192,7 @@
+                     {
+                         if (this.func_181624_a(p_176476_1_, p_176476_2_, i, j, BlockPlanks.EnumType.DARK_OAK))
+                         {
++                            treeType = TreeType.DARK_OAK;
+                             worldgenerator = new WorldGenCanopyTree(true);
+                             flag = true;
+                             break label96;
+@@ -198,10 +240,7 @@
  
      private boolean func_181624_a(World p_181624_1_, BlockPos p_181624_2_, int p_181624_3_, int p_181624_4_, BlockPlanks.EnumType p_181624_5_)
      {
@@ -89,7 +184,7 @@
      }
  
      public boolean func_176477_a(World p_176477_1_, BlockPos p_176477_2_, BlockPlanks.EnumType p_176477_3_)
-@@ -210,13 +204,11 @@
+@@ -210,13 +249,11 @@
          return iblockstate.func_177230_c() == this && iblockstate.func_177229_b(field_176480_a) == p_176477_3_;
      }
  
@@ -104,7 +199,7 @@
      public void func_149666_a(CreativeTabs p_149666_1_, NonNullList<ItemStack> p_149666_2_)
      {
          for (BlockPlanks.EnumType blockplanks$enumtype : BlockPlanks.EnumType.values())
-@@ -225,43 +217,36 @@
+@@ -225,43 +262,36 @@
          }
      }
  

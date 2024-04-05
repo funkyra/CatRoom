@@ -1,11 +1,16 @@
 --- before/net/minecraft/item/crafting/ShapelessRecipes.java
 +++ after/net/minecraft/item/crafting/ShapelessRecipes.java
-@@ -10,63 +10,59 @@
+@@ -9,64 +9,66 @@
+ import net.minecraft.item.ItemStack;
  import net.minecraft.util.JsonUtils;
  import net.minecraft.util.NonNullList;
++import net.minecraft.util.ResourceLocation;
  import net.minecraft.world.World;
 -import net.minecraftforge.fml.relauncher.Side;
 -import net.minecraftforge.fml.relauncher.SideOnly;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
++import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftShapelessRecipe;
++import org.bukkit.inventory.Recipe;
  
 -public class ShapelessRecipes implements IRecipe
 +public class ShapelessRecipes extends net.minecraftforge.registries.IForgeRegistryEntry.Impl<IRecipe> implements IRecipe
@@ -14,6 +19,8 @@
      public final NonNullList<Ingredient> field_77579_b;
      private final String field_194138_c;
 +    private final boolean isSimple;
++
++    public ResourceLocation key;
  
      public ShapelessRecipes(String p_i47500_1_, ItemStack p_i47500_2_, NonNullList<Ingredient> p_i47500_3_)
      {
@@ -75,7 +82,7 @@
  
          for (int i = 0; i < p_77569_1_.func_174923_h(); ++i)
          {
-@@ -76,30 +72,24 @@
+@@ -76,30 +78,24 @@
  
                  if (!itemstack.func_190926_b())
                  {
@@ -118,7 +125,7 @@
      public ItemStack func_77572_b(InventoryCrafting p_77572_1_)
      {
          return this.field_77580_a.func_77946_l();
-@@ -127,7 +117,7 @@
+@@ -127,7 +123,7 @@
  
      private static NonNullList<Ingredient> func_193364_a(JsonArray p_193364_0_)
      {
@@ -127,7 +134,7 @@
  
          for (int i = 0; i < p_193364_0_.size(); ++i)
          {
-@@ -142,8 +132,6 @@
+@@ -142,10 +138,29 @@
          return nonnulllist;
      }
  
@@ -136,3 +143,26 @@
      public boolean func_194133_a(int p_194133_1_, int p_194133_2_)
      {
          return p_194133_1_ * p_194133_2_ >= this.field_77579_b.size();
++    }
++
++    @Override
++    public Recipe toBukkitRecipe() {
++        CraftItemStack result = CraftItemStack.asCraftMirror(this.field_77580_a);
++        CraftShapelessRecipe recipe = new CraftShapelessRecipe(result, this);
++        for (Ingredient list : this.field_77579_b) {
++            if (list != null) { // CatServer - get recipe from OreDictionary
++                ItemStack[] matchingStacks = list.func_193365_a();
++                if (matchingStacks.length > 0) {
++                    net.minecraft.item.ItemStack stack = matchingStacks[0];
++                    recipe.addIngredient(org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers.getMaterial(stack.func_77973_b()), (matchingStacks.length) > 1 ? 32767 : stack.func_77960_j());
++                }
++            }
++        }
++        return recipe;
++    }
++
++    @Override
++    public void setKey(ResourceLocation key) {
++        this.key = key;
+     }
+ }

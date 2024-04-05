@@ -167,7 +167,7 @@
      public int func_149738_a(World p_149738_1_)
      {
          if (this.field_149764_J == Material.field_151586_h)
-@@ -253,27 +223,91 @@
+@@ -253,27 +223,93 @@
      }
  
      @SideOnly(Side.CLIENT)
@@ -237,15 +237,17 @@
 +
 +                if (integer.intValue() == 0)
 +                {
-+                    p_176365_1_.func_175656_a(p_176365_2_, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_176365_1_, p_176365_2_, p_176365_2_, Blocks.field_150343_Z.func_176223_P()));
-+                    this.func_180688_d(p_176365_1_, p_176365_2_);
++                    if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleBlockFormEvent(p_176365_1_, p_176365_2_, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_176365_1_, p_176365_2_, p_176365_2_, Blocks.field_150343_Z.func_176223_P()), null)) {
++                        this.func_180688_d(p_176365_1_, p_176365_2_);
++                    }
 +                    return true;
 +                }
 +
 +                if (integer.intValue() <= 4)
 +                {
-+                    p_176365_1_.func_175656_a(p_176365_2_, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_176365_1_, p_176365_2_, p_176365_2_, Blocks.field_150347_e.func_176223_P()));
-+                    this.func_180688_d(p_176365_1_, p_176365_2_);
++                    if (org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.handleBlockFormEvent(p_176365_1_, p_176365_2_, net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(p_176365_1_, p_176365_2_, p_176365_2_, Blocks.field_150347_e.func_176223_P()), null)) {
++                        this.func_180688_d(p_176365_1_, p_176365_2_);
++                    }
 +                    return true;
 +                }
 +            }
@@ -266,7 +268,7 @@
      public void func_180655_c(IBlockState p_180655_1_, World p_180655_2_, BlockPos p_180655_3_, Random p_180655_4_)
      {
          double d0 = (double)p_180655_3_.func_177958_n();
-@@ -282,72 +316,35 @@
+@@ -282,72 +318,35 @@
  
          if (this.field_149764_J == Material.field_151586_h)
          {
@@ -346,7 +348,7 @@
              }
          }
  
-@@ -358,16 +355,16 @@
+@@ -358,16 +357,16 @@
              if (!material.func_76230_c() && !material.func_76224_d())
              {
                  double d3 = d0 + (double)p_180655_4_.nextFloat();
@@ -366,7 +368,7 @@
                  }
              }
          }
-@@ -377,59 +374,7 @@
+@@ -377,59 +376,7 @@
      public static float func_189544_a(IBlockAccess p_189544_0_, BlockPos p_189544_1_, Material p_189544_2_, IBlockState p_189544_3_)
      {
          Vec3d vec3d = func_176361_a(p_189544_2_).func_189543_a(p_189544_0_, p_189544_1_, p_189544_3_);
@@ -427,7 +429,7 @@
      }
  
      protected void func_180688_d(World p_180688_1_, BlockPos p_180688_2_)
-@@ -437,37 +382,27 @@
+@@ -437,37 +384,27 @@
          double d0 = (double)p_180688_2_.func_177958_n();
          double d1 = (double)p_180688_2_.func_177956_o();
          double d2 = (double)p_180688_2_.func_177952_p();
@@ -470,7 +472,7 @@
      }
  
      public static BlockDynamicLiquid func_176361_a(Material p_176361_0_)
-@@ -504,7 +439,7 @@
+@@ -504,7 +441,7 @@
  
      public static float func_190973_f(IBlockState p_190973_0_, IBlockAccess p_190973_1_, BlockPos p_190973_2_)
      {
@@ -479,7 +481,7 @@
          return (i & 7) == 0 && p_190973_1_.func_180495_p(p_190973_2_.func_177984_a()).func_185904_a() == Material.field_151586_h ? 1.0F : 1.0F - func_149801_b(i);
      }
  
-@@ -514,8 +449,38 @@
+@@ -514,8 +451,38 @@
      }
  
      @Override
