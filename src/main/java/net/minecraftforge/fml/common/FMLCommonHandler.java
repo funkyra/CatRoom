@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 
 import catserver.server.BukkitInjector;
 import catserver.server.CatServer;
+import com.cleanroommc.common.CleanroomVersion;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.item.EntityItem;
@@ -234,7 +235,7 @@ public class FMLCommonHandler
             Builder<String> brd = ImmutableList.builder();
             brd.add(Loader.instance().getMCVersionString());
             brd.add(Loader.instance().getMCPVersionString());
-            brd.add("Powered by Cleanroom " + ForgeVersion.getVersion());
+            brd.add("Cleanroom " + CleanroomVersion.BUILD_VERSION);
             if (sidedDelegate!=null)
             {
                 brd.addAll(sidedDelegate.getAdditionalBrandingInformation());
