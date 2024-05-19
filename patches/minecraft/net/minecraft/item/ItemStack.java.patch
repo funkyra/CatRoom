@@ -1,51 +1,10 @@
 --- before/net/minecraft/item/ItemStack.java
 +++ after/net/minecraft/item/ItemStack.java
-@@ -5,11 +5,17 @@
- import com.google.common.collect.Multimap;
- import java.text.DecimalFormat;
- import java.util.List;
-+import java.util.Map;
- import java.util.Random;
- import java.util.Map.Entry;
- import javax.annotation.Nullable;
- import net.minecraft.advancements.CriteriaTriggers;
- import net.minecraft.block.Block;
-+import net.minecraft.block.BlockContainer;
-+import net.minecraft.block.BlockJukebox;
-+import net.minecraft.block.BlockMushroom;
-+import net.minecraft.block.BlockSapling;
-+import net.minecraft.block.SoundType;
- import net.minecraft.block.state.IBlockState;
- import net.minecraft.client.util.ITooltipFlag;
- import net.minecraft.enchantment.Enchantment;
-@@ -30,12 +36,16 @@
- import net.minecraft.nbt.NBTBase;
- import net.minecraft.nbt.NBTTagCompound;
- import net.minecraft.nbt.NBTTagList;
-+import net.minecraft.server.MinecraftServer;
- import net.minecraft.stats.StatList;
-+import net.minecraft.tileentity.TileEntity;
-+import net.minecraft.tileentity.TileEntitySkull;
- import net.minecraft.util.ActionResult;
- import net.minecraft.util.EnumActionResult;
- import net.minecraft.util.EnumFacing;
- import net.minecraft.util.EnumHand;
- import net.minecraft.util.ResourceLocation;
-+import net.minecraft.util.SoundCategory;
- import net.minecraft.util.datafix.DataFixer;
- import net.minecraft.util.datafix.FixTypes;
- import net.minecraft.util.datafix.walkers.BlockEntityTag;
-@@ -49,14 +59,21 @@
+@@ -49,14 +49,15 @@
  import net.minecraft.world.World;
  import net.minecraftforge.fml.relauncher.Side;
  import net.minecraftforge.fml.relauncher.SideOnly;
-+import org.bukkit.Location;
-+import org.bukkit.TreeType;
-+import org.bukkit.block.BlockState;
-+import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockState;
 +import org.bukkit.craftbukkit.v1_12_R1.util.CraftMagicNumbers;
-+import org.bukkit.entity.Player;
-+import org.bukkit.event.world.StructureGrowEvent;
  
 -public final class ItemStack
 +public final class ItemStack implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>
@@ -59,7 +18,7 @@
      private NBTTagCompound field_77990_d;
      private boolean field_190928_g;
      int field_77991_e;
-@@ -66,6 +83,10 @@
+@@ -66,6 +67,10 @@
      private Block field_179550_j;
      private boolean field_179551_k;
  
@@ -70,7 +29,7 @@
      public ItemStack(Block p_i1876_1_)
      {
          this(p_i1876_1_, 1);
-@@ -91,8 +112,10 @@
+@@ -91,8 +96,10 @@
          this(p_i1880_1_, p_i1880_2_, 0);
      }
  
@@ -82,7 +41,7 @@
          this.field_151002_e = p_i1881_1_;
          this.field_77991_e = p_i1881_3_;
          this.field_77994_a = p_i1881_2_;
-@@ -103,6 +126,18 @@
+@@ -103,6 +110,18 @@
          }
  
          this.func_190923_F();
@@ -101,7 +60,7 @@
      }
  
      private void func_190923_F()
-@@ -112,41 +147,41 @@
+@@ -112,41 +131,42 @@
  
      public ItemStack(NBTTagCompound p_i47263_1_)
      {
@@ -132,22 +91,26 @@
 +            // this.stackTagCompound = compound.getCompoundTag("tag");
 +            this.field_77990_d = compound.func_74775_l("tag").func_74737_b();
  
-@@ -127,6 +135,11 @@
+             if (this.field_151002_e != null)
+             {
+-                this.field_151002_e.func_179215_a(p_i47263_1_);
++                // this.item.updateItemStackNBT(compound);
++                this.field_151002_e.func_179215_a(this.field_77990_d);
+             }
          }
- 
-         this.func_190923_F();
-+        this.forgeInit();
 +    }
-+
+ 
+-        this.func_190923_F();
 +    private ItemStack(Item item, Object unused) {
 +        this.field_151002_e = item;
      }
  
      public boolean func_190926_b()
-@@ -135,17 +148,20 @@
-         {
-             return true;
-         }
+     {
+-        if (this == field_190927_a)
+-        {
+-            return true;
+-        }
 -        else if (this.field_151002_e == null || this.field_151002_e == Item.func_150898_a(Blocks.field_150350_a))
 -        {
 -            return true;
@@ -163,7 +126,8 @@
 +        return this == field_190927_a || this.getItemRaw() == null || this.getItemRaw() == Items.field_190931_a || this.field_77994_a <= 0 || this.field_77991_e < -32768 || this.field_77991_e > 65535; // Paper
      }
  
-@@ -166,22 +182,13 @@
+     public static void func_189868_a(DataFixer p_189868_0_)
+@@ -166,22 +186,13 @@
  
      public Item func_77973_b()
      {
@@ -190,7 +154,7 @@
  
          if (enumactionresult == EnumActionResult.SUCCESS)
          {
-@@ -191,6 +198,19 @@
+@@ -191,6 +202,19 @@
          return enumactionresult;
      }
  
@@ -210,9 +174,7 @@
      public float func_150997_a(IBlockState p_150997_1_)
      {
          return this.func_77973_b().func_150893_a(this, p_150997_1_);
-@@ -218,12 +238,18 @@
-             p_77955_1_.func_74782_a("tag", this.field_77990_d);
-         }
+@@ -215,7 +239,14 @@
  
          if (this.field_77990_d != null)
          {
@@ -228,7 +190,7 @@
          }
  
          return p_77955_1_;
-@@ -223,7 +269,7 @@
+@@ -223,7 +254,7 @@
  
      public int func_77976_d()
      {
@@ -237,7 +199,7 @@
      }
  
      public boolean func_77985_e()
-@@ -237,7 +263,7 @@
+@@ -237,7 +268,7 @@
          {
              return false;
          }
@@ -246,7 +208,7 @@
          {
              return false;
          }
-@@ -254,32 +280,27 @@
+@@ -254,32 +285,48 @@
  
      public boolean func_77951_h()
      {
@@ -305,7 +267,27 @@
      }
  
      public boolean func_96631_a(int p_96631_1_, Random p_96631_2_, @Nullable EntityPlayerMP p_96631_3_)
-@@ -316,8 +337,8 @@
+@@ -304,7 +351,18 @@
+                 }
+ 
+                 p_96631_1_ -= j;
+-
++                // Spigot start
++                if (p_96631_3_ != null) {
++                    org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack item = org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack.asCraftMirror(this);
++                    org.bukkit.event.player.PlayerItemDamageEvent event = new org.bukkit.event.player.PlayerItemDamageEvent(p_96631_3_.getBukkitEntity(), item, p_96631_1_);
++                    org.bukkit.Bukkit.getServer().getPluginManager().callEvent(event);
++                    if (p_96631_1_ != event.getDamage() || event.isCancelled()) {
++                        event.getPlayer().updateInventory();
++                    }
++                    if (event.isCancelled()) return false;
++                    p_96631_1_ = event.getDamage();
++                }
++                // Spigot end
+                 if (p_96631_1_ <= 0)
+                 {
+                     return false;
+@@ -316,8 +374,8 @@
                  CriteriaTriggers.field_193132_s.func_193158_a(p_96631_3_, this, this.field_77991_e + p_96631_1_);
              }
  
@@ -316,7 +298,19 @@
          }
      }
  
-@@ -366,7 +387,7 @@
+@@ -330,6 +388,11 @@
+                 if (this.func_96631_a(p_77972_1_, p_77972_2_.func_70681_au(), p_77972_2_ instanceof EntityPlayerMP ? (EntityPlayerMP)p_77972_2_ : null))
+                 {
+                     p_77972_2_.func_70669_a(this);
++                    // CraftBukkit start - Check for item breaking
++                    if (this.field_77994_a == 1 && p_77972_2_ instanceof EntityPlayer) {
++                        org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callPlayerItemBreakEvent((EntityPlayer) p_77972_2_, this);
++                    }
++                    // CraftBukkit end
+                     this.func_190918_g(1);
+ 
+                     if (p_77972_2_ instanceof EntityPlayer)
+@@ -366,7 +429,7 @@
  
      public boolean func_150998_b(IBlockState p_150998_1_)
      {
@@ -325,7 +319,7 @@
      }
  
      public boolean func_111282_a(EntityPlayer p_111282_1_, EntityLivingBase p_111282_2_, EnumHand p_111282_3_)
-@@ -374,17 +395,27 @@
+@@ -374,17 +437,27 @@
          return this.func_77973_b().func_111207_a(this, p_111282_1_, p_111282_2_, p_111282_3_);
      }
  
@@ -364,7 +358,7 @@
      }
  
      public static boolean func_77970_a(ItemStack p_77970_0_, ItemStack p_77970_1_)
-@@ -393,17 +424,20 @@
+@@ -393,17 +466,20 @@
          {
              return true;
          }
@@ -393,7 +387,7 @@
          }
      }
  
-@@ -439,7 +473,7 @@
+@@ -439,7 +515,7 @@
          }
          else
          {
@@ -402,7 +396,7 @@
          }
      }
  
-@@ -815,6 +849,7 @@
+@@ -815,6 +891,7 @@
                                  I18n.func_74838_a("attribute.name." + (String)entry.getKey())
                              )
                          );
@@ -410,7 +404,7 @@
                      }
                  }
              }
-@@ -890,6 +925,7 @@
+@@ -890,6 +967,7 @@
              }
          }
  
@@ -418,7 +412,7 @@
          return list;
      }
  
-@@ -899,6 +935,7 @@
+@@ -899,6 +977,7 @@
          return this.func_77973_b().func_77636_d(this);
      }
  
@@ -426,7 +420,23 @@
      public EnumRarity func_77953_t()
      {
          return this.func_77973_b().func_77613_e(this);
-@@ -1018,7 +1055,7 @@
+@@ -985,6 +1064,15 @@
+ 
+     public void func_82841_c(int p_82841_1_)
+     {
++        // CraftBukkit start - remove RepairCost tag when 0 (SPIGOT-3945)
++        if (p_82841_1_ == 0) {
++            if (this.func_77942_o()) {
++                this.field_77990_d.func_82580_o("RepairCost");
++            }
++            return;
++        }
++        // CraftBukkit end
++
+         if (!this.func_77942_o())
+         {
+             this.field_77990_d = new NBTTagCompound();
+@@ -1018,7 +1106,7 @@
          }
          else
          {
@@ -435,7 +445,22 @@
          }
  
          return multimap;
-@@ -1063,7 +1100,7 @@
+@@ -1048,6 +1136,14 @@
+         nbttaglist.func_74742_a(nbttagcompound);
+     }
+ 
++    @Deprecated
++    public void setItem(Item item) {
++        this.field_151002_e = item;
++        // Update delegate as well
++        this.delegate = item.delegate;
++        this.func_77964_b(this.func_77952_i()); // CraftBukkit - Set data again to ensure it is filtered properly
++    }
++
+     public ITextComponent func_151000_E()
+     {
+         TextComponentString textcomponentstring = new TextComponentString(this.func_82833_r());
+@@ -1063,7 +1159,7 @@
          {
              NBTTagCompound nbttagcompound = this.func_77955_b(new NBTTagCompound());
              itextcomponent.func_150256_b().func_150209_a(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new TextComponentString(nbttagcompound.toString())));
@@ -444,8 +469,7 @@
          }
  
          return itextcomponent;
-@@ -1160,5 +1197,129 @@
-     public void func_190918_g(int p_190918_1_)
+@@ -1161,4 +1257,140 @@
      {
          this.func_190917_f(-p_190918_1_);
      }

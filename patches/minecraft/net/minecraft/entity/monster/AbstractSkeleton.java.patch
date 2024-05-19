@@ -103,7 +103,7 @@
 +                    this.field_70170_p.getServer().getPluginManager().callEvent(event);
 +
 +                    if (!event.isCancelled()) {
-+                        this.func_70015_d(event.getDuration());
++                        this.setFire(event.getDuration());
 +                    }
                  }
              }

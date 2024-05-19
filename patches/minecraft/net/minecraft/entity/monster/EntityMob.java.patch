@@ -103,7 +103,7 @@
 +                org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 +
 +                if (!combustEvent.isCancelled()) {
-+                    p_70652_1_.func_70015_d(combustEvent.getDuration());
++                    p_70652_1_.setFire(combustEvent.getDuration());
 +                }
 +                // CraftBukkit end
              }

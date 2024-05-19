@@ -345,7 +345,7 @@
 +                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), entity.getBukkitEntity(), 5);
 +                org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 +                if (!combustEvent.isCancelled()) {
-+                    entity.func_70015_d(combustEvent.getDuration());
++                    entity.setFire(combustEvent.getDuration());
 +                }
              }
  
@@ -569,7 +569,7 @@
 +            this.field_70170_p.getServer().getPluginManager().callEvent(event);
 +
 +            if (!event.isCancelled()) {
-+                this.func_70015_d(event.getDuration());
++                this.setFire(event.getDuration());
 +            }
          }
      }

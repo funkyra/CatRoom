@@ -1,6 +1,11 @@
 --- before/net/minecraft/network/play/client/CPacketCloseWindow.java
 +++ after/net/minecraft/network/play/client/CPacketCloseWindow.java
-@@ -9,7 +9,7 @@
+@@ -4,18 +4,15 @@
+ import net.minecraft.network.Packet;
+ import net.minecraft.network.PacketBuffer;
+ import net.minecraft.network.play.INetHandlerPlayServer;
+-import net.minecraftforge.fml.relauncher.Side;
+-import net.minecraftforge.fml.relauncher.SideOnly;
  
  public class CPacketCloseWindow implements Packet<INetHandlerPlayServer>
  {
@@ -9,3 +14,9 @@
  
      public CPacketCloseWindow()
      {
+     }
+ 
+-    @SideOnly(Side.CLIENT)
+     public CPacketCloseWindow(int p_i46881_1_)
+     {
+         this.field_149556_a = p_i46881_1_;

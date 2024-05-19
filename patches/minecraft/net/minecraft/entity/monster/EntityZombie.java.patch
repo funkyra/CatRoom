@@ -120,7 +120,7 @@
 +                    this.field_70170_p.getServer().getPluginManager().callEvent(event);
 +
 +                    if (!event.isCancelled()) {
-+                        this.func_70015_d(event.getDuration());
++                        this.setFire(event.getDuration());
 +                    }
                  }
              }
@@ -213,7 +213,7 @@
 +                this.field_70170_p.getServer().getPluginManager().callEvent(event);
 +
 +                if (!event.isCancelled()) {
-+                    p_70652_1_.func_70015_d(event.getDuration());
++                    p_70652_1_.setFire(event.getDuration());
 +                }
              }
          }

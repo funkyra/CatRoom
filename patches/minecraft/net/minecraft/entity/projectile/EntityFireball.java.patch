@@ -44,7 +44,7 @@
          return p_70112_1_ < d0 * d0;
      }
  
-@@ -57,35 +59,39 @@
+@@ -57,49 +59,56 @@
          this.func_70012_b(p_i1760_2_, p_i1760_4_, p_i1760_6_, this.field_70177_z, this.field_70125_A);
          this.func_70107_b(p_i1760_2_, p_i1760_4_, p_i1760_6_);
          double d0 = (double)MathHelper.func_76133_a(p_i1760_8_ * p_i1760_8_ + p_i1760_10_ * p_i1760_10_ + p_i1760_12_ * p_i1760_12_);
@@ -102,7 +102,12 @@
          {
              super.func_70071_h_();
  
-@@ -97,9 +103,12 @@
+             if (this.func_184564_k())
+             {
+-                this.func_70015_d(1);
++                this.setFire(1);
+             }
+ 
              ++this.field_70234_an;
              RayTraceResult raytraceresult = ProjectileHelper.func_188802_a(this, true, this.field_70234_an >= 25, this.field_70235_a);
  

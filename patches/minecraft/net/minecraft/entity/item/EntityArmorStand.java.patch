@@ -435,7 +435,7 @@
 +                    }
 +                    else
 +                    {
-+                        this.func_70015_d(5);
++                        this.setFire(5);
 +                    }
  
 -                if (p_70097_1_.func_76346_g() instanceof EntityPlayer && !((EntityPlayer)p_70097_1_.func_76346_g()).field_71075_bZ.field_75099_e)

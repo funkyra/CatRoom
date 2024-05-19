@@ -183,7 +183,7 @@ import catserver.server.command.CraftSimpleCommandMap;
 import catserver.server.remapper.ReflectionTransformer;
 
 public final class CraftServer implements Server {
-    private final String serverName = "CatServer";
+    private final String serverName = "CatRoom";
     private final String serverVersion;
     private final String bukkitVersion = Versioning.getBukkitVersion();
     private final Logger logger = Logger.getLogger("Minecraft");
@@ -310,7 +310,7 @@ public final class CraftServer implements Server {
         chunkGCPeriod = configuration.getInt("chunk-gc.period-in-ticks");
         chunkGCLoadThresh = configuration.getInt("chunk-gc.load-threshold");
         loadIcon();
-        CatServer.getConfig().loadConfig(); // CatServer
+//        CatServer.getConfig().loadConfig(); // CatServer
     }
 
     public boolean getPermissionOverride(ICommandSender listener) {

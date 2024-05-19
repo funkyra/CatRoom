@@ -36,7 +36,7 @@
 +import org.spigotmc.CustomTimingsHandler;
  
 -public abstract class Entity implements ICommandSender
-+public abstract class Entity implements ICommandSender, net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>
++public abstract class Entity implements ICommandSender, net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound>, catserver.server.asm.ASMFixer.IEntityASMFixer
  {
 +    // CraftBukkit start
 +    private static final int CURRENT_LEVEL = 2;
@@ -64,7 +64,7 @@
      private int field_145783_c;
      public boolean field_70156_m;
 -    private final List<Entity> field_184244_h;
-+    public final List<Entity> field_184244_h;
++    public final List<Entity> field_184244_h;  // Spigot
      protected int field_184245_j;
      private Entity field_184239_as;
      public boolean field_98038_p;
@@ -467,10 +467,11 @@
          {
              this.func_70076_C();
          }
-@@ -539,6 +667,26 @@
+@@ -539,11 +667,31 @@
          if (!this.field_70178_ae)
          {
              this.func_70097_a(DamageSource.field_76371_c, 4.0F);
+-            this.func_70015_d(15);
 +            // CraftBukkit start - Fallen in lava TODO: this event spams!
 +            if (this instanceof EntityLiving) {
 +                if (field_190534_ay <= 0) {
@@ -482,18 +483,24 @@
 +                    this.field_70170_p.getServer().getPluginManager().callEvent(combustEvent);
 +
 +                    if (!combustEvent.isCancelled()) {
-+                        this.func_70015_d(combustEvent.getDuration());
++                        this.setFire(combustEvent.getDuration());
 +                    }
 +                } else {
 +                    // This will be called every single tick the entity is in lava, so don't throw an event
-+                    this.func_70015_d(15);
++                    this.setFire(15);
 +                }
 +                return;
 +            }
 +            // CraftBukkit end - we also don't throw an event unless the object in lava is living, to save on some event calls
-             this.func_70015_d(15);
++            this.setFire(15);
          }
      }
+ 
+-    public void func_70015_d(int p_70015_1_)
++    public void setFire(int p_70015_1_)
+     {
+         int i = p_70015_1_ * 20;
+ 
 @@ -581,6 +729,7 @@
  
      public void func_70091_d(MoverType p_70091_1_, double p_70091_2_, double p_70091_4_, double p_70091_6_)
@@ -1023,7 +1030,7 @@
 +                        field_70170_p.getServer().getPluginManager().callEvent(event);
 +
 +                        if (!event.isCancelled()) {
-+                            this.func_70015_d(event.getDuration());
++                            this.setFire(event.getDuration());
 +                        }
                      }
                  }
@@ -1887,7 +1894,7 @@
 +            EntityCombustByEntityEvent entityCombustEvent = new EntityCombustByEntityEvent(stormBukkitEntity, thisBukkitEntity, 8);
 +            pluginManager.callEvent(entityCombustEvent);
 +            if (!entityCombustEvent.isCancelled()) {
-+                this.func_70015_d(entityCombustEvent.getDuration());
++                this.setFire(entityCombustEvent.getDuration());
 +            }
 +            // CraftBukkit end
          }

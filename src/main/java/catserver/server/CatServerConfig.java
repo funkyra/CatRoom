@@ -1,11 +1,18 @@
 package catserver.server;
 
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.server.MinecraftServer;
+import net.openhft.affinity.Affinity;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class CatServerConfig {
     private final File configFile;
@@ -55,6 +62,8 @@ public class CatServerConfig {
     public boolean disableFMLStatusModInfo = false;
     public boolean disableAsyncCatchWarn = false;
     public boolean versionCheck = true;
+
+    public BitSet affinity = Affinity.getAffinity();
 
     public CatServerConfig(String file) {
         this.configFile = new File(file);
@@ -107,6 +116,8 @@ public class CatServerConfig {
         disableUpdateGameProfile = getOrWriteBooleanConfig("disableUpdateGameProfile", disableUpdateGameProfile);
         disableAsyncCatchWarn = getOrWriteBooleanConfig("disableAsyncCatchWarn", disableAsyncCatchWarn);
         versionCheck = getOrWriteBooleanConfig("versionCheck", versionCheck);
+        // affinity
+        affinity = validateAndConvertConfig(config.getIntegerList("affinity"));
         // remove old config
         config.set("vanilla.limitFastClickGUI", null);
         config.set("disableFMLHandshake", null);
@@ -149,5 +160,35 @@ public class CatServerConfig {
         }
         config.set(path, def);
         return def;
+    }
+
+    private BitSet validateAndConvertConfig(List<Integer> config) {
+        if (config.isEmpty()) {
+            List<Integer> affinityConfig = new ArrayList<>();
+            affinity.stream().forEach(affinityConfig::add);
+            this.config.set("affinity", affinityConfig);
+            return affinity;
+        }
+
+        int maxAvailable = Runtime.getRuntime().availableProcessors();
+        MinecraftServer.LOGGER.info("Available CPU: " + maxAvailable);
+
+        BitSet affinity = new BitSet(config.size());
+        for (int cpuId : config) {
+            if (cpuId < 0 || cpuId >= maxAvailable) {
+                MinecraftServer.LOGGER.warn(String.format(
+                        "Unusable CPU #%d, ignored.", cpuId)
+                );
+                continue;
+            }
+            affinity.set(cpuId);
+        }
+
+        if (affinity.isEmpty()) {
+            MinecraftServer.LOGGER.warn("Invalid CPU affinity config! Using default affinity (All CPU)...");
+            IntStream.range(0, maxAvailable).forEach(affinity::set);
+        }
+
+        return affinity;
     }
 }

@@ -17,3 +17,12 @@
      }
  
      @Override
+@@ -132,7 +133,7 @@
+     protected EntityArrow func_190726_a(float p_190726_1_)
+     {
+         EntityArrow entityarrow = super.func_190726_a(p_190726_1_);
+-        entityarrow.func_70015_d(100);
++        entityarrow.setFire(100);
+         return entityarrow;
+     }
+ }

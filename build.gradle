@@ -500,6 +500,11 @@ project(':cleanroom') {
         installer 'org.xerial:sqlite-jdbc:3.21.0.1'
         installer 'mysql:mysql-connector-java:5.1.45'
 
+        // CatRoom
+        installer 'net.openhft:affinity:3.23.3'
+        installer 'org.slf4j:slf4j-api:2.1.0-alpha1' // Affinity
+        installer 'org.slf4j:slf4j-simple:2.1.0-alpha1' // Affinity
+
         /*
         forgeGradleMcDeps
         +--- com.google.code.findbugs:jsr305:3.0.1

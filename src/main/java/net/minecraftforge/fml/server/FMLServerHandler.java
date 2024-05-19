@@ -187,9 +187,9 @@ public class FMLServerHandler implements IFMLSidedHandler
                 DedicatedServer dedServer = (DedicatedServer) server;
 
                 // rudimentary command processing, check for fml confirm/cancel and stop commands
-                synchronized (dedServer.field_71341_l)
+                synchronized (dedServer.pendingCommandList)
                 {
-                    for (Iterator<PendingCommand> it = dedServer.field_71341_l.iterator(); it.hasNext(); )
+                    for (Iterator<PendingCommand> it = dedServer.pendingCommandList.iterator(); it.hasNext(); )
                     {
                         String cmd = it.next().command.trim().toLowerCase();
 

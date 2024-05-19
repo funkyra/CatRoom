@@ -109,7 +109,7 @@
 +                            entityarrow.field_70170_p.getServer().getPluginManager().callEvent(event);
 +
 +                            if (!event.isCancelled()) {
-+                                entityarrow.func_70015_d(event.getDuration());
++                                entityarrow.setFire(event.getDuration());
 +                            }
 +                        }
 +                        org.bukkit.event.entity.EntityShootBowEvent event = org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory.callEntityShootBowEvent(entityplayer, itemstack, entityarrow, f);

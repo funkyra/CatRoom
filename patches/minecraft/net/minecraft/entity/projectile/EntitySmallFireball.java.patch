@@ -51,7 +51,7 @@
 +                        p_70227_1_.field_72308_g.field_70170_p.getServer().getPluginManager().callEvent(event);
 +
 +                        if (!event.isCancelled()) {
-+                            p_70227_1_.field_72308_g.func_70015_d(event.getDuration());
++                            p_70227_1_.field_72308_g.setFire(event.getDuration());
 +                        }
                      }
                  }

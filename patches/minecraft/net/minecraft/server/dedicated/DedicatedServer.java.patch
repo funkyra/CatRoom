@@ -31,7 +31,7 @@
      private static final Logger field_155771_h = LogManager.getLogger();
      private static final Pattern field_189647_l = Pattern.compile("^[a-fA-F0-9]{40}$");
 -    public final List<PendingCommand> field_71341_l = Collections.synchronizedList(Lists.newArrayList());
-+    public final List<PendingCommand> field_71341_l = Collections.<PendingCommand>synchronizedList(Lists.newArrayList());
++//    public final List<PendingCommand> pendingCommandList = Collections.<PendingCommand>synchronizedList(Lists.newArrayList());
      private RConThreadQuery field_71342_m;
 -    private final RConConsoleSource field_184115_n = new RConConsoleSource(this);
 +    public final RConConsoleSource field_184115_n = new RConConsoleSource(this);
@@ -447,7 +447,7 @@
          {
 -            PendingCommand pendingcommand = this.field_71341_l.remove(0);
 -            this.func_71187_D().func_71556_a(pendingcommand.field_73701_b, pendingcommand.field_73702_a);
-+            pendingcommand = this.field_71341_l.remove(0);
++            pendingcommand = this.field_71341_l.poll();
 +            ServerCommandEvent event = new ServerCommandEvent(console, pendingcommand.field_73702_a);
 +            server.getPluginManager().callEvent(event);
 +            if (event.isCancelled()) continue;
