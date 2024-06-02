@@ -528,7 +528,7 @@ project(':cleanroom') {
         installer 'net.md-5:bungeecord-chat:1.16-R0.4'
         installer 'commons-lang:commons-lang:2.6' // Is needed for plugin compatibility
         installer 'org.xerial:sqlite-jdbc:3.21.0.1'
-        installer 'mysql:mysql-connector-java:5.1.45'
+        installer 'mysql:mysql-connector-java:8.0.33'
 
         // CatRoom
         installer 'net.openhft:affinity:3.23.3'
