@@ -229,7 +229,7 @@
 +                    widths[0] = lineWidth;
 +                    formats[0] = format.toString();
 +                    continue;
-+                case '鎼�':
++                case '§':
 +                    if (i + 1 < chars.length) { // Prevent out of bound
 +                        f = chars[i + 1];
 +                        boolean isC = func_78272_b(f);
@@ -244,8 +244,8 @@
 +                            } else {
 +                                bold = true;
 +                            }
-+                            format.append('搂').append(f); // Add to current format code
-+                            line.append('搂').append(f);
++                            format.append('§').append(f); // Add to current format code
++                            line.append('§').append(f);
 +                            widths[i - fed] = lineWidth;
 +                            widths[i - fed + 1] = lineWidth;
 +                            formats[i - fed] = format.toString();
@@ -278,7 +278,7 @@
 +                    lineWidth = func_78263_a(current);
 +                } else {
 +                    d = icui - fed;
-+                    if (line.charAt(d + prevFormat - 1) == '搂') d++;
++                    if (line.charAt(d + prevFormat - 1) == '§') d++;
 +                    list.add(line.substring(0, d + prevFormat));
 +                    temp = line.substring(d + prevFormat);
 +                    fed += d;
