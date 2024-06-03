@@ -376,7 +376,9 @@ public class ForgeModContainer extends DummyModContainer implements WorldAccessC
         categoryHud.setLanguageKey("forge.configgui.hud.category");
         propOrder.addFirst(categoryHud.getName());
 
-        config.setCategoryPropertyOrder(categoryHudId, setupHudConfig(categoryHudId));
+        if (FMLCommonHandler.instance().getSide().isClient()) {
+            config.setCategoryPropertyOrder(categoryHudId, setupHudConfig(categoryHudId));
+        }
 
         config.setCategoryPropertyOrder(CATEGORY_CLIENT, propOrder);
 
