@@ -49,9 +49,11 @@ def details = versionDetails()
 
 group 'com.cleanroommc'
 
-version details.lastTag + (project.hasProperty("release") ?
-        "" : ("+build." + details.commitDistance + (project.hasProperty("run_number") ?
-                (".run." + props.run_number) : "")))
+//version details.lastTag + (project.hasProperty("release") ?
+//        "" : ("+build." + details.commitDistance + (project.hasProperty("run_number") ?
+//                (".run." + props.run_number) : "")))
+
+version "0.2.1-alpha"
 
 def version_txt = new File(project.projectDir, "version.txt")
 version_txt.write(version.toString())
@@ -185,7 +187,7 @@ project(':cleanroom') {
 
             target.withWriter { def writer ->
                 template.eachLine { def line ->
-                    def newLine = line.replace("%VERSION%", versionDetails().lastTag)
+                    def newLine = line.replace("%VERSION%", rootProject.version.toString())
                             .replace("%BUILD_VERSION%", rootProject.version.toString())
                     writer.write(newLine + "\n");
                 }
@@ -435,7 +437,7 @@ project(':cleanroom') {
         installer "org.ow2.asm:asm-deprecated:$props.asm_deprecated"
 
         //installer "com.cleanroommc:bouncepad:$props.bouncepad_version"
-        installer "top.outlands:foundation:0.13.5"
+        installer "top.outlands:foundation:0.13.6"
         installer 'org.burningwave:jvm-driver:8.15.0'
         installer 'io.github.toolfactory:jvm-driver:9.7.0'
         installer 'io.github.toolfactory:narcissus:1.0.7'
