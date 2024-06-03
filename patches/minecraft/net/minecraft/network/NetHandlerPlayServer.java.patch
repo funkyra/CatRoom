@@ -118,7 +118,7 @@
 -    private int field_147374_l;
 +    // private int chatSpamThresholdCount;
 +    // CraftBukkit start - multithreaded fields
-+    private volatile int field_147374_l;
++    private volatile int chatSpamThresholdCount;
 +    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "chatSpamThresholdCount" : "chatSpamThresholdCount");
 +    // CraftBukkit end
      private int field_147375_m;
@@ -260,7 +260,7 @@
 -
 -        if (this.field_147374_l > 0)
 +        // CraftBukkit start
-+        for (int spam; (spam = this.field_147374_l) > 0 && !chatSpamField.compareAndSet(this, spam, spam - 1); ) ;
++        for (int spam; (spam = this.chatSpamThresholdCount) > 0 && !chatSpamField.compareAndSet(this, spam, spam - 1); ) ;
 +        /* Use thread-safe field access instead
 +        if (this.chatThrottle > 0)
          {
