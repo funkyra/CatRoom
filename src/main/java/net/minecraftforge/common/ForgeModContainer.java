@@ -376,10 +376,7 @@ public class ForgeModContainer extends DummyModContainer implements WorldAccessC
         categoryHud.setLanguageKey("forge.configgui.hud.category");
         propOrder.addFirst(categoryHud.getName());
 
-        if (FMLCommonHandler.instance().getSide().isClient()) {
-            config.setCategoryPropertyOrder(categoryHudId, setupHudConfig(categoryHudId));
-        }
-
+        config.setCategoryPropertyOrder(categoryHudId, setupHudConfig(categoryHudId));
         config.setCategoryPropertyOrder(CATEGORY_CLIENT, propOrder);
 
         if (config.hasChanged())
@@ -427,20 +424,22 @@ public class ForgeModContainer extends DummyModContainer implements WorldAccessC
             values[i] = prop.getBoolean(true);
         }
 
-        GuiIngameForge.renderVignette       = values[0];
-        GuiIngameForge.renderHelmet         = values[1];
-        GuiIngameForge.renderPortal         = values[2];
-        GuiIngameForge.renderHotbar         = values[3];
-        GuiIngameForge.renderCrosshairs     = values[4];
-        GuiIngameForge.renderBossHealth     = values[5];
-        GuiIngameForge.renderHealth         = values[6];
-        GuiIngameForge.renderArmor          = values[7];
-        GuiIngameForge.renderFood           = values[8];
-        GuiIngameForge.renderHealthMount    = values[9];
-        GuiIngameForge.renderAir            = values[10];
-        GuiIngameForge.renderExperiance     = values[11];
-        GuiIngameForge.renderJumpBar        = values[12];
-        GuiIngameForge.renderObjective      = values[13];
+        if (FMLCommonHandler.instance().getSide().isClient()) {
+            GuiIngameForge.renderVignette       = values[0];
+            GuiIngameForge.renderHelmet         = values[1];
+            GuiIngameForge.renderPortal         = values[2];
+            GuiIngameForge.renderHotbar         = values[3];
+            GuiIngameForge.renderCrosshairs     = values[4];
+            GuiIngameForge.renderBossHealth     = values[5];
+            GuiIngameForge.renderHealth         = values[6];
+            GuiIngameForge.renderArmor          = values[7];
+            GuiIngameForge.renderFood           = values[8];
+            GuiIngameForge.renderHealthMount    = values[9];
+            GuiIngameForge.renderAir            = values[10];
+            GuiIngameForge.renderExperiance     = values[11];
+            GuiIngameForge.renderJumpBar        = values[12];
+            GuiIngameForge.renderObjective      = values[13];
+        }
 
         return order;
     }
