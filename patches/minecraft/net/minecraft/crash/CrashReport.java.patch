@@ -1,11 +1,6 @@
 --- before/net/minecraft/crash/CrashReport.java
 +++ after/net/minecraft/crash/CrashReport.java
-@@ -9,18 +9,26 @@
- import java.io.Writer;
- import java.lang.management.ManagementFactory;
- import java.lang.management.RuntimeMXBean;
-+import java.lang.reflect.Method;
- import java.nio.charset.StandardCharsets;
+@@ -13,6 +13,9 @@
  import java.text.SimpleDateFormat;
  import java.util.Date;
  import java.util.List;
@@ -14,10 +9,8 @@
 +import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
  import net.minecraft.util.ReportedException;
  import net.minecraft.world.gen.layer.IntCache;
-+import net.minecraftforge.fml.relauncher.MixinBooterPlugin;
  import net.minecraftforge.fml.relauncher.Side;
- import net.minecraftforge.fml.relauncher.SideOnly;
- import org.apache.commons.io.IOUtils;
+@@ -21,6 +24,9 @@
  import org.apache.commons.lang3.ArrayUtils;
  import org.apache.logging.log4j.LogManager;
  import org.apache.logging.log4j.Logger;
@@ -27,7 +20,7 @@
  
  public class CrashReport
  {
-@@ -28,7 +36,7 @@
+@@ -28,7 +34,7 @@
      private final String field_71513_a;
      private final Throwable field_71511_b;
      private final CrashReportCategory field_85061_c = new CrashReportCategory(this, "System Details");

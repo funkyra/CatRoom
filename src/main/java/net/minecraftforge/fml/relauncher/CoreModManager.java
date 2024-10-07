@@ -25,6 +25,7 @@ import com.google.common.primitives.Ints;
 import net.minecraft.launchwrapper.ITweaker;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.launchwrapper.LaunchClassLoader;
+import net.minecraftforge.common.ForgeEarlyConfig;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.CertificateHelper;
 import net.minecraftforge.fml.common.FMLLog;
@@ -54,6 +55,7 @@ import java.util.jar.Manifest;
 
 public class CoreModManager {
     private static final Attributes.Name COREMODCONTAINSFMLMOD = new Attributes.Name("FMLCorePluginContainsFMLMod");
+    private static final Attributes.Name FORCELOADASMOD = new Attributes.Name("ForceLoadAsMod");
     private static final Attributes.Name MODTYPE = new Attributes.Name("ModType");
     private static String[] rootPlugins = { "net.minecraftforge.fml.relauncher.FMLCorePlugin", "net.minecraftforge.classloading.FMLForgePlugin", "catserver.server.CatCorePlugin" };
     private static List<String> ignoredModFiles = Lists.newArrayList();
@@ -350,7 +352,7 @@ public class CoreModManager {
             String configs;
             String cascadedTweaker;
             File mods_ver = new File(new File(Launch.minecraftHome, "mods"), ForgeVersion.mcVersion);
-            boolean containNonMods = false;
+            boolean containNonMods = false, ignoreMods = false;
             try
             {
                 File manifest = new File(coreMod.getAbsolutePath() + ".meta");
@@ -401,8 +403,8 @@ public class CoreModManager {
                     handleCascadingTweak(coreMod, jar, cascadedTweaker, classLoader, sortOrder);
                     if (!Strings.isNullOrEmpty(configs))
                         mixin_configs.addAll(List.of(configs.split(",")));
+                    ignoredModFiles.add(coreMod.getName());
                     if (!MixinServiceLaunchWrapper.MIXIN_TWEAKER_CLASS.equals(cascadedTweaker)) {
-                        ignoredModFiles.add(coreMod.getName());
                         continue;
                     }
                 }
@@ -415,10 +417,26 @@ public class CoreModManager {
                     continue;
                 }
                 fmlCorePlugin = mfAttributes.getValue("FMLCorePlugin");
+                for (String plugin : ForgeEarlyConfig.LOADING_PLUGIN_BLACKLIST) {
+                    if (plugin.equals(fmlCorePlugin)) {
+                        ignoreMods = true;
+                        break;
+                    }
+                }
+                if (ignoreMods) {
+                    ignoredModFiles.add(coreMod.getName());
+                    continue;
+                }
                 if (fmlCorePlugin == null)
                 {
                     // Not a coremod
                     FMLLog.log.debug("Not found coremod data in {}", coreMod.getName());
+                    if (MixinServiceLaunchWrapper.MIXIN_TWEAKER_CLASS.equals(cascadedTweaker) && (mfAttributes.containsKey(COREMODCONTAINSFMLMOD) || mfAttributes.containsKey(FORCELOADASMOD))) {
+                        FMLLog.log.info("Found FMLCorePluginContainsFMLMod marker in mixin container {}.",
+                                coreMod.getName());
+                        candidateModFiles.add(coreMod.getName());
+                        ignoredModFiles.remove(coreMod.getName());
+                    }
                     continue;
                 }
             }
@@ -442,7 +460,7 @@ public class CoreModManager {
                 classLoader.addURL(coreMod.toURI().toURL());
                 if (!Strings.isNullOrEmpty(configs))
                     mixin_configs.addAll(List.of(configs.split(",")));
-                if (!mfAttributes.containsKey(COREMODCONTAINSFMLMOD))
+                if (!(mfAttributes.containsKey(COREMODCONTAINSFMLMOD) || mfAttributes.containsKey(FORCELOADASMOD)))
                 {
                     FMLLog.log.trace("Adding {} to the list of known coremods, it will not be examined again", coreMod.getName());
                     ignoredModFiles.add(coreMod.getName());
@@ -450,6 +468,7 @@ public class CoreModManager {
                     FMLLog.log.info("Found FMLCorePluginContainsFMLMod marker in {}.",
                             coreMod.getName());
                     candidateModFiles.add(coreMod.getName());
+                    ignoredModFiles.remove(coreMod.getName());
                 }
             }
             catch (MalformedURLException e)
