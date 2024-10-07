@@ -15,8 +15,6 @@ public class LibrariesManager {
     private static final List<String> librariesSources = new ArrayList<>();
     public static final File serverJarDir = findJarDir();
     public static final File librariesDir =  new File(serverJarDir, "libraries");
-    public static final String sparkPluginFileName = "spark-1.8.19-bukkit.jar";
-    public static final String sparkPluginMD5 = "ab5e7e1cd1bcd7cc910c2b7a59e7b7e5";
 
     public static void checkLibraries() {
         if (!librariesDir.exists()) librariesDir.mkdir();
@@ -45,12 +43,6 @@ public class LibrariesManager {
                     } catch (IOException e) {
                         System.out.println(e.toString());
                     }
-                }
-            }
-            if (Boolean.parseBoolean(System.getProperty("catserver.spark.enable", "true"))) {
-                File sparkPluginFile = new File(librariesDir, sparkPluginFileName);
-                if (!sparkPluginFile.exists() || !Md5Utils.getFileMD5String(sparkPluginFile).equals(sparkPluginMD5)) {
-                    librariesNeedDownload.put(sparkPluginFile, sparkPluginMD5);
                 }
             }
         } catch (IOException e) {

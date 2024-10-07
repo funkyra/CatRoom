@@ -84,7 +84,7 @@ public class MinecraftForge
     */
    public static void initialize()
    {
-       FMLLog.log.info("Cleanroom v{} Initialized", CleanroomVersion.BUILD_VERSION);
+       FMLLog.log.info("CatRoom v{} Initialized", CleanroomVersion.BUILD_VERSION);
 
        OreDictionary.getOreName(0);
 

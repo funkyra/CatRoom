@@ -45,7 +45,6 @@ public class CatServerConfig {
     public boolean enableCitizensCompatible = true;
     public boolean enableSuperiorSkyblock2Compatible = true;
     public List<String> disableHopperMoveEventWorlds = Lists.<String>newArrayList();
-    public boolean defaultInstallPluginSpark = true;
 
     public boolean waitForgeServerChatEvent = false;
 
@@ -100,7 +99,6 @@ public class CatServerConfig {
         enableCitizensCompatible = getOrWriteBooleanConfig("plugin.patcher.enableCitizensCompatible", enableCitizensCompatible);
         enableSuperiorSkyblock2Compatible = getOrWriteBooleanConfig("plugin.patcher.enableSuperiorSkyblock2Compatible", enableSuperiorSkyblock2Compatible);
         disableHopperMoveEventWorlds = getOrWriteStringListConfig("plugin.disableHopperMoveEventWorlds", disableHopperMoveEventWorlds);
-        defaultInstallPluginSpark = getOrWriteBooleanConfig("plugin.defaultInstall.spark", defaultInstallPluginSpark);
         // async
         waitForgeServerChatEvent = getOrWriteBooleanConfig("async.waitForgeServerChatEvent", waitForgeServerChatEvent);
         // network
