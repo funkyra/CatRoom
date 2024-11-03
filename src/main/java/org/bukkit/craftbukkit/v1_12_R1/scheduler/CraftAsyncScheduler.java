@@ -14,17 +14,23 @@ import java.util.concurrent.TimeUnit;
 
 public class CraftAsyncScheduler extends CraftScheduler {
 
+    // CatRoom start - Use virtual thread for async scheduler
     private final ThreadPoolExecutor executor = new ThreadPoolExecutor(
-            4, Integer.MAX_VALUE,30L, TimeUnit.SECONDS, new SynchronousQueue<>(),
-            new ThreadFactoryBuilder().setNameFormat("Craft Scheduler Thread - %1$d").build());
+            0, Integer.MAX_VALUE,10L, TimeUnit.SECONDS, new SynchronousQueue<>(),
+            new ThreadFactoryBuilder().setThreadFactory(Thread.ofVirtual().factory()).setNameFormat("Craft Scheduler Thread - %1$d").build());
+    // CatRoom end - Use virtual thread for async scheduler
     private final Executor management = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
             .setNameFormat("Craft Async Scheduler Management Thread").build());
     private final List<CraftTask> temp = new ArrayList<>();
 
     CraftAsyncScheduler() {
         super(true);
+        // CatRoom start - Use virtual thread for async scheduler
+        /*
         executor.allowCoreThreadTimeOut(true);
         executor.prestartAllCoreThreads();
+        */
+        // CatRoom end - Use virtual thread for async scheduler
     }
 
     @Override
