@@ -474,6 +474,7 @@ public final class SimplePluginManager implements PluginManager {
      * @param event Event details
      */
     public void callEvent(Event event) {
+        if (event.getHandlers().getRegisteredListeners().length == 0) return; // CatRoom - Skip event if no listeners
         if (CatServer.getConfig().fakePlayerEventPass && event instanceof PlayerEvent && ((PlayerEvent) event).getPlayer() instanceof CraftFakePlayer) return; // CatServer
         if (event.isAsynchronous() || !server.isPrimaryThread()) { // CatServer
             if (Thread.holdsLock(this)) {
