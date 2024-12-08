@@ -13,7 +13,7 @@ import org.bukkit.event.Listener;
 import com.google.common.base.Preconditions;
 
 // CatRoom start
-import catserver.server.executor.methodhandle.EventExecutorFactory;
+import catserver.server.executor.hiddenclass.EventExecutorFactory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 // CatRoom end

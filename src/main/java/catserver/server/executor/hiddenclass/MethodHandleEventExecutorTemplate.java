@@ -1,4 +1,4 @@
-package catserver.server.executor.methodhandle;
+package catserver.server.executor.hiddenclass;
 
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
