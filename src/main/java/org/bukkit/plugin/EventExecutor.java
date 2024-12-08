@@ -50,7 +50,7 @@ public interface EventExecutor {
         if (m.getReturnType() != Void.TYPE) {
             final JavaPlugin plugin = JavaPlugin.getProvidingPlugin(m.getDeclaringClass());
             Bukkit.getLogger().warning("@EventHandler method " + m.getDeclaringClass().getName() + (Modifier.isStatic(m.getModifiers()) ? '.' : '#') + m.getName()
-            + "returns non-void type " + m.getReturnType().getName() + ", which is unsupported behaviour."
+            + " returns non-void type " + m.getReturnType().getName() + ", which is unsupported behaviour."
             + " This should be reported to the author of " + plugin.getDescription().getName() + " (" + String.join(",", plugin.getDescription().getAuthors()) + ')');
         }
         if (!m.trySetAccessible()) {
