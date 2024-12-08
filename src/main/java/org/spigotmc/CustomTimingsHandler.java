@@ -12,6 +12,7 @@ import org.bukkit.World;
 /**
  * Provides custom timing sections for /timings merged.
  */
+@Deprecated(forRemoval = true) // CatRoom - Mark as forRemoval
 public class CustomTimingsHandler
 {
 
@@ -45,6 +46,7 @@ public class CustomTimingsHandler
      */
     public static void printTimings(PrintStream printStream)
     {
+        if (true) return; // CatRoom - Force disable Timings
         printStream.println( "Minecraft" );
         for ( CustomTimingsHandler timings : HANDLERS )
         {
@@ -75,6 +77,7 @@ public class CustomTimingsHandler
      */
     public static void reload()
     {
+        if (true) return; // CatRoom - Force disable timings
         if ( Bukkit.getPluginManager().useTimings() )
         {
             for ( CustomTimingsHandler timings : HANDLERS )
@@ -91,6 +94,7 @@ public class CustomTimingsHandler
      */
     public static void tick()
     {
+        if (true) return; // CatRoom - Force disable Timings
         if ( Bukkit.getPluginManager().useTimings() )
         {
             for ( CustomTimingsHandler timings : HANDLERS )
@@ -110,6 +114,7 @@ public class CustomTimingsHandler
      */
     public void startTiming()
     {
+        if (true) return; // CatRoom - Force disable Timings
         // If second condtion fails we are already timing
         if ( Bukkit.getPluginManager().useTimings() && ++timingDepth == 1 )
         {
@@ -126,6 +131,7 @@ public class CustomTimingsHandler
      */
     public void stopTiming()
     {
+        if (true) return; // CatRoom - Force disable Timings
         if ( Bukkit.getPluginManager().useTimings() )
         {
             if ( --timingDepth != 0 || start == 0 )
