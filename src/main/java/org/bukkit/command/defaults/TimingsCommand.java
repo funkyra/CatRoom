@@ -34,6 +34,12 @@ public class TimingsCommand extends BukkitCommand {
 
     // Spigot start - redesigned Timings Command
     public void executeSpigotTimings(CommandSender sender, String[] args) {
+        // CatRoom start - Force disable Timings
+        if (true) {
+            sender.sendMessage("Timings has performance issues and has been force disabled, use Spark instead.");
+            return;
+        }
+        // CatRoom end - Force disable Timings
         if ( "on".equals( args[0] ) )
         {
             ( (SimplePluginManager) Bukkit.getPluginManager() ).useTimings( true );
