@@ -28,7 +28,7 @@ public class CatServer {
 
     public static void onServerStart() {
         RealtimeThread.INSTANCE.start();
-        new VersionCheck();
+        // new VersionCheck(); // CatRoom
     }
 
     public static void onServerStop() {
