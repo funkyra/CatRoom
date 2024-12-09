@@ -13,7 +13,7 @@ import org.bukkit.event.Listener;
 import com.google.common.base.Preconditions;
 
 // CatRoom start
-import catserver.server.executor.hiddenclass.EventExecutorFactory;
+import catserver.server.executor.hiddenclass.BukkitEventExecutorFactory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 // CatRoom end
@@ -42,11 +42,11 @@ public interface EventExecutor {
         }
     };
 
-    // CatRoom start - Use hidden class for event executors
     public static EventExecutor create(Method m, Class<? extends Event> eventClass) {
         Preconditions.checkNotNull(m, "Null method");
         Preconditions.checkArgument(m.getParameterCount() != 0, "Incorrect number of arguments %s", m.getParameterCount());
         Preconditions.checkArgument(m.getParameterTypes()[0] == eventClass, "First parameter %s doesn't match event class %s", m.getParameterTypes()[0], eventClass);
+        // CatRoom start - Use hidden class for event executors
         if (m.getReturnType() != Void.TYPE) {
             final JavaPlugin plugin = JavaPlugin.getProvidingPlugin(m.getDeclaringClass());
             Bukkit.getLogger().warning("@EventHandler method " + m.getDeclaringClass().getName() + (Modifier.isStatic(m.getModifiers()) ? '.' : '#') + m.getName()
@@ -60,7 +60,7 @@ public interface EventExecutor {
                             + " This should be reported to the author of " + plugin.getDescription().getName() + " (" + String.join(",", plugin.getDescription().getAuthors()) + ')'
             );
         }
-        return EventExecutorFactory.create(m, eventClass);
+        return BukkitEventExecutorFactory.create(m, eventClass);
     }
     // CatRoom end - Use hidden class for event executors
 }

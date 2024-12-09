@@ -14,19 +14,18 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Objects;
 
-public final class EventExecutorFactory {
+public final class BukkitEventExecutorFactory {
     private static final byte[] TEMPLATE_CLASS_BYTES;
 
     static {
-        try (final InputStream is = EventExecutorFactory.class.getResourceAsStream("MethodHandleEventExecutorTemplate.class")) {
+        try (final InputStream is = BukkitEventExecutorFactory.class.getResourceAsStream("MethodHandleEventExecutorTemplate.class")) {
             TEMPLATE_CLASS_BYTES = Objects.requireNonNull(is, "template class is missing").readAllBytes();
         } catch (IOException e) {
             throw new AssertionError(e);
         }
     }
 
-    private EventExecutorFactory() {
-
+    private BukkitEventExecutorFactory() {
     }
 
     /**

@@ -30,7 +30,7 @@ class MethodHandleEventExecutorTemplate implements EventExecutor {
 
     static {
         final MethodHandles.Lookup lookup = MethodHandles.lookup();
-        final EventExecutorFactory.ClassData classData = EventExecutorFactory.classData(lookup);
+        final BukkitEventExecutorFactory.ClassData classData = BukkitEventExecutorFactory.classData(lookup);
         METHOD = classData.method();
         HANDLE = classData.methodHandle();
         EVENT_CLASS = classData.eventClass();
