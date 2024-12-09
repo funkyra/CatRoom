@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class AsyncTaskThread {
-    private static final ExecutorService asyncExecutor = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("CatServer Async Task Handler Thread - %1$d").build());
+    private static final ExecutorService asyncExecutor = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder().setNameFormat("CatServer Async Task Handler Thread - %1$d").build()); // CatRoom - Sync Paper changes
 
     public static void shutdown() {
         try {
