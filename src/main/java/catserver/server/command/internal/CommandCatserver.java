@@ -69,9 +69,9 @@ public class CommandCatserver extends Command {
                 return true;
             }
             sender.sendMessage(NBTUtils.formatNbtToPrettyString(tag.toString()));
-            TextComponent message = new TextComponent("[Click to copy give command]");
+            TextComponent message = new TextComponent("[Click to insert give command]");
             message.setColor(net.md_5.bungee.api.ChatColor.GREEN);
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, NBTUtils.itemStackToGiveCommand(nmsItemStack)));
+            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, NBTUtils.itemStackToGiveCommand(nmsItemStack)));
             sender.spigot().sendMessage(message);
             // CatRoom end - Dump item command
         }
