@@ -141,7 +141,7 @@ public class ItemStackUtils {
 
         }
 
-        return stringBuilder.toString();
+        return fullBuilder.append(stringBuilder).toString();
     }
 
     private static void addNewLine(StringBuilder s, int indent) {

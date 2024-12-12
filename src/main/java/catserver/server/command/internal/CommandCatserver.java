@@ -6,18 +6,17 @@ import catserver.server.utils.ItemStackUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 // CatRoom end - Dump item command
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material; // CatRoom
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_12_R1.CraftServer;
 // CatRoom start - Dump item command
-import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 // CatRoom end - Dump item command
 
 public class CommandCatserver extends Command {
@@ -56,16 +55,15 @@ public class CommandCatserver extends Command {
                 sender.sendMessage(ChatColor.RED + "Only players can use this command.");
                 return true;
             }
-            ItemStack itemInHand = player.getInventory().getItemInMainHand();
-            if (itemInHand.getType() == Material.AIR) {
+            var itemInHand = ((CraftPlayer) player).getHandle().getHeldItemMainhand();
+            if (itemInHand == ItemStack.EMPTY) {
                 sender.sendMessage(ChatColor.RED + "You are not holding any item.");
                 return true;
             }
-            var nmsItemStack = CraftItemStack.asNMSCopy(itemInHand);
-            sender.sendMessage(ItemStackUtils.formatItemStackToPrettyString(nmsItemStack));
+            sender.sendMessage(ItemStackUtils.formatItemStackToPrettyString(itemInHand));
             TextComponent message = new TextComponent("[Click to insert give command]");
             message.setColor(net.md_5.bungee.api.ChatColor.GREEN);
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, ItemStackUtils.itemStackToGiveCommand(nmsItemStack)));
+            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, ItemStackUtils.itemStackToGiveCommand(itemInHand)));
             sender.spigot().sendMessage(message);
             // CatRoom end - Dump item command
         }
