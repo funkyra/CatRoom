@@ -5,8 +5,8 @@ import catserver.server.CatServer;
 import catserver.server.utils.ItemStackUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-// CatRoom end - Dump item command
 import net.minecraft.item.ItemStack;
+// CatRoom end - Dump item command
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import org.bukkit.Bukkit;
