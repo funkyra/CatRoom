@@ -2,10 +2,9 @@ package catserver.server.command.internal;
 
 import catserver.server.CatServer;
 // CatRoom start - Dump item command
-import catserver.server.utils.NBTUtils;
+import catserver.server.utils.ItemStackUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.nbt.NBTTagCompound;
 // CatRoom end - Dump item command
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -63,15 +62,10 @@ public class CommandCatserver extends Command {
                 return true;
             }
             var nmsItemStack = CraftItemStack.asNMSCopy(itemInHand);
-            NBTTagCompound tag = nmsItemStack.getTagCompound();
-            if (tag == null) {
-                sender.sendMessage(ChatColor.RED + "Item does not have NBT.");
-                return true;
-            }
-            sender.sendMessage(NBTUtils.formatNbtToPrettyString(tag.toString()));
+            sender.sendMessage(ItemStackUtils.formatItemStackToPrettyString(nmsItemStack));
             TextComponent message = new TextComponent("[Click to insert give command]");
             message.setColor(net.md_5.bungee.api.ChatColor.GREEN);
-            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, NBTUtils.itemStackToGiveCommand(nmsItemStack)));
+            message.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, ItemStackUtils.itemStackToGiveCommand(nmsItemStack)));
             sender.spigot().sendMessage(message);
             // CatRoom end - Dump item command
         }

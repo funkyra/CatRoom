@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 
-public class NBTUtils {
+public class ItemStackUtils {
     public static String itemStackToGiveCommand(ItemStack nmsItemStack) {
         ResourceLocation itemRl = Item.REGISTRY.getNameForObject(nmsItemStack.getItem());
         String itemNamespacedId = itemRl != null ? itemRl.toString() : "";
@@ -29,7 +29,18 @@ public class NBTUtils {
     }
 
     // Took from CraftTweaker
-    public static String formatNbtToPrettyString(String string) {
+    public static String formatItemStackToPrettyString(ItemStack itemStack) {
+        StringBuilder fullBuilder = new StringBuilder();
+        ResourceLocation rl = Item.REGISTRY.getNameForObject(itemStack.getItem());
+        fullBuilder.append("\u00A7e").append(rl != null ? rl.toString() : "unknown:unknown").append("\u00A7r, ");
+        fullBuilder.append("\u00A7ddamage\u00A7r:\u00A7b ").append(itemStack.getItemDamage()).append("\u00A7r, ");
+        NBTTagCompound tagCompound = itemStack.getTagCompound();
+        if (tagCompound == null || tagCompound.isEmpty()) {
+            fullBuilder.append("\u00A7eNo NBT data");
+            return fullBuilder.toString();
+        }
+
+        String nbtString = tagCompound.toString();
         StringBuilder stringBuilder = new StringBuilder();
         StringBuilder stringBuilderNonColor = new StringBuilder();
         int currentIndent = 0;
@@ -41,9 +52,9 @@ public class NBTUtils {
         stringBuilderNonColor.append("\n\u251c");
 
 
-        for (int i = 0; i < string.length(); i++) {
+        for (int i = 0; i < nbtString.length(); i++) {
             char[] cArray = new char[1];
-            string.getChars(i, i + 1, cArray, 0);
+            nbtString.getChars(i, i + 1, cArray, 0);
             char c = cArray[0];
 
             switch (c) {
