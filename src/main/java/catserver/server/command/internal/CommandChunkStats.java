@@ -76,6 +76,7 @@ public class CommandChunkStats extends Command {
 
                 sender.sendMessage("Chunks Time:");
                 for (ChunkTime chunkTime : chunkList) {
+                    if (chunkTime.chunk == null) continue;
                     int chunkX = chunkTime.chunk.x;
                     int chunkZ = chunkTime.chunk.z;
                     int posX = chunkX << 4;
@@ -83,7 +84,7 @@ public class CommandChunkStats extends Command {
                     int time = (int) (chunkTime.time / 1000 / 1000);
                     int avg = totalTick > 0 ? time / totalTick : 0;
 
-                    TextComponent component = new TextComponent(String.format("[%s: %d,%d at chunk %d,%d] has running time: %d ms (Arg %d ms/tick)", chunkTime.chunk.world.getWorld().getName(), posX, posZ, chunkX, chunkZ, time, avg));
+                    TextComponent component = new TextComponent(String.format("[%s: %d,%d at chunk %d,%d] has running time: %d ms (Avg %d ms/tick)", chunkTime.chunk.world.getWorld().getName(), posX, posZ, chunkX, chunkZ, time, avg));
                     component.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format("/minecraft:tp %d 128 %d", posX, posZ)));
                     component.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent[]{new TextComponent(String.format("Execute command: /minecraft:tp %d 128 %d", posX, posZ))}));
                     sender.spigot().sendMessage(component);
