@@ -14,7 +14,7 @@ public class ItemStackUtils {
         int count = nmsItemStack.getCount();
 
         NBTTagCompound tag = nmsItemStack.getTagCompound();
-        String nbtData = tag != null ? tag.toString() : "";
+        String nbtData = tag != null && !tag.isEmpty() ? tag.toString() : "";
 
         StringBuilder command = new StringBuilder();
         command.append("/minecraft:give ").append("@s").append(" ");
