@@ -11,6 +11,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+@Deprecated // CatRoom - We have hidden class executors :3
 public class StaticMethodHandleEventExecutor implements EventExecutor {
     private final Class<? extends Event> eventClass;
     private final MethodHandle handle;

@@ -5,6 +5,7 @@ import com.google.common.collect.MapMaker;
 
 import java.util.concurrent.ConcurrentMap;
 
+@Deprecated // CatRoom - We have hidden class executors :3
 public class SafeClassDefiner implements ClassDefiner {
     /* default */ static final SafeClassDefiner INSTANCE = new SafeClassDefiner();
 

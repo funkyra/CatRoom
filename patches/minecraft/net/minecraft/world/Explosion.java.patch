@@ -188,12 +188,13 @@
 -                        d5 /= d13;
 -                        d7 /= d13;
 -                        d9 /= d13;
+-                        double d14 = (double)this.field_77287_j.func_72842_a(vec3d, entity.func_174813_aQ());
+-                        double d10 = (1.0 - d12) * d14;
+-                        entity.func_70097_a(DamageSource.func_94539_a(this), (float)((int)((d10 * d10 + d10) / 2.0 * 7.0 * (double)f3 + 1.0)));
 +                        d5 = d5 / d13;
 +                        d7 = d7 / d13;
 +                        d9 = d9 / d13;
-                         double d14 = (double)this.field_77287_j.func_72842_a(vec3d, entity.func_174813_aQ());
--                        double d10 = (1.0 - d12) * d14;
--                        entity.func_70097_a(DamageSource.func_94539_a(this), (float)((int)((d10 * d10 + d10) / 2.0 * 7.0 * (double)f3 + 1.0)));
++                        double d14 = this.getBlockDensity(vec3d, entity.func_174813_aQ()); // Paper - Optimize explosions
 +                        double d10 = (1.0D - d12) * d14;
 +                        // entity.attackEntityFrom(DamageSource.causeExplosionDamage(this), (float)((int)((d10 * d10 + d10) / 2.0D * 7.0D * (double)f3 + 1.0D)));
 +                        CraftEventFactory.entityDamage = field_77283_e;
