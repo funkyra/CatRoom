@@ -88,7 +88,7 @@ public class CatServerEventHandler {
             explosion.getAffectedBlockPositions().clear();
 
             if (cancelled) {
-                event.getAffectedEntities().clear(); // We can't actually cancel the explosion at this stage without touching Forge code :( but it's enough.
+                event.getAffectedEntities().clear();
                 explosion.wasCanceled = true;
             } else {
                 for (Block bblock : bukkitBlocks) {
