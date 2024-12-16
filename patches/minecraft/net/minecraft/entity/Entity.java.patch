@@ -993,7 +993,7 @@
                  }
              }
 -
-+            catserver.server.utils.ModFixUtils.doBlockCollisions(); // CatServer - fix Quark
++            catserver.server.utils.ModFixUtils.func_145775_I(); // CatServer - fix Quark
 +            // Move to the top of the method
 +            /*
              try
