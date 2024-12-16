@@ -9,6 +9,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 
+@Deprecated // CatRoom - We have hidden class executors :3
 public class MethodHandleEventExecutor implements EventExecutor {
     private final Class<? extends Event> eventClass;
     private final MethodHandle handle;

@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.Loader;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 
 public class ModFixUtils {
-    public static void func_145775_I() { }
+    public static void doBlockCollisions() { }
 
     public static void fixNetherex() {
         if (Loader.instance().getIndexedModList().containsKey("netherex")) {

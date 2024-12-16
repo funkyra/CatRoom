@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import org.bukkit.craftbukkit.v1_12_R1.scheduler.CraftTask;
 
+@Deprecated(forRemoval = true) // CatRoom - for removal
 public class SpigotTimings {
 
     public static final CustomTimingsHandler serverTickTimer = new CustomTimingsHandler("** Full Server Tick");

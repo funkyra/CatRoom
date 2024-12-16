@@ -474,6 +474,7 @@ public final class SimplePluginManager implements PluginManager {
      * @param event Event details
      */
     public void callEvent(Event event) {
+        if (event.getHandlers().getRegisteredListeners().length == 0) return; // CatRoom - Skip event if no listeners
         if (CatServer.getConfig().fakePlayerEventPass && event instanceof PlayerEvent && ((PlayerEvent) event).getPlayer() instanceof CraftFakePlayer) return; // CatServer
         if (event.isAsynchronous() || !server.isPrimaryThread()) { // CatServer
             if (Thread.holdsLock(this)) {
@@ -557,7 +558,7 @@ public final class SimplePluginManager implements PluginManager {
             throw new IllegalPluginAccessException("Plugin attempted to register " + event + " while not enabled");
         }
 
-        if (useTimings) {
+        if (useTimings) { // Always false here
             getEventListeners(event).register(new TimedRegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
         } else {
             getEventListeners(event).register(new RegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
@@ -741,7 +742,8 @@ public final class SimplePluginManager implements PluginManager {
      *
      * @param use True if per event timing code should be used
      */
+    @Deprecated(forRemoval = true) // CatRoom - for removal
     public void useTimings(boolean use) {
-        useTimings = use;
+        useTimings = false; // CatRoom - Force disable Timings
     }
 }

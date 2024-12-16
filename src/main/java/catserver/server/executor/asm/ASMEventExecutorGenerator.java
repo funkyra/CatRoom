@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.objectweb.asm.Opcodes.*;
 
+@Deprecated // CatRoom - We have hidden class executors :3
 public class ASMEventExecutorGenerator {
     public static byte[] generateEventExecutor(Method m, String name) {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);

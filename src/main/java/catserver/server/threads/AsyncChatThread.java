@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class AsyncChatThread {
-    private static final ExecutorService executors = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setNameFormat( "Async Chat Thread - #%d" ).build());
+    private static final ExecutorService executors = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setDaemon(true).setThreadFactory(Thread.ofVirtual().factory()).setNameFormat( "Async Chat Thread - #%d" ).build()); // CatRoom - Virtual Thread for AsyncChatThread
 
     public static void shutdown() {
         try {

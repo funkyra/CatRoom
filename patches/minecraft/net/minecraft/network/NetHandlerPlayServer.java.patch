@@ -119,7 +119,7 @@
 +    // private int chatSpamThresholdCount;
 +    // CraftBukkit start - multithreaded fields
 +    private volatile int field_147374_l;
-+    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "chatSpamThresholdCount" : "chatSpamThresholdCount");
++    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "chatSpamThresholdCount" : new String(new char[]{'f', 'i', 'e', 'l', 'd', '_', '1', '4', '7', '3', '7', '4', '_', 'l'}));
 +    // CraftBukkit end
      private int field_147375_m;
 -    private final IntHashMap<Short> field_147372_n = new IntHashMap<>();
