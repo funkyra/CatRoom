@@ -56,7 +56,7 @@ public class CommandCatserver extends Command {
                 return true;
             }
             var itemInHand = ((CraftPlayer) player).getHandle().getHeldItemMainhand();
-            if (itemInHand == ItemStack.EMPTY) {
+            if (itemInHand.isEmpty()) {
                 sender.sendMessage(ChatColor.RED + "You are not holding any item.");
                 return true;
             }
