@@ -1,10 +1,12 @@
+<img src="./images/catroom.png" height="160" alt="CatRoom" align="right">
+
 # CatRoom
 
 CatRoom is a Cleanroom+Bukkit+Spigot server software forked from [CatServer](https://github.com/Luohuayu/CatServer).
 
 ## Features:
 
-- CleanroomLoader
+- Replaced Forge with Cleanroom
 - Enhanced mod compatibility
 - Built-in Forge-Bukkit permission bridge
 - Make use of modern Java features
