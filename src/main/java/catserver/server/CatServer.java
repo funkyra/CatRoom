@@ -28,7 +28,7 @@ public class CatServer {
 
     public static void onServerStart() {
         RealtimeThread.INSTANCE.start();
-        new VersionCheck();
+        // new VersionCheck(); // CatRoom
     }
 
     public static void onServerStop() {
@@ -36,7 +36,7 @@ public class CatServer {
         AsyncChatThread.shutdown();
     }
 
-    public static void onWorldDataLave(SaveHandler handler, WorldInfo worldInfo, NBTTagCompound tagCompound) {
+    public static void onWorldDataLoad(SaveHandler handler, WorldInfo worldInfo, NBTTagCompound tagCompound) {
         NBTTagCompound catserverData = tagCompound.getCompoundTag("catserver");
         BukkitWorldDimensionManager.load(catserverData);
     }

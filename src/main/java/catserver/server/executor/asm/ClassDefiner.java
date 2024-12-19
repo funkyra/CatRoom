@@ -1,5 +1,6 @@
 package catserver.server.executor.asm;
 
+@Deprecated // CatRoom - We have hidden class executors :3
 public interface ClassDefiner {
 
     /**

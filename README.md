@@ -1,22 +1,16 @@
-# Cleanroom Minecraft
+<img src="./images/catroom.png" height="160" alt="CatRoom" align="right">
 
-## Features
-### Implemented
+# CatRoom
 
-- 1.12.2 on Java 21
-- LWJGL3
-- A working *mod development template/kit*
-- Patches for loading incompatible mods
-- Built-in Mixin w/ handy bootstrapping
-- Develop using Scala 3 + Kotlin 2
-- Compatibility to 99% of Forge mods
+CatRoom is a Cleanroom+Bukkit+Spigot server software forked from [CatServer](https://github.com/Luohuayu/CatServer).
 
-### Planning
+## Features:
 
-- CleanroomGradle to replace ForgeGradle
-- Classfile API
-- Actually useful APIs (See [here](https://github.com/orgs/CleanroomMC/projects/4/))
-- Optimized
+- Replaced Forge with Cleanroom
+- Enhanced mod compatibility
+- Built-in Forge-Bukkit permission bridge
+- Make use of modern Java features
+- Optimized plugin performance
 
 ## Components:
 
@@ -28,13 +22,6 @@
 - [Fugue](https://github.com/CleanroomMC/Fugue), a mod patches many incompatibilities.
 - Javassist
 - [Scalar](https://github.com/CleanroomMC/Scalar/releases/tag/2.11.1), a Scala provider. We made Scala libraries become a standalone mod so it can be updated.
-
-## Download & Installation:
-
-- For MultiMC-based launchers (PolyMC, PrismLauncher), download the MMC instance from [release](https://github.com/CleanroomMC/Cleanroom/releases), import it in your launcher(alternatively unzip patches and json inside to your 1.12 instance).
-- For regular launcher (official launcher, AT launcher, FTB, HMCL), download the installer jar from release. You could use the installer like the Forge one.
-- **Remember to install Fugue!**
-- **And Scalar!**
 
 ## Build Instructions:
 
