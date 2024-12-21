@@ -277,7 +277,7 @@
 +                field_77281_g.add(coords);
 +            }
 +
-+            if (cancelled) {
++            if (cancelled || this.wasCanceled) { // CatRoom - Handle mod explosion event
 +                this.wasCanceled = true;
 +                return;
 +            }
