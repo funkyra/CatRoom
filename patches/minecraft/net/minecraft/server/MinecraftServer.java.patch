@@ -579,7 +579,7 @@
  
      public boolean func_71278_l()
      {
-@@ -480,64 +586,142 @@
+@@ -480,64 +586,134 @@
          this.field_71317_u = false;
      }
  
@@ -598,47 +598,39 @@
 +    public static class RollingAverage {
 +        private final int size;
 +        private long time;
-+        private java.math.BigDecimal total;
++        private double total;
 +        private int index = 0;
-+        private final java.math.BigDecimal[] samples; // Paper - Further improve server tick loop
++        private final double[] samples;
 +        private final long[] times;
 +
 +        RollingAverage(int size) {
 +            this.size = size;
 +            this.time = size * SEC_IN_NANO;
-+            // Paper start - Further improve server tick loop
-+            this.total = dec(TPS).multiply(dec(SEC_IN_NANO)).multiply(dec(size));
-+            this.samples = new java.math.BigDecimal[size];
-+            // Paper end - Further improve server tick loop
++            this.total = TPS * SEC_IN_NANO * size;
++            this.samples = new double[size];
 +            this.times = new long[size];
 +            for (int i = 0; i < size; i++) {
-+                this.samples[i] = dec(TPS); // Paper
++                this.samples[i] = TPS;
 +                this.times[i] = SEC_IN_NANO;
 +            }
 +        }
 +
-+        // Paper start - Further improve server tick loop
-+        private static java.math.BigDecimal dec(long t) {
-+            return new java.math.BigDecimal(t);
-+        }
-+        // Paper end - Further improve server tick loop
-+        public void add(java.math.BigDecimal x, long t) { // Paper
++        public void add(double x, long t) {
 +            time -= times[index];
-+            total = total.subtract(samples[index].multiply(dec(times[index]))); // Paper
++            total -= samples[index] * times[index];
 +            samples[index] = x;
 +            times[index] = t;
 +            time += t;
-+            total = total.add(x.multiply(dec(t))); // Paper
++            total += x * t;
 +            if (++index == size) {
 +                index = 0;
 +            }
 +        }
 +
 +        public double getAverage() {
-+            return total.divide(dec(time), 30, java.math.RoundingMode.HALF_UP).doubleValue(); // Paper
++            return total / time;
 +        }
 +    }
-+    private static final java.math.BigDecimal TPS_BASE = new java.math.BigDecimal(1E9).multiply(new java.math.BigDecimal(SAMPLE_INTERVAL)); // Paper
 +    // Paper End
 +
      public void run()
@@ -722,7 +714,7 @@
 +                    if ( ++MinecraftServer.currentTick % SAMPLE_INTERVAL == 0 )
 +                    {
 +                        final long diff = curTime - tickSection;
-+                        java.math.BigDecimal currentTps = TPS_BASE.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP); // Paper
++                        double currentTps = 1E9 / diff * SAMPLE_INTERVAL;
 +                        tps1.add(currentTps, diff);
 +                        tps5.add(currentTps, diff);
 +                        tps15.add(currentTps, diff);
@@ -758,7 +750,7 @@
          }
          catch (Throwable throwable1)
          {
-@@ -553,26 +737,24 @@
+@@ -553,26 +729,24 @@
                  crashreport = this.func_71230_b(new CrashReport("Exception in server tick loop", throwable1));
              }
  
@@ -788,7 +780,7 @@
                  this.func_71260_j();
              }
              catch (Throwable throwable)
-@@ -581,6 +763,8 @@
+@@ -581,6 +755,8 @@
              }
              finally
              {
@@ -797,7 +789,7 @@
                  this.func_71240_o();
              }
          }
-@@ -607,6 +791,7 @@
+@@ -607,6 +783,7 @@
                  ImageIO.write(bufferedimage, "PNG", new ByteBufOutputStream(bytebuf));
                  ByteBuf bytebuf1 = Base64.encode(bytebuf);
                  p_184107_1_.func_151320_a("data:image/png;base64," + bytebuf1.toString(StandardCharsets.UTF_8));
@@ -805,7 +797,7 @@
              }
              catch (Exception exception)
              {
-@@ -647,7 +832,10 @@
+@@ -647,7 +824,10 @@
  
      public void func_71217_p()
      {
@@ -816,7 +808,7 @@
          ++this.field_71315_w;
  
          if (this.field_71295_T)
-@@ -669,20 +857,33 @@
+@@ -669,20 +849,33 @@
  
              for (int k = 0; k < agameprofile.length; ++k)
              {
@@ -855,7 +847,7 @@
  
          this.field_71304_b.func_76320_a("tallying");
          this.field_71311_j[this.field_71315_w % 100] = System.nanoTime() - i;
-@@ -701,47 +902,87 @@
+@@ -701,47 +894,87 @@
  
          this.field_71304_b.func_76319_b();
          this.field_71304_b.func_76319_b();
@@ -967,7 +959,7 @@
                  }
                  catch (Throwable throwable1)
                  {
-@@ -752,7 +993,9 @@
+@@ -752,7 +985,9 @@
  
                  try
                  {
@@ -977,7 +969,7 @@
                  }
                  catch (Throwable throwable)
                  {
-@@ -761,28 +1004,42 @@
+@@ -761,28 +996,42 @@
                      throw new ReportedException(crashreport1);
                  }
  
@@ -1025,7 +1017,7 @@
  
          this.field_71304_b.func_76319_b();
      }
-@@ -792,137 +1049,14 @@
+@@ -792,137 +1041,14 @@
          return true;
      }
  
@@ -1168,7 +1160,7 @@
      }
  
      public File func_71209_f(String p_71209_1_)
-@@ -930,12 +1064,6 @@
+@@ -930,12 +1056,6 @@
          return new File(this.func_71238_n(), p_71209_1_);
      }
  
@@ -1181,7 +1173,7 @@
      public void func_71236_h(String p_71236_1_)
      {
          field_147145_h.warn(p_71236_1_);
-@@ -943,14 +1071,18 @@
+@@ -943,14 +1063,18 @@
  
      public WorldServer func_71218_a(int p_71218_1_)
      {
@@ -1208,7 +1200,7 @@
      }
  
      public String func_71249_w()
-@@ -978,30 +1110,10 @@
+@@ -978,30 +1102,10 @@
          return this.field_71318_t.func_152600_g();
      }
  
@@ -1241,7 +1233,7 @@
      }
  
      public CrashReport func_71230_b(CrashReport p_71230_1_)
-@@ -1016,21 +1128,13 @@
+@@ -1016,21 +1120,13 @@
  
          if (this.field_71318_t != null)
          {
@@ -1266,7 +1258,7 @@
          }
  
          return p_71230_1_;
-@@ -1038,7 +1142,7 @@
+@@ -1038,7 +1134,7 @@
  
      public List<String> func_184104_a(ICommandSender p_184104_1_, String p_184104_2_, @Nullable BlockPos p_184104_3_, boolean p_184104_4_)
      {
@@ -1275,7 +1267,7 @@
          boolean flag = p_184104_2_.startsWith("/");
  
          if (flag)
-@@ -1055,11 +1159,9 @@
+@@ -1055,11 +1151,9 @@
              {
                  if (CommandBase.func_71523_a(s2, s1))
                  {
@@ -1288,7 +1280,7 @@
          }
          else
          {
-@@ -1072,37 +1174,37 @@
+@@ -1072,37 +1166,37 @@
                  {
                      if (flag1 && !p_184104_4_)
                      {
@@ -1335,7 +1327,7 @@
      public boolean func_70003_b(int p_70003_1_, String p_70003_2_)
      {
          return true;
-@@ -1118,18 +1220,6 @@
+@@ -1118,18 +1212,6 @@
          return this.field_71292_I;
      }
  
@@ -1354,7 +1346,7 @@
      public String func_71214_G()
      {
          return this.field_71293_J;
-@@ -1174,24 +1264,24 @@
+@@ -1174,24 +1256,24 @@
  
      public void func_147139_a(EnumDifficulty p_147139_1_)
      {
@@ -1388,7 +1380,7 @@
                  }
              }
          }
-@@ -1238,58 +1328,55 @@
+@@ -1238,58 +1320,55 @@
          this.field_175588_P = p_180507_2_;
      }
  
@@ -1472,7 +1464,7 @@
      public boolean func_70002_Q()
      {
          return true;
-@@ -1299,7 +1386,8 @@
+@@ -1299,7 +1378,8 @@
  
      public boolean func_71266_T()
      {
@@ -1482,7 +1474,7 @@
      }
  
      public void func_71229_d(boolean p_71229_1_)
-@@ -1312,12 +1400,6 @@
+@@ -1312,12 +1392,6 @@
          return this.field_190519_A;
      }
  
@@ -1495,7 +1487,7 @@
      public boolean func_71268_U()
      {
          return this.field_71324_y;
-@@ -1394,14 +1476,14 @@
+@@ -1394,14 +1468,14 @@
  
      public void func_184105_a(PlayerList p_184105_1_)
      {
@@ -1513,7 +1505,7 @@
          }
      }
  
-@@ -1439,16 +1521,9 @@
+@@ -1439,16 +1513,9 @@
          return this.field_71307_n;
      }
  
@@ -1531,7 +1523,7 @@
      }
  
      public boolean func_175579_a(World p_175579_1_, BlockPos p_175579_2_, EntityPlayer p_175579_3_)
-@@ -1456,12 +1531,6 @@
+@@ -1456,12 +1523,6 @@
          return false;
      }
  
@@ -1544,7 +1536,7 @@
      public boolean func_104056_am()
      {
          return this.field_104057_T;
-@@ -1515,11 +1584,11 @@
+@@ -1515,11 +1576,11 @@
      @Nullable
      public Entity func_175576_a(UUID p_175576_1_)
      {
@@ -1559,7 +1551,7 @@
  
                  if (entity != null)
                  {
-@@ -1531,18 +1600,21 @@
+@@ -1531,18 +1592,21 @@
          return null;
      }
  
@@ -1584,7 +1576,7 @@
      public int func_175580_aG()
      {
          return 29999984;
-@@ -1552,37 +1624,34 @@
+@@ -1552,37 +1616,34 @@
      {
          Validate.notNull(p_175586_1_);
  
@@ -1631,7 +1623,7 @@
      public boolean func_152345_ab()
      {
          return Thread.currentThread() == this.field_175590_aa;
-@@ -1593,18 +1662,6 @@
+@@ -1593,18 +1654,6 @@
          return 256;
      }
  
@@ -1650,7 +1642,7 @@
      public int func_184108_a(@Nullable WorldServer p_184108_1_)
      {
          return p_184108_1_ != null ? p_184108_1_.func_82736_K().func_180263_c("spawnRadius") : 10;
-@@ -1612,12 +1669,12 @@
+@@ -1612,12 +1661,12 @@
  
      public AdvancementManager func_191949_aK()
      {
@@ -1665,7 +1657,7 @@
      }
  
      public void func_193031_aM()
-@@ -1625,7 +1682,7 @@
+@@ -1625,7 +1674,7 @@
          if (this.func_152345_ab())
          {
              this.func_184103_al().func_72389_g();
@@ -1674,7 +1666,7 @@
              this.func_191949_aK().func_192779_a();
              this.func_193030_aL().func_193059_f();
              this.func_184103_al().func_193244_w();
-@@ -1634,5 +1691,151 @@
+@@ -1634,5 +1683,151 @@
          {
              this.func_152344_a(this::func_193031_aM);
          }
