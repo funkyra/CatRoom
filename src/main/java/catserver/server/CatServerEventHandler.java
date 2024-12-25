@@ -53,10 +53,11 @@ public class CatServerEventHandler {
 
     // CatRoom start - Handle mod explosion event
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void onExplode(ExplosionEvent.Detonate event) {
+    public void onExplosionDetonate(ExplosionEvent.Detonate event) {
         if (!CatServer.getConfig().bridgeForgeExplosionEventToBukkit) return;
         Explosion explosion = event.getExplosion();
         if (explosion.getClass() != Explosion.class) {
+            // Copied from Explosion class
             Entity exploder = explosion.exploder;
             World bworld = event.getWorld().getWorld();
             Vec3d explosionPos = explosion.getPosition();
