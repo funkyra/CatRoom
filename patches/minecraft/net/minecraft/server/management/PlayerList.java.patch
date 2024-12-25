@@ -773,6 +773,9 @@
 -        entityplayermp.func_184819_a(p_72368_1_.func_184591_cq());
 -
 -        for (String s : p_72368_1_.func_184216_O())
++            playerinteractionmanager = new PlayerInteractionManager(this.mcServer.getWorld(playerIn.dimension));
++        }
++
 +        EntityPlayerMP entityplayermp = new EntityPlayerMP(this.mcServer, this.mcServer.getWorld(playerIn.dimension), playerIn.getGameProfile(), playerinteractionmanager);
 +        */
 +        EntityPlayerMP entityplayermp = playerIn;
