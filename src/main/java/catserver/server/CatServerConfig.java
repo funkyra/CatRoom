@@ -62,6 +62,8 @@ public class CatServerConfig {
     public boolean disableAsyncCatchWarn = false;
     public boolean versionCheck = true;
 
+    public boolean callConstructCapabilityEventOnRespawn = false;
+
     public boolean enableAffinity = false;
     public BitSet affinity = Affinity.getAffinity();
 
@@ -114,6 +116,10 @@ public class CatServerConfig {
         // Event bridge // CatRoom start - Handle mod explosion event
         bridgeForgeExplosionEventToBukkit = getOrWriteBooleanConfig("event-bridge.bridgeForgeExplosionEventToBukkit", bridgeForgeExplosionEventToBukkit);
         // CatRoom end - Handle mod explosion event
+        // CatRoom start - Call construct and capability event on respawn
+        // compatibility
+        callConstructCapabilityEventOnRespawn = getOrWriteBooleanConfig("compatibility.callConstructCapabilityEventOnRespawn", callConstructCapabilityEventOnRespawn);
+        // CatRoom end - Call construct and capability event on respawn
         // general
         disableUpdateGameProfile = getOrWriteBooleanConfig("disableUpdateGameProfile", disableUpdateGameProfile);
         disableAsyncCatchWarn = getOrWriteBooleanConfig("disableAsyncCatchWarn", disableAsyncCatchWarn);
