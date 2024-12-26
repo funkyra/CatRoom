@@ -12,6 +12,8 @@ CatRoom is a Cleanroom+Bukkit+Spigot server software forked from [CatServer](htt
 - Make use of modern Java features
 - Optimized plugin performance
 
+For all fixes, see [fixed upstream issues](FIXED_UPSTREAM_ISSUES.md)
+
 ## Components:
 
 - Minecraft Coder Pack
