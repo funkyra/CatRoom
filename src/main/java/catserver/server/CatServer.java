@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 public class CatServer {
     public static final Logger log = LogManager.getLogger("CatServer");
+    public static final boolean DISABLE_PERMISSION_BRIDGE = Boolean.getBoolean("catserver.disablePermissionBridge");
     private static final String version = "2.1.0";
     private static final String native_version = "v1_12_R1";
 

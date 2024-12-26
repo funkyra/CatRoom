@@ -629,7 +629,7 @@ public class Loader
         GameData.fireCreateRegistryEvents();
         ObjectHolderRegistry.INSTANCE.findObjectHolders(discoverer.getASMTable());
         ItemStackHolderInjector.INSTANCE.findHolders(discoverer.getASMTable());
-        net.minecraftforge.server.permission.PermissionAPI.setPermissionHandler(new catserver.server.permission.BukkitForgePermissionHandler()); // CatRoom - Permission bridge
+        if (!catserver.server.CatServer.DISABLE_PERMISSION_BRIDGE) net.minecraftforge.server.permission.PermissionAPI.setPermissionHandler(new catserver.server.permission.BukkitForgePermissionHandler()); // CatRoom - Permission bridge
         CapabilityManager.INSTANCE.injectCapabilities(discoverer.getASMTable());
         modController.distributeStateMessage(LoaderState.PREINITIALIZATION, discoverer.getASMTable(), canonicalConfigDir);
         GameData.fireRegistryEvents(rl -> !rl.equals(GameData.RECIPES));
