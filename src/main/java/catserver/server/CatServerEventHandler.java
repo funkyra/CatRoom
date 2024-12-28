@@ -64,7 +64,6 @@ public class CatServerEventHandler {
             Location location = new Location(bworld, explosionPos.x, explosionPos.y, explosionPos.z);
             List<Block> bukkitBlocks;
             boolean cancelled;
-            float yield;
             final List<Block> blockList = Lists.newArrayList();
             List<BlockPos> affectedBlockPositions = event.getAffectedBlocks();
             for (int i1 = affectedBlockPositions.size() - 1; i1 >= 0; i1--) {
@@ -79,13 +78,11 @@ public class CatServerEventHandler {
                 Bukkit.getServer().getPluginManager().callEvent(bukkitEvent);
                 cancelled = bukkitEvent.isCancelled();
                 bukkitBlocks = bukkitEvent.blockList();
-                yield = bukkitEvent.getYield();
             } else {
                 BlockExplodeEvent bukkitEvent = new BlockExplodeEvent(location.getBlock(), blockList, 1.0F / explosion.size);
                 Bukkit.getServer().getPluginManager().callEvent(bukkitEvent);
                 cancelled = bukkitEvent.isCancelled();
                 bukkitBlocks = bukkitEvent.blockList();
-                yield = bukkitEvent.getYield();
             }
             explosion.getAffectedBlockPositions().clear();
 
@@ -97,7 +94,6 @@ public class CatServerEventHandler {
                     BlockPos coords = new BlockPos(bblock.getX(), bblock.getY(), bblock.getZ());
                     explosion.getAffectedBlockPositions().add(coords);
                 }
-                explosion.size = yield * explosion.size;
             }
         }
     }
