@@ -1441,6 +1441,7 @@ public interface Player extends HumanEntity, Conversable, CommandSender, Offline
      *
      * @return player ping
      */
+    @catserver.api.annotation.Backported(from = "1.17")
     public int getPing();
     // CatRoom end - Backport APIs
 
