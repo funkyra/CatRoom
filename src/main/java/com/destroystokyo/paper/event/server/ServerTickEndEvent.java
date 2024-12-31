@@ -1,11 +1,13 @@
 package com.destroystokyo.paper.event.server;
 
+import catserver.api.annotation.Backported;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 /**
  * Called when the server has finished ticking the main loop
  */
+@Backported(from = "1.13.2")
 public class ServerTickEndEvent extends Event {
 
     private static final HandlerList HANDLER_LIST = new HandlerList();
