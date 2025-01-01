@@ -48,8 +48,6 @@ public class CatServerConfig {
 
     public boolean waitForgeServerChatEvent = false;
 
-    public boolean bridgeForgeExplosionEventToBukkit = true; // CatRoom
-
     public int craftRequestThrottle = 20;
     public int itemNBTThrottle = 200;
     public boolean limitFastClickGUI = false;
@@ -61,8 +59,11 @@ public class CatServerConfig {
     public boolean disableFMLStatusModInfo = false;
     public boolean disableAsyncCatchWarn = false;
     public boolean versionCheck = true;
+    public boolean cachePlayerProfileResult = false;
+    public int playerProfileResultCacheMinutes = 1440;
 
     public boolean callConstructCapabilityEventOnRespawn = false;
+    public boolean bridgeForgeExplosionEventToBukkit = false;
 
     public boolean enableAffinity = false;
     public BitSet affinity = Affinity.getAffinity();
@@ -113,10 +114,11 @@ public class CatServerConfig {
         releaseUseItemThrottle = getOrWriteIntConfig("network.packetLimit.releaseUseItemThrottle", releaseUseItemThrottle);
         disableFMLHandshake = getOrWriteBooleanConfig("network.fml.disableHandshake", config.getBoolean("disableFMLHandshake", disableFMLHandshake));
         disableFMLStatusModInfo = getOrWriteBooleanConfig("network.fml.disableStatusModInfo", config.getBoolean("disableFMLStatusModInfo", disableFMLStatusModInfo));
-        // event bridge
-        bridgeForgeExplosionEventToBukkit = getOrWriteBooleanConfig("event-bridge.bridgeForgeExplosionEventToBukkit", bridgeForgeExplosionEventToBukkit);
+        cachePlayerProfileResult = getOrWriteBooleanConfig("network.profile.cachePlayerProfileResult", cachePlayerProfileResult);
+        playerProfileResultCacheMinutes = getOrWriteIntConfig("network.profile.playerProfileResultCacheMinutes", playerProfileResultCacheMinutes);
         // compatibility
         callConstructCapabilityEventOnRespawn = getOrWriteBooleanConfig("compatibility.callConstructCapabilityEventOnRespawn", callConstructCapabilityEventOnRespawn);
+        bridgeForgeExplosionEventToBukkit = getOrWriteBooleanConfig("compatibility.bridgeForgeExplosionEventToBukkit", bridgeForgeExplosionEventToBukkit);
         // general
         disableUpdateGameProfile = getOrWriteBooleanConfig("disableUpdateGameProfile", disableUpdateGameProfile);
         disableAsyncCatchWarn = getOrWriteBooleanConfig("disableAsyncCatchWarn", disableAsyncCatchWarn);
