@@ -69,6 +69,8 @@ public class CatServerConfig {
     public boolean enableAffinity = false;
     public BitSet affinity = Affinity.getAffinity();
 
+    public boolean disableAsyncCatcher = false;
+
     public CatServerConfig(String file) {
         this.configFile = new File(file);
     }
@@ -133,6 +135,8 @@ public class CatServerConfig {
             Affinity.setAffinity(affinity);
             MinecraftServer.LOGGER.info("[CatRoom] Server Thread is bound cpu: {}", affinity);
         }
+        // disable async catcher
+        disableAsyncCatcher = getOrWriteBooleanConfig("disableAsyncCatcher", disableAsyncCatcher);
         // remove old config
         config.set("vanilla.limitFastClickGUI", null);
         config.set("disableFMLHandshake", null);
