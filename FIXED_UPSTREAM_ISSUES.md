@@ -13,4 +13,6 @@
 - Simple Difficulty(And any other similar mods) thirst is not getting reset on player respawn[(Luohuayu/CatServer#536)](https://github.com/Luohuayu/CatServer/issues/536)[(MohistMC/Mohist#2905)](https://github.com/MohistMC/Mohist/issues/2905)
 - Ring dupe bug in The Betweenlands mod[(Luohuayu/CatServer#204)](https://github.com/Luohuayu/CatServer/issues/204)
 
-**All fixes have been contributed to the upstream project.**
+## More
+
+- It is recommended to install [HybridFix](https://github.com/HaHaWTH/HybridFix), which aims to improve Forge+Bukkit compatibility and fix behaviour inconsistencies.

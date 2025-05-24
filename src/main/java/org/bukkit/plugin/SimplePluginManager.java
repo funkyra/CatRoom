@@ -475,7 +475,7 @@ public final class SimplePluginManager implements PluginManager {
      */
     public void callEvent(Event event) {
         if (event.getHandlers().getRegisteredListeners().length == 0) return; // CatRoom - Skip event if no listeners
-        if (CatServer.getConfig().fakePlayerEventPass && event instanceof PlayerEvent && ((PlayerEvent) event).getPlayer() instanceof CraftFakePlayer) return; // CatServer
+        if (CatServer.getConfig().fakePlayerEventPass && event instanceof PlayerEvent playerEvent && playerEvent.getPlayer() instanceof CraftFakePlayer) return; // CatServer
         if (event.isAsynchronous() || !server.isPrimaryThread()) { // CatServer
             if (Thread.holdsLock(this)) {
                 throw new IllegalStateException(event.getEventName() + " cannot be triggered asynchronously from inside synchronized code.");
@@ -558,7 +558,7 @@ public final class SimplePluginManager implements PluginManager {
             throw new IllegalPluginAccessException("Plugin attempted to register " + event + " while not enabled");
         }
 
-        if (useTimings) { // Always false here
+        if (false) { // CatRoom - Disable Timings
             getEventListeners(event).register(new TimedRegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
         } else {
             getEventListeners(event).register(new RegisteredListener(listener, executor, priority, plugin, ignoreCancelled));
