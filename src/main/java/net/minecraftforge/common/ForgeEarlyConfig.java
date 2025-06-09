@@ -21,5 +21,6 @@ public class ForgeEarlyConfig {
     public static String X11_CLASS_NAME = "minecraft";
     public static String COCOA_FRAME_NAME = "minecraft";
     public static String CONFIG_ANY_TIME_VERSION = "3.0";
+    public static String MIXIN_BOOTER_VERSION = "10.6";
     public static String[] LOADING_PLUGIN_BLACKLIST = new String[] { "com.cleanroommc.configanytime.ConfigAnytimePlugin", "zone.rong.mixinbooter.MixinBooterPlugin"};
 }

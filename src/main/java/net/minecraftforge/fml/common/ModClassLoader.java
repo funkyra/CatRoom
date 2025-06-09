@@ -48,11 +48,29 @@ public class ModClassLoader extends URLClassLoader
 
     public ModClassLoader(ClassLoader parent) {
         super(new URL[0], null);
-        if (parent instanceof LaunchClassLoader)
-        {
-            this.mainClassLoader = (LaunchClassLoader)parent;
-        }
         this.sources = Lists.newArrayList();
+
+        if (parent instanceof LaunchClassLoader) {
+            this.mainClassLoader = (LaunchClassLoader)parent;
+            File customLibFolder = new File("./libraries/customize_libraries");
+            if (!customLibFolder.exists()) customLibFolder.mkdir();
+
+            if (customLibFolder.isDirectory()) {
+                File[] files = customLibFolder.listFiles();
+                if (files != null) {
+                    for (File file : files) {
+                        if (file.isFile() && file.getName().endsWith(".jar")) {
+                            try {
+                                this.addFile(file);
+                                FMLLog.log.info("Loaded custom library {}", file.getName());
+                            } catch (MalformedURLException e) {
+                                FMLLog.log.error("Unable to add custom mod file {} to the mod classloader", file.getAbsolutePath(), e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public void addFile(File modFile) throws MalformedURLException

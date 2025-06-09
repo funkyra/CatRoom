@@ -40,6 +40,7 @@ import java.util.Set;
 
 import com.cleanroommc.common.CleanroomContainer;
 import com.cleanroommc.common.ConfigAnytimeContainer;
+import com.cleanroommc.common.MixinContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -375,6 +376,7 @@ public class Loader
         // Add in the MCP mod container
         mods.add(new InjectedModContainer(mcp,new File("minecraft.jar")));
         mods.add(new InjectedModContainer(new ConfigAnytimeContainer(), FMLSanityChecker.fmlLocation));
+        mods.add(new InjectedModContainer(new MixinContainer(), FMLSanityChecker.fmlLocation));
         mods.add(new InjectedModContainer(new CleanroomContainer(), FMLSanityChecker.fmlLocation));
         for (String cont : injectedContainers)
         {

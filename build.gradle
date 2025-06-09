@@ -500,8 +500,8 @@ project(':cleanroom') {
         installer 'org.openjdk.nashorn:nashorn-core:15.4'
 
         // Mixin
-        installer 'com.cleanroommc:sponge-mixin:0.20.6+mixin.0.8.7'
-        installer annotationProcessor('io.github.llamalad7:mixinextras-common:0.4.1')
+        installer 'com.cleanroommc:sponge-mixin:0.20.10+mixin.0.8.7'
+        installer annotationProcessor('io.github.llamalad7:mixinextras-common:0.5.0-rc.2')
 
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
         testImplementation 'org.junit.vintage:junit-vintage-engine:5.11.0'
@@ -515,7 +515,7 @@ project(':cleanroom') {
         installer 'net.md-5:bungeecord-chat:1.16-R0.4'
         installer 'commons-lang:commons-lang:2.6' // Is needed for plugin compatibility
         installer 'org.xerial:sqlite-jdbc:3.21.0.1'
-        installer 'mysql:mysql-connector-java:5.1.49'
+        installer 'mysql:mysql-connector-java:8.0.24'
 
         // CatRoom
         installer 'net.openhft:affinity:3.23.3'

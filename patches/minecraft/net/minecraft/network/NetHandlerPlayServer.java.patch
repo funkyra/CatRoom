@@ -119,7 +119,7 @@
 +    // private int chatSpamThresholdCount;
 +    // CraftBukkit start - multithreaded fields
 +    private volatile int field_147374_l;
-+    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "chatSpamThresholdCount" : "field_147374_l");
++    private static final AtomicIntegerFieldUpdater chatSpamField = AtomicIntegerFieldUpdater.newUpdater(NetHandlerPlayServer.class, FMLLaunchHandler.isDeobfuscatedEnvironment() ? "chatSpamThresholdCount" : new String(new char[]{'f', 'i', 'e', 'l', 'd', '_', '1', '4', '7', '3', '7', '4', '_', 'l'}));
 +    // CraftBukkit end
      private int field_147375_m;
 -    private final IntHashMap<Short> field_147372_n = new IntHashMap<>();
@@ -184,7 +184,7 @@
 -    }
 -
 -    @Override
-+        this.craftServer = field_147367_d == null ? (org.bukkit.craftbukkit.v1_12_R1.CraftServer)org.bukkit.Bukkit.getServer() : field_147367_d.server;
++        this.craftServer = p_i1530_1_ == null ? (org.bukkit.craftbukkit.v1_12_R1.CraftServer)org.bukkit.Bukkit.getServer() : p_i1530_1_.server;
 +    }
 +    // CatRoom End
 +

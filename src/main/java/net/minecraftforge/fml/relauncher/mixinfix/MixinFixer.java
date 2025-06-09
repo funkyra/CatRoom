@@ -2,7 +2,7 @@ package net.minecraftforge.fml.relauncher.mixinfix;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraftforge.fml.relauncher.MixinBooterPlugin;
+import net.minecraftforge.fml.common.FMLLog;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.mixin.transformer.ClassInfo;
 import sun.misc.Unsafe;
@@ -126,7 +126,7 @@ public class MixinFixer {
                 } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
                     // Skip when no classes are found, that cannot be the case unless an old dj2addons is installed
                 } catch (ReflectiveOperationException e2) {
-                    MixinBooterPlugin.LOGGER.fatal("DJ2Addons compatibility patch failed.", e2);
+                    FMLLog.log.fatal("DJ2Addons compatibility patch failed.", e2);
                 }
             }
         }
