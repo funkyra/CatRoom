@@ -1,7 +1,6 @@
 package catserver.server;
 
 import catserver.server.entity.CraftCustomEntity;
-import catserver.server.launch.Java11Support;
 import com.cleanroommc.hackery.enums.EnumHackery;
 import net.minecraft.block.Block;
 import net.minecraft.enchantment.Enchantment;
@@ -10,18 +9,21 @@ import net.minecraft.item.Item;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.BannerPattern;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.EnumHelper;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 import net.minecraftforge.registries.GameData;
+import net.minecraftforge.server.permission.DefaultPermissionLevel;
 import org.apache.logging.log4j.Level;
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.entity.EntityType;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.permissions.DefaultPermissions;
 
 import java.util.Map;
 
@@ -126,5 +128,15 @@ public class BukkitInjector {
                 }
             }
         }
+    }
+
+    public static void registerDefaultPermission(String name, DefaultPermissionLevel level, String desc) {
+        PermissionDefault permissionDefault = switch (level) {
+            case ALL -> PermissionDefault.TRUE;
+            case OP -> PermissionDefault.OP;
+            default -> PermissionDefault.FALSE;
+        };
+        Permission permission = new Permission(name, desc, permissionDefault);
+        DefaultPermissions.registerPermission(permission);
     }
 }

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import catserver.server.BukkitPermissionsHandler;
 import com.cleanroommc.common.CleanroomContainer;
 import com.cleanroommc.common.ConfigAnytimeContainer;
 import com.cleanroommc.common.MixinContainer;
@@ -73,6 +74,7 @@ import net.minecraftforge.fml.relauncher.libraries.Repository;
 import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.ObjectHolderRegistry;
 
+import net.minecraftforge.server.permission.PermissionAPI;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.Level;
 
@@ -637,6 +639,7 @@ public class Loader
         GameData.fireRegistryEvents(rl -> !rl.equals(GameData.RECIPES));
         FMLCommonHandler.instance().fireSidedRegistryEvents();
         ObjectHolderRegistry.INSTANCE.applyObjectHolders();
+        PermissionAPI.setPermissionHandler(new BukkitPermissionsHandler());
         ItemStackHolderInjector.INSTANCE.inject();
         modController.transition(LoaderState.INITIALIZATION, false);
         progressBar.step("Initializing Minecraft Engine");
@@ -645,7 +648,7 @@ public class Loader
     private void disableRequestedMods()
     {
         String forcedModList = System.getProperty("fml.modStates", "");
-        FMLLog.log.trace("Received a system property request \'{}\'",forcedModList);
+        FMLLog.log.trace("Received a system property request '{}'",forcedModList);
         Map<String, String> sysPropertyStateList = Splitter.on(CharMatcher.anyOf(";:"))
                 .omitEmptyStrings().trimResults().withKeyValueSeparator("=")
                 .split(forcedModList);
