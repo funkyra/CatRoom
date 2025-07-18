@@ -4,11 +4,13 @@ import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
@@ -22,6 +24,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_12_R1.block.CraftBlockState;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_12_R1.event.CraftEventFactory;
 import org.bukkit.event.Event;
@@ -29,6 +32,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 
@@ -50,6 +55,22 @@ public class CatServerEventHandler {
 
         bukkitBlockBreakEventCapture.put(bukkitEvent);
     }
+
+    // funkyra start - Handle mod attack event (for check attacks in regions)
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onAttack(LivingAttackEvent e) {
+        if (e.getSource() instanceof EntityDamageSource && e.getSource().getTrueSource() instanceof EntityPlayerMP) {
+            CraftEntity source = e.getSource().getTrueSource().getBukkitEntity();
+            CraftEntity target = e.getEntityLiving().getBukkitEntity();
+
+            EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(source, target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 0);
+            CraftEventFactory.callEvent(event);
+            if (event.isCancelled()) {
+                e.setCanceled(true);
+            }
+        }
+    }
+    // funkyra end - Handle mod attack event (for check attacks in regions)
 
     // CatRoom start - Handle mod explosion event
     @SubscribeEvent(priority = EventPriority.HIGHEST)
