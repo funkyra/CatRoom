@@ -1443,7 +1443,7 @@
              textcomponenttranslation.func_150256_b().func_150238_a(TextFormatting.RED);
              this.func_147359_a(new SPacketChat(textcomponenttranslation));
          }
-@@ -1029,47 +1464,313 @@
+@@ -1029,47 +1464,324 @@
              {
                  if (!ChatAllowedCharacters.func_71566_a(s.charAt(i)))
                  {
@@ -1680,14 +1680,25 @@
 +        this.field_147370_c.info(this.field_147369_b.func_70005_c_() + " issued server command: " + p_147361_1_);
 +
 +        CraftPlayer player = this.getPlayer();
-+        List<String> params = new ArrayList<>(List.of(p_147361_1_.split(" ")));
-+        ICommand iCommand = BukkitCommandWrapper.toNMSCommand(this.field_147369_b, params.removeFirst());
++        List<String> params = new ArrayList<>(List.of(p_147361_1_.trim().split(" ")));
++        String commandWithNoArgs = params.removeFirst().replaceFirst("^/", "");
++        ICommand iCommand = this.field_147367_d.func_71187_D().func_71555_a().get(commandWithNoArgs);
++
++        if (iCommand == null) {
++            iCommand = BukkitCommandWrapper.toNMSCommand(this.field_147369_b, commandWithNoArgs);
++        }
 +
 +        PlayerCommandPreprocessEvent event = new PlayerCommandPreprocessEvent(player, p_147361_1_, new LazyPlayerSet(field_147367_d));
-+        MinecraftForge.EVENT_BUS.post(new CommandEvent(iCommand, this.field_147369_b, params.toArray(new String[0])));
 +        this.craftServer.getPluginManager().callEvent(event);
 +
 +        if (event.isCancelled()) {
++            org.bukkit.craftbukkit.v1_12_R1.SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
++            return;
++        }
++
++        CommandEvent forgeEvent = new CommandEvent(iCommand, this.field_147369_b, params.toArray(new String[0]));
++
++        if (MinecraftForge.EVENT_BUS.post(forgeEvent)) {
 +            org.bukkit.craftbukkit.v1_12_R1.SpigotTimings.playerCommandTimer.stopTiming(); // Spigot
 +            return;
 +        }
@@ -1771,7 +1782,7 @@
          this.field_147369_b.func_143004_u();
  
          switch (p_147357_1_.func_180764_b())
-@@ -1128,10 +1829,7 @@
+@@ -1128,10 +1840,7 @@
                  break;
              case START_FALL_FLYING:
  
@@ -1783,7 +1794,7 @@
                  {
                      ItemStack itemstack = this.field_147369_b.func_184582_a(EntityEquipmentSlot.CHEST);
  
-@@ -1151,10 +1849,10 @@
+@@ -1151,10 +1860,10 @@
          }
      }
  
@@ -1795,7 +1806,7 @@
          WorldServer worldserver = this.field_147367_d.func_71218_a(this.field_147369_b.field_71093_bK);
          Entity entity = p_147340_1_.func_149564_a(worldserver);
          this.field_147369_b.func_143004_u();
-@@ -1162,41 +1860,83 @@
+@@ -1162,41 +1871,83 @@
          if (entity != null)
          {
              boolean flag = this.field_147369_b.func_70685_l(entity);
@@ -1884,7 +1895,7 @@
      public void func_147342_a(CPacketClientStatus p_147342_1_)
      {
          PacketThreadUtil.func_180031_a(p_147342_1_, this, this.field_147369_b.func_71121_q());
-@@ -1220,7 +1960,7 @@
+@@ -1220,7 +1971,7 @@
                          return;
                      }
  
@@ -1893,7 +1904,7 @@
  
                      if (this.field_147367_d.func_71199_h())
                      {
-@@ -1235,40 +1975,345 @@
+@@ -1235,40 +1986,345 @@
          }
      }
  
@@ -2251,7 +2262,7 @@
                  {
                      this.field_147369_b.field_71135_a.func_147359_a(new SPacketConfirmTransaction(p_147351_1_.func_149548_c(), p_147351_1_.func_149547_f(), true));
                      this.field_147369_b.field_71137_h = true;
-@@ -1278,15 +2323,15 @@
+@@ -1278,15 +2334,15 @@
                  }
                  else
                  {
@@ -2271,7 +2282,7 @@
                          nonnulllist1.add(itemstack1);
                      }
  
-@@ -1296,39 +2341,46 @@
+@@ -1296,39 +2352,46 @@
          }
      }
  
@@ -2327,7 +2338,7 @@
  
          if (this.field_147369_b.field_71134_c.func_73083_d())
          {
-@@ -1356,7 +2408,46 @@
+@@ -1356,7 +2419,46 @@
              }
  
              boolean flag1 = p_147344_1_.func_149627_c() >= 1 && p_147344_1_.func_149627_c() <= 45;
@@ -2375,7 +2386,7 @@
  
              if (flag1 && flag2)
              {
-@@ -1384,26 +2475,22 @@
+@@ -1384,26 +2486,22 @@
          }
      }
  
@@ -2405,7 +2416,7 @@
          this.field_147369_b.func_143004_u();
          WorldServer worldserver = this.field_147367_d.func_71218_a(this.field_147369_b.field_71093_bK);
          BlockPos blockpos = p_147343_1_.func_179722_a();
-@@ -1423,14 +2510,30 @@
+@@ -1423,14 +2521,30 @@
              if (!tileentitysign.func_145914_a() || tileentitysign.func_145911_b() != this.field_147369_b)
              {
                  this.field_147367_d.func_71236_h("Player " + this.field_147369_b.func_70005_c_() + " just tried to change non-editable sign");
@@ -2437,7 +2448,7 @@
              }
  
              tileentitysign.func_70296_d();
-@@ -1438,9 +2541,9 @@
+@@ -1438,9 +2552,9 @@
          }
      }
  
@@ -2448,7 +2459,7 @@
          if (this.field_194403_g && p_147353_1_.func_149460_c() == this.field_194404_h)
          {
              int i = (int)(this.func_147363_d() - this.field_194402_f);
-@@ -1449,7 +2552,7 @@
+@@ -1449,7 +2563,7 @@
          }
          else if (!this.field_147369_b.func_70005_c_().equals(this.field_147367_d.func_71214_G()))
          {
@@ -2457,7 +2468,7 @@
          }
      }
  
-@@ -1458,36 +2561,44 @@
+@@ -1458,36 +2572,44 @@
          return System.nanoTime() / 1000000L;
      }
  
@@ -2511,7 +2522,7 @@
      public void func_147349_a(CPacketCustomPayload p_147349_1_)
      {
          PacketThreadUtil.func_180031_a(p_147349_1_, this, this.field_147369_b.func_71121_q());
-@@ -1495,6 +2606,11 @@
+@@ -1495,6 +2617,11 @@
  
          if ("MC|BEdit".equals(s))
          {
@@ -2523,7 +2534,7 @@
              PacketBuffer packetbuffer = p_147349_1_.func_180760_b();
  
              try
-@@ -1521,15 +2637,22 @@
+@@ -1521,15 +2648,22 @@
                  if (itemstack.func_77973_b() == Items.field_151099_bA && itemstack.func_77973_b() == itemstack1.func_77973_b())
                  {
                      itemstack1.func_77983_a("pages", itemstack.func_77978_p().func_150295_c("pages", 8));
@@ -2546,7 +2557,7 @@
              PacketBuffer packetbuffer1 = p_147349_1_.func_180760_b();
  
              try
-@@ -1569,12 +2692,14 @@
+@@ -1569,12 +2703,14 @@
                      }
  
                      itemstack2.func_77983_a("pages", nbttaglist);
@@ -2562,7 +2573,7 @@
              }
          }
          else if ("MC|TrSel".equals(s))
-@@ -1592,19 +2717,20 @@
+@@ -1592,19 +2728,20 @@
              catch (Exception exception5)
              {
                  field_147370_c.error("Couldn't select trade", (Throwable)exception5);
@@ -2585,7 +2596,7 @@
                  return;
              }
  
-@@ -1617,9 +2743,7 @@
+@@ -1617,9 +2754,7 @@
  
                  if (l == 0)
                  {
@@ -2596,7 +2607,7 @@
  
                      if (tileentity instanceof TileEntityCommandBlock)
                      {
-@@ -1646,29 +2770,30 @@
+@@ -1646,29 +2781,30 @@
  
                      if (!flag2)
                      {
@@ -2631,7 +2642,7 @@
                  return;
              }
  
-@@ -1695,39 +2820,21 @@
+@@ -1695,39 +2831,21 @@
  
                  if (commandblockbaselogic != null)
                  {
@@ -2675,7 +2686,7 @@
                      }
  
                      tileentity2.func_145829_t();
-@@ -1737,7 +2844,7 @@
+@@ -1737,7 +2855,7 @@
  
                      if (!flag3)
                      {
@@ -2684,7 +2695,7 @@
                      }
  
                      tileentitycommandblock.func_184253_b(flag1);
-@@ -1745,13 +2852,14 @@
+@@ -1745,13 +2863,14 @@
  
                      if (!net.minecraft.util.StringUtils.func_151246_b(s7))
                      {
@@ -2700,7 +2711,7 @@
              }
          }
          else if ("MC|Beacon".equals(s))
-@@ -1778,6 +2886,7 @@
+@@ -1778,6 +2897,7 @@
                  catch (Exception exception2)
                  {
                      field_147370_c.error("Couldn't set beacon", (Throwable)exception2);
@@ -2708,7 +2719,7 @@
                  }
              }
          }
-@@ -1848,37 +2957,37 @@
+@@ -1848,37 +2968,37 @@
                      {
                          if (tileentitystructure.func_184419_m())
                          {
@@ -2753,7 +2764,7 @@
                          }
                      }
  
-@@ -1889,6 +2998,7 @@
+@@ -1889,6 +3009,7 @@
              catch (Exception exception1)
              {
                  field_147370_c.error("Couldn't set structure block", (Throwable)exception1);
@@ -2761,7 +2772,7 @@
              }
          }
          else if ("MC|PickItem".equals(s))
-@@ -1899,22 +3009,50 @@
+@@ -1899,22 +3020,50 @@
              {
                  int j1 = packetbuffer6.func_150792_a();
                  this.field_147369_b.field_71071_by.func_184430_d(j1);
