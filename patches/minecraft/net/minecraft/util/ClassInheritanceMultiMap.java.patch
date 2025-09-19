@@ -1,6 +1,17 @@
 --- before/net/minecraft/util/ClassInheritanceMultiMap.java
 +++ after/net/minecraft/util/ClassInheritanceMultiMap.java
-@@ -13,11 +13,12 @@
+@@ -4,20 +4,17 @@
+ import com.google.common.collect.Lists;
+ import com.google.common.collect.Maps;
+ import com.google.common.collect.Sets;
+-import java.util.AbstractSet;
+-import java.util.Collections;
+-import java.util.Iterator;
+-import java.util.List;
+-import java.util.Map;
+-import java.util.Set;
++
++import java.util.*;
  
  public class ClassInheritanceMultiMap<T> extends AbstractSet<T>
  {
@@ -17,7 +28,7 @@
  
      public ClassInheritanceMultiMap(Class<T> p_i45909_1_)
      {
-@@ -63,7 +64,6 @@
+@@ -63,7 +60,6 @@
          }
      }
  
@@ -25,33 +36,19 @@
      public boolean add(T p_add_1_)
      {
          for (Class<?> oclass : this.field_180216_b)
-@@ -79,7 +79,7 @@
- 
-     private void func_181743_a(T p_181743_1_, Class<?> p_181743_2_)
-     {
--        List<T> list = this.field_180218_a.get(p_181743_2_);
-+        List<T> list = (List)this.field_180218_a.get(p_181743_2_);
- 
-         if (list == null)
-         {
-@@ -91,7 +91,6 @@
+@@ -91,10 +87,9 @@
          }
      }
  
 -    @Override
      public boolean remove(Object p_remove_1_)
      {
-         T t = (T)p_remove_1_;
-@@ -101,7 +100,7 @@
-         {
-             if (oclass.isAssignableFrom(t.getClass()))
-             {
--                List<T> list = this.field_180218_a.get(oclass);
-+                List<T> list = (List)this.field_180218_a.get(oclass);
+-        T t = (T)p_remove_1_;
++        T t = (T) p_remove_1_;
+         boolean flag = false;
  
-                 if (list != null && list.remove(t))
-                 {
-@@ -113,7 +112,6 @@
+         for (Class<?> oclass : this.field_180216_b)
+@@ -113,7 +108,6 @@
          return flag;
      }
  
@@ -59,7 +56,7 @@
      public boolean contains(Object p_contains_1_)
      {
          return Iterators.contains(this.func_180215_b(p_contains_1_.getClass()).iterator(), p_contains_1_);
-@@ -123,31 +121,40 @@
+@@ -123,31 +117,40 @@
      {
          return new Iterable<S>()
          {
@@ -101,7 +98,8 @@
 -    @Override
      public Iterator<T> iterator()
      {
-         return (Iterator<T>)(this.field_181745_e.isEmpty() ? Collections.emptyIterator() : Iterators.unmodifiableIterator(this.field_181745_e.iterator()));
+-        return (Iterator<T>)(this.field_181745_e.isEmpty() ? Collections.emptyIterator() : Iterators.unmodifiableIterator(this.field_181745_e.iterator()));
++        return this.field_181745_e.isEmpty() ? Collections.emptyIterator() : this.field_181745_e.iterator();
      }
  
 -    @Override
